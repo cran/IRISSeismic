@@ -1,0 +1,508 @@
+
+\documentclass{article}
+
+%%%\VignetteIndexEntry{Introduction to the IRISSeismic Package} % causes texi2dvi to fail
+
+\usepackage{graphicx}         % if you want to include postscript graphics
+\usepackage[colorlinks=true,urlcolor=blue]{hyperref}
+
+\usepackage{amsmath}          % miscellanious LaTeX enhancements
+\usepackage{amssymb}          % some extra symbols
+
+\usepackage{Sweave}
+
+% Define new, regularized latex commands
+\newcommand{\strong}[1]{{\normalfont\fontseries{b}\selectfont #1}}
+\newcommand{\code}[1]{{\tt #1}}
+
+% Modify new paragraph format
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2ex}
+
+% Set up title-author-date
+\title{ Introduction to the \code{IRISSeismic} Package for R }
+\author{
+  Jonathan Callahan\footnote{\code{jonathan@mazamascience.com}}\\
+  Mazama Science
+  \and
+  Robert Casey\footnote{\code{rob@iris.washington.edu}}\\
+  IRIS DMC
+  \and
+  Mary Templeton\footnote{\code{met@iris.washington.edu}}\\
+  IRIS DMC
+}
+\date{August 2015 }
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+% Set the default image width
+\setkeys{Gin}{width=0.95\textwidth}
+  
+\maketitle
+\tableofcontents
+
+% ------------------------------------------------------------------------------
+
+\section{Introduction}
+
+The \code{IRISSeismic} package for seismic data analysis is being developed by 
+\href{http://mazamascience.com}{Mazama Science} for the \href{http://www.iris.edu/dms/dmc/}
+{IRIS DMC} (Incorporated Research Institutions for Seismology - Data Management
+Center).  This development is part of the \strong{MUSTANG} project for
+automated QC of seismic data.
+
+The goal of this package is to make it easy to obtain and work with data from
+IRIS DMC \href{http://service.iris.edu/}{web services}.  This introduction
+will demonstrate some of the core functionality of the \code{IRISSeismic} package
+and how it can be used in interactive sessions.  Detailed information about 
+object properties and function arguments can be found in the package documentation.
+
+The core objects in this package, especially \code{Trace} and \code{Stream} objects,
+borrow heavily from concepts and features found in the Python \href{http://obspy.org}
+{ObsPy} package.  References to specific \strong{ObsPy} classes can be found in
+the source code.
+
+\section{Getting Started}
+
+For those who are not used to working with \code{R}, the 
+\href{http://mazamascience.com/WorkingWithData/?series=using-r}{Using R} series of
+blog posts offers tips on how to get started and includes links to other introductory
+documentation.
+
+\subsection{RStudio}
+
+Users of the \code{IRISSeismic} package are encouraged to first download and install
+the \href{http://rstudio.org/}{RStudio} integrated development environment for 
+\strong{R}.  Newcomers to \code{R} will find \strong{RStudio} a much friendlier 
+environment in which to work.
+
+\begin{center}
+\includegraphics[width=0.95\textwidth]{rstudio-IRISSeismic.png}
+\end{center}
+
+% ------------------------------------------------------------------------------
+
+\subsection{First example}
+
+Once you have an \strong{R} environment up and running, the first step is to 
+load the \code{IRISSeismic} package.  Then you can create a new 
+\code{IrisClient} object that will be responsible for all subsequent communication
+with DMC provided web services.
+
+<<results=hide>>=
+library(IRISSeismic)
+iris <- new("IrisClient")
+@ 
+
+In order to get data from one of the IRIS DMC web services we must specify all 
+the information needed to create a webservice request:  \code{network, station, 
+location, channel, starttime, endtime}.  Each unique combination of these
+elements is known as a \emph{SNCL}.  These elements are passed to the
+\code{getDataselect()} method of the \code{IrisClient} as a series of character 
+strings except for the times which are of type \code{POSIXct}.  The user is
+responsible for creating datetime objects of class \code{POSIXct}.
+
+The first three commands in the following code chunk use the \code{IrisClient}
+object to communicate with web services and return a \code{Stream} object full
+of data from the IRIS DMC.  The fourth line checks to see how many distinct
+chunks of seismic data exist.  The last line passes this \code{Stream} object to
+a function that will plot the times at which this channel was collecting data.
+
+<<fig=TRUE, echo=TRUE, results=verbatim>>=
+starttime <- as.POSIXct("2002-04-20", tz="GMT")
+endtime <- as.POSIXct("2002-04-21", tz="GMT")
+st <- getDataselect(iris,"US","OXF","","BHZ",starttime,endtime)
+length(st@traces)
+plotUpDownTimes(st, min_signal=1, min_gap=1)
+@ 
+
+This station had a few minor data dropouts, causing the data to be broken up into
+several separate signals that the \code{IRISSeismic} package stores in \code{Trace} 
+objects.
+
+We can get more information on the gaps between traces with the \code{getGaps()}
+function.  The duration (secs) of gaps between traces is displayed along with the
+number of samples that were missed during the gap.
+
+<<>>=
+getGaps(st)
+@ 
+
+Next we can examine various statistics for each individual trace with
+the following \code{parallel-} functions. 
+
+<<>>=
+parallelLength(st)
+parallelMax(st)
+parallelSd(st)
+@ 
+
+It looks like the third trace, with a larger maximum and standard deviation,
+might have a signal.  Metadata for this trace is stored in the \code{stats}
+slot of the \code{Trace} object.
+
+<<>>=
+tr <- st@traces[[3]]
+tr@stats
+@ 
+
+Finally, we can look at the seismic signal with the \code{plot} method.
+
+<<fig=TRUE, echo=TRUE, results=hide>>=
+plot(tr)
+@ 
+
+This small seismic signal was recorded in Oxford, Mississippi and is from a quake
+that occurred in New York state
+
+\begin{quote}
+\strong{Note:}  By default, data are subsampled before plotting to \emph{greatly!} improve plotting
+speed. You can sometimes improve the appearance of a plot by reducing the amount of
+subsampling used. The \code{plot} method accepts a \code{subsampling} parameter
+to specify this.
+\end{quote}
+
+% ------------------------------------------------------------------------------
+
+\subsection{Understanding \code{Stream} and \code{Trace} objects}
+
+In order to work effectively with the \code{IRISSeismic} package you must first
+understand the structure of the new \code{S4} objects it defines. 
+The package documentation gives a full description of each object but we can
+also interrogate them using the \code{slotNames()} function.
+
+<<>>=
+slotNames(st)
+@ 
+
+The \code{Stream} object has the following \emph{slots} (aka \emph{properties}
+or \emph{attributes}):
+
+\begin{itemize}
+  \item \code{url} -- full web services URL used to obtain data
+  \item \code{requestedStarttime} -- POSIXct datetime of the requested start
+  \item \code{requestedEndtime} -- POSIXct datetime of the requested end
+  \item \code{act\_flags} -- act flags from the miniSEED record
+  \item \code{io\_flags} -- act flags from the miniSEED record
+  \item \code{dq\_flags} -- act flags from the miniSEED record
+  \item \code{timing\_qual} -- timing quality from the miniSEED record
+  \item \code{traces} -- list of \code{Trace} objects
+\end{itemize}
+
+When in doubt about what a particular \emph{slot} contains, it is always a good
+idea to ask what type of object it is.
+
+<<>>=
+class(st@url)
+class(st@requestedStarttime)
+class(st@traces)
+@
+
+The next code chunk examines the first \code{Trace} in our 
+\code{Stream}.
+
+\begin{quote}
+\strong{Note:}  \code{R} uses double square brackets, \code{[[...]]} to access list items.
+\end{quote}
+
+<<>>=
+slotNames(st@traces[[1]])
+@
+
+The \code{Trace} object has the following slots:
+\begin{itemize}
+  \item \code{id} -- SNCLQ identifier of the form "US.OXF..BHZ.B"
+  \item \code{stats} -- \code{TraceHeader} object (metadata from the trace)
+  \item \code{Sensor} -- instrument equipment name
+  \item \code{InstrumentSensitivity} -- instrument total sensitivity (stage 0 gain)
+  \item \code{InputUnits} -- instrument data qcquisition input units
+  \item \code{data} -- vector of \code{numeric} data (the actual signal)
+\end{itemize}
+
+The \code{TraceHeader} metadata and the actual signal come from the
+\href{http://service.iris.edu/fdsnws/dataselect/}{dataselect webservice}.
+The instrument metadata are obtained from the
+\href{http://service.iris.edu/fdsnws/station/}{station webservice}.
+
+% ------------------------------------------------------------------------------
+
+\subsection{Be careful with times}
+
+Time stamps associated with seismic data should be given as "Universal" or "GMT" times.
+When specifying times to be used with methods of the \code{IRISSeismic} package you must
+be careful to specify the timezone as R assumes the local timezone by default.
+
+Also, R assumes that datetime strings are formatted with a space
+separating date and time as opposed to the
+\href{http://en.wikipedia.org/wiki/ISO_8601}{ISO 8601} 'T' separator.  If  an 
+ISO 8601 character string is provided without specific formatting
+instructions, the time portion of the string will be lost \emph{without any warning!}
+So it is very important to be careful and consistent if you write code that 
+converts ASCII strings into times.
+
+A few examples will demonstrate the issues:
+
+<<>>=
+as.POSIXct("2010-02-27", tz="GMT") # good
+as.POSIXct("2010-02-27 04:00:00", tz="GMT") # good
+as.POSIXct("2010-02-27T04:00:00", tz="GMT",
+           format="%Y-%m-%dT%H:%M:%OS") # good
+
+as.POSIXct("2010-02-27") # BAD -- no timezone
+as.POSIXct("2010-02-27T04:00:00", tz="GMT") # BAD -- no formatting
+@
+
+
+% ------------------------------------------------------------------------------
+
+\section{Example Operations}
+
+The example at the beginning of this vignette already demonstrated how to obtain 
+seismic data from DMC web services, how to learn about the number and size of 
+individual traces within the requested time range and how to generate a first
+plot of the seismic signal.  This section will introduce more use cases that
+delve further into the capabilities of the \code{IRISSeismic} package.  For complete
+details on available functions, please see the package documentation.
+
+<<results=hide>>==
+help("IRISSeismic",package="IRISSeismic")
+@
+
+% ------------------------------------------------------------------------------
+
+\subsection{Closer examination of a seismic signal}
+
+Once seismic data are in memory, performing mathematical analysis on those data can
+be very fast.  All mathematical operations are performed on every data point.  
+But plotting can still be a slow process.
+
+\begin{quote}
+\strong{Note:}  The \code{plot()} method of \code{Stream} objects deals with gaps by
+first calling \code{mergeTraces()} to fill all gaps with missing values (\code{NA}).
+Then the single, merged trace is plotted with the \code{plot()} method for \code{Trace} objects.
+Any gaps of a significant size will be now visible in the resulting plot.
+\end{quote}
+
+By default, the \code{plot()} method of \code{Trace} and \code{Stream} objects subsamples the data
+so that approximately 5,000 points are used in the plot.  This dramatically speeds
+up plotting.  One of the first things 
+you will want to do with a full day's worth of seismic signal is clip it to a 
+region of interest.  One way to do that would be to  modify the \code{starttime} 
+and \code{endtime} parameters to \code{getDataselect} and then make a data request 
+covering a shorter period of time.  A simpler technique, if the signal is already
+in memory, is to use the \code{slice()} 
+method.
+
+<<fig=TRUE, echo=TRUE, results=verbatim>>=
+starttime <- as.POSIXct("2010-02-27", tz="GMT")
+endtime <- as.POSIXct("2010-02-28", tz="GMT")
+st <- getDataselect(iris,"IU","ANMO","00","BHZ",starttime,endtime)
+
+start2 <- as.POSIXct("2010-02-27 06:40:00", tz="GMT")
+end2 <- as.POSIXct("2010-02-27 07:40:00", tz="GMT")
+
+tr1 <- st@traces[[1]]
+tr2 <- slice(tr1, start2, end2)
+
+layout(matrix(seq(2)))        # layout a 2x1 matrix
+plot(tr1)                     # top
+plot(tr2)                     # bottom
+layout(1)                     # restore original layout
+@ 
+
+% ------------------------------------------------------------------------------
+
+\subsection{Detecting events with STA/LTA}
+
+Access to triggering algorithms for detecting events is provided by the
+\code{STALTA()} method of \code{Trace} objects.  (\emph{cf} 
+\href{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.116.245&rep=rep1&type=pdf}
+{A Comparison of Select Trigger Algorithms for Automated Global Seismic 
+Phase and Event Detection})  The \code{STALTA()} method has the following
+arguments and defaults:
+
+\begin{itemize}
+  \item \code{x} -- \code{Trace} being analyzed
+  \item \code{staSecs} -- size of the short window in secs
+  \item \code{ltaSecs} -- size of the long window in secs
+  \item \code{algorithm} -- named algorithm (default="classic\_LR")
+  \item \code{demean} -- should the signal have the mean removed (default=\code{TRUE})
+  \item \code{detrend} -- should the signal have the trend removed (default=\code{TRUE})
+  \item \code{taper} -- portion of the seismic signal to be tapered at each end (default=0.0)
+  \item \code{increment} -- integer increment to use when sliding the averaging windows to the next location (default=1)
+\end{itemize}
+
+The \code{STALTA()} method returns a \emph{picker}, a vector of numeric values, one
+for every value in the \code{Trace@data} slot.  Note that this is a fairly 
+compute-intensive operation.  This picker can then be used with the \code{triggerOnset()}
+function to return the \strong{approximate} start of the seismic signal.
+
+We'll test this with our original seismic signal.
+
+<<>>=
+starttime <- as.POSIXct("2002-04-20", tz="GMT")
+endtime <- as.POSIXct("2002-04-21", tz="GMT")
+st <- getDataselect(iris,"US","OXF","","BHZ",starttime,endtime)
+tr <- st@traces[[3]]
+picker <- STALTA(tr,3,30)
+threshold <- quantile(picker,0.99999,na.rm=TRUE)
+to <- triggerOnset(tr,picker,threshold)
+@
+
+\begin{quote}
+\strong{NOTE:}  The \code{STALTA()} method is intended to be used for crude, automatic event 
+detection, not precise determination of signal arrival.  Optimal values 
+for the  arguments to the \code{STALTA()} method will depend on the details 
+of the seismic signal.
+\end{quote}
+
+The \code{eventWindow()} method allows you to focus on the region identified by 
+the picker by automatically finding the trigger onset time and then slicing out 
+the region of the trace centered on that time.  This method has the following 
+arguments and defaults:
+
+\begin{itemize}
+  \item \code{x} -- \code{Trace} being analyzed
+  \item \code{picker} -- picker returned by \code{STALTA()}
+  \item \code{threshold} -- threshold value as used in \code{triggerOnset()}
+  \item \code{windowSecs} -- total window size (secs)
+\end{itemize}
+
+<<fig=TRUE, echo=TRUE, results=verbatim>>=
+layout(matrix(seq(3)))        # layout a 3x1 matrix
+closeup1 <- eventWindow(tr,picker,threshold,3600)
+closeup2 <- eventWindow(tr,picker,threshold,600)
+plot(tr)
+abline(v=to, col='red', lwd=2)
+plot(closeup1)
+abline(v=to, col='red', lwd=2)
+plot(closeup2)
+abline(v=to, col='red', lwd=2)
+layout(1)                     # restore original layout
+@
+
+% ------------------------------------------------------------------------------
+
+\subsection{Data availability}
+
+The \code{IrisClient} also provides functionality for interacting with
+other web services at the DMC.  The \code{getAvailability()} method allows users
+to query what SNCLs are available, obtaining that information from the
+\href{http://service.iris.edu/fdsnws/station/}{station webservice}.
+
+Information is returned as a dataframe containing all the information
+returned by ws-availability.  Standard
+DMC webservice wildcards can be used as in the example below which tells us
+what other 'B' channels are available at our station of interest during
+the time of the big quake above.
+
+<<>>=
+starttime <- as.POSIXct("2010-02-27", tz="GMT")
+endtime <- as.POSIXct("2010-02-28", tz="GMT")
+availability <- getAvailability(iris,"IU","ANMO","*","B??",starttime,endtime)
+availability
+@
+
+The \code{getAvailability()} method accepts the following arguments:
+
+\begin{itemize}
+  \item \code{obj} -- an \code{IrisClient} object 
+  \item \code{network} -- network code 
+  \item \code{station} -- station code 
+  \item \code{location} -- location code 
+  \item \code{channel} -- channel code 
+  \item \code{starttime} -- POSIXct starttime (GMT) 
+  \item \code{endtime} -- POSIXct endtime (GMT) 
+  \item \code{restricted} -- optional flag whether to report on restricted data (default=\code{FALSE}) 
+  \item \code{latitude} -- optional latitude when specifying location and radius 
+  \item \code{longitude} -- optional longitude when specifying location and radius 
+  \item \code{minradius} -- optional minimum radius when specifying location and radius 
+  \item \code{maxradius} -- optional maximum radius  when specifying location and radius 
+\end{itemize}
+
+% ------------------------------------------------------------------------------
+
+\subsection{Other IRIS DMC web services}
+
+Several methods of the \code{IrisClient} class work very similarly to the
+\code{getAvailability()} method in that they return dataframes of information obtained
+from web services of the same name.  The suite of methods returning dataframes includes:
+
+\begin{itemize}
+  \item \code{getAvailability}
+  \item \code{getChannel}
+  \item \code{getEvalresp}
+  \item \code{getEvent}
+  \item \code{getNetwork}
+  \item \code{getStation}
+  \item \code{getTraveltime}
+  \item \code{getUnavailability}
+\end{itemize}
+
+The following example demonstrates the use of several of these services together to do the following:
+
+\begin{enumerate}
+  \item find seismic events on a particular day
+  \item find available US network BHZ channels in the hour after the biggest event that day
+  \item determine the easternmost of those channels
+  \item get the P and S travel times to that station
+  \item plot the seismic signal detected at that station with markers for P and S arrival times
+\end{enumerate}
+
+<<fig=TRUE, echo=TRUE, results=verbatim>>=
+# Open a connection to IRIS DMC webservices
+iris <- new("IrisClient")
+
+# Two days around the "Nisqually Quake"
+starttime <- as.POSIXct("2001-02-27", tz="GMT")
+endtime <- starttime + 3600 * 24 * 2
+
+# Find biggest seismic event over these two days -- it's the "Nisqually"
+events <- getEvent(iris, starttime, endtime, minmag=5.0)
+bigOneIndex <- which(events$magnitude == max(events$magnitude))
+bigOne <- events[bigOneIndex,]
+
+# Find US stations that are available within 10 degrees of arc of the 
+# event location during the hour after the event
+start <- bigOne$time
+end <- start + 3600
+av <- getAvailability(iris, "US", "", "", "BHZ", start, end,
+                      latitude=bigOne$latitude, longitude=bigOne$longitude,
+                      minradius=0, maxradius=10)
+    
+# Get the station the furthest East
+minLonIndex <- which(av$longitude == max(av$longitude))
+snclE <- av[minLonIndex,]
+
+# Get travel times to this station
+traveltimes <- getTraveltime(iris, bigOne$latitude, bigOne$longitude, bigOne$depth,
+                             snclE$latitude, snclE$longitude)
+
+# Look at the list                             
+traveltimes
+
+# Find the P and S arrival times
+pArrival <- start + traveltimes$travelTime[traveltimes$phaseName=="P"]
+sArrival <- start + traveltimes$travelTime[traveltimes$phaseName=="S"] 
+
+# Get the BHZ signal for this station
+st <- getDataselect(iris,snclE$network,snclE$station,
+                    snclE$location,snclE$channel,
+                    start,end)
+
+# Check that there is only a single trace
+length(st@traces)
+
+# Plot the seismic trace and mark the "P" and "S" arrival times
+tr <- st@traces[[1]]
+plot(tr, subsampling=1) # need subsmpling=1 to add vertical lines with abline()
+abline(v=pArrival, col='red')
+abline(v=sArrival, col='blue')
+@
+
+
+\end{document}
+
+
+
