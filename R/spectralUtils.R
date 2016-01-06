@@ -435,11 +435,12 @@ psdList <- function(st) {
     tr <- slice(tr_merged,start,end)
     
     if (!isDC(tr)) {
-      
-      psdCount <- psdCount + 1
       # NOTE:  Each psd has elements: freq, spec, snclq, starttime, endtime
-      psdList[[psdCount]] <- McNamaraPSD(tr, loFreq, hiFreq, alignFreq)
-      
+      psds <- McNamaraPSD(tr, loFreq, hiFreq, alignFreq)
+      if (! "-Inf" %in% psds$spec) {
+          psdCount <- psdCount + 1
+          psdList[[psdCount]] <- McNamaraPSD(tr, loFreq, hiFreq, alignFreq)
+      }
     }
     
     # Increment the window with 50% overlap

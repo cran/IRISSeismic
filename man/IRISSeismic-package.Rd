@@ -28,6 +28,11 @@ IRIS DMC web services: \url{http://service.iris.edu/}
 
 \section{History}{
 
+  version 1.0.6 -- CRAN updates required
+  \itemize{
+    \item{Removed "mode" argument form Trace.as.vector() signature.}
+  }
+
   version 1.0.4 -- name change to IRISSeismic
   \itemize{
     \item{Name change required because 'seismic' was recently taken.}

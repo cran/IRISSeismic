@@ -29,8 +29,8 @@ butterworth(x, n, low, high, type)
 This method creates a Butterworth filter with the specified characteristics and applies
 it to the Trace data.
 
-When only \code{n} and \code{low} are specified, a low pass filter is applied.
-When only \code{n} and \code{high} are specified, a high pass filter is applied.
+When only \code{n} and \code{low} are specified, a high pass filter is applied.
+When only \code{n} and \code{high} are specified, a low pass filter is applied.
 When \code{n} and both \code{low} and \code{high} are specified, a band pass filter is applied.
 To apply a band stop filter you must specify \code{n}, \code{low}, \code{high} and \code{type='stop'}
 }

@@ -69,7 +69,7 @@
 #                        password = "character",
 #                        timeout = "integer",
 #                        debug = "logical",
-#                        user_agent = "character"),
+#                        useragent = "character"),
 #         # default values for slots
 #         prototype(site = "http://service.iris.edu",
 #                   user = "",
@@ -100,7 +100,7 @@ if (Sys.getenv("IrisClient_netrc") != "") {
 # we will want the client using us as a library to be able to identify itself.
 # it's easy enough to make this an environment setting as well.
 # we will generate a default user agent to represent the metrics calculators.
-irisUserAgent <- "MUSTANG R Client/1 - IRISSeismic lib "
+irisUserAgent <- "unidentified R script"
 if (Sys.getenv("IrisClient_agent") != "") {
 	irisUserAgent <- Sys.getenv("IrisClient_agent")
 }
@@ -112,13 +112,15 @@ setClass("IrisClient",
                         useragent = "character"),
          prototype(site = irisSite,
                    debug = FALSE,
-                   useragent = paste(irisUserAgent,
-						   ifelse("IRISSeismic" %in% rownames(installed.packages()),
-                           		installed.packages()["IRISSeismic","Version"], "local code"),
-						   " RCurl ",
-						   ifelse("RCurl" %in% rownames(installed.packages()),
-								installed.packages()["RCurl","Version"], "local code"),
-						   " R ver ", R.version.string, " OS ", version$platform))
+                   useragent = paste0("IRISSeismic ",
+                                      ifelse("IRISSeismic" %in% rownames(installed.packages()),
+                                             installed.packages()["IRISSeismic","Version"], "local code"),
+                                      ", RCurl ",
+                                      ifelse("RCurl" %in% rownames(installed.packages()),
+                                             installed.packages()["RCurl","Version"], "local code"),
+                                      ", ", R.version.string,
+                                      ", OS ", version$platform,
+                                      ", (",irisUserAgent,")"))
 )
 
 

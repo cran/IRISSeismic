@@ -292,7 +292,7 @@ setMethod("initialize", "Trace",
 as.vector.Trace <- function(x, mode="any") {
   return( x@data )
 }
-setMethod("as.vector", signature(x="Trace", mode="ANY"), function(x, mode) as.vector.Trace(x, mode=mode))
+setMethod("as.vector", signature(x="Trace"), function(x) as.vector.Trace(x))
 
 
 # isDC -------------------------------------------------------------------------
