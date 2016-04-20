@@ -1,6 +1,6 @@
 Type: Package
 Package: IRISSeismic
-Version: 1.0.7
+Version: 1.0.7-1
 Title: Classes and Methods for Seismic Data Analysis
 Authors@R: c(
     person("Jonathan", "Callahan", email="jonathan.s.callahan@gmail.com", role=c("aut","cre")),
@@ -25,5 +25,5 @@ Collate: Class-Trace.R Class-Stream.R Class-IrisClient.R
 License: GPL (>= 2)
 Repository: CRAN
 NeedsCompilation: yes
-Packaged: 2016-01-05 22:00:51 UTC; root
-Date/Publication: 2016-01-06 10:01:02
+Packaged: 2016-04-20 11:32:51 UTC; ligges
+Date/Publication: 2016-04-20 13:33:46
