@@ -11,16 +11,21 @@ or \code{psdDF} dataframe.
 }
 
 \usage{
-psdPlot(PSDs, style, showNoiseModel, showMaxMin, showMode, showMean, ...)
+psdPlot(PSDs, style='psd', evalresp=NULL, ylo=-200, yhi=-50, showNoiseModel=TRUE, 
+        showMaxMin=TRUE, showMode=TRUE, showMean=FALSE, showMedian=FALSE, ...)
 }
 
 \arguments{
   \item{PSDs}{either a list as returned by \code{psdList} or a dataframe of PSD values obtained from the BSS}
   \item{style}{character identifier of plot type: \code{'psd'} plots PSD lines, \code{'pdf'} plots the \code{pdfMatrix}}
+  \item{evalresp}{dataframe of freq, amp, phase information matching output of \code{getEvalresp}, optional}
+  \item{ylo}{numeric setting lower limit of plot y-axis (default=\code{-200})}
+  \item{yhi}{numeric setting upper limit of plot y-axis (default=\code{-50})}
   \item{showNoiseModel}{logical controlling plotting of noise model lines (default=\code{TRUE})}
   \item{showMaxMin}{logical controlling plotting of PSD max and min lines (default=\code{TRUE})}
   \item{showMode}{logical controlling plotting of PDF mode line (default=\code{TRUE})}
   \item{showMean}{logical controlling plotting of PSD mean line (default=\code{FALSE})}
+  \item{showMedian}{logical controlling plotting of PSD median line (default=\code{FALSE})}
   \item{...}{arguments to be passed to plotting methods}
 }
 
@@ -36,7 +41,7 @@ mimic the plots presented in the McNamara paper.
 }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 %% \note{ }

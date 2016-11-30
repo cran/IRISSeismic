@@ -35,7 +35,7 @@ whose data have been replaced with the Hilbert transform of the seismic signal.
 }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \note{
@@ -57,9 +57,6 @@ endtime <- as.POSIXct("2010-02-27 09:00:00", tz="GMT")
 # Get the waveform
 st <- getDataselect(iris,"IU","ANMO","00","BHZ",starttime,endtime)
 tr <- st@traces[[1]]
-
-# Demean, detrend, cosine taper
-tr <- DDT(tr)
 
 # Create Hilbert transform of the trace
 trh <- hilbert(tr)

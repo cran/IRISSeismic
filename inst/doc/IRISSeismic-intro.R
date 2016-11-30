@@ -65,7 +65,7 @@ slotNames(st@traces[[1]])
 
 
 ###################################################
-### code chunk number 10: IRISSeismic-intro.Rnw:246-253
+### code chunk number 10: IRISSeismic-intro.Rnw:247-254
 ###################################################
 as.POSIXct("2010-02-27", tz="GMT") # good
 as.POSIXct("2010-02-27 04:00:00", tz="GMT") # good
@@ -77,13 +77,13 @@ as.POSIXct("2010-02-27T04:00:00", tz="GMT") # BAD -- no formatting
 
 
 ###################################################
-### code chunk number 11: IRISSeismic-intro.Rnw:268-269
+### code chunk number 11: IRISSeismic-intro.Rnw:269-270
 ###################################################
 help("IRISSeismic",package="IRISSeismic")
 
 
 ###################################################
-### code chunk number 12: IRISSeismic-intro.Rnw:297-311
+### code chunk number 12: IRISSeismic-intro.Rnw:298-312
 ###################################################
 starttime <- as.POSIXct("2010-02-27", tz="GMT")
 endtime <- as.POSIXct("2010-02-28", tz="GMT")
@@ -102,7 +102,7 @@ layout(1)                     # restore original layout
 
 
 ###################################################
-### code chunk number 13: IRISSeismic-intro.Rnw:343-350
+### code chunk number 13: IRISSeismic-intro.Rnw:344-351
 ###################################################
 starttime <- as.POSIXct("2002-04-20", tz="GMT")
 endtime <- as.POSIXct("2002-04-21", tz="GMT")
@@ -114,7 +114,7 @@ to <- triggerOnset(tr,picker,threshold)
 
 
 ###################################################
-### code chunk number 14: IRISSeismic-intro.Rnw:372-382
+### code chunk number 14: IRISSeismic-intro.Rnw:373-383
 ###################################################
 layout(matrix(seq(3)))        # layout a 3x1 matrix
 closeup1 <- eventWindow(tr,picker,threshold,3600)
@@ -129,7 +129,7 @@ layout(1)                     # restore original layout
 
 
 ###################################################
-### code chunk number 15: IRISSeismic-intro.Rnw:400-404
+### code chunk number 15: IRISSeismic-intro.Rnw:401-405
 ###################################################
 starttime <- as.POSIXct("2010-02-27", tz="GMT")
 endtime <- as.POSIXct("2010-02-28", tz="GMT")
@@ -138,7 +138,7 @@ availability
 
 
 ###################################################
-### code chunk number 16: IRISSeismic-intro.Rnw:453-501
+### code chunk number 16: IRISSeismic-intro.Rnw:456-504
 ###################################################
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
@@ -150,7 +150,7 @@ endtime <- starttime + 3600 * 24 * 2
 # Find biggest seismic event over these two days -- it's the "Nisqually"
 events <- getEvent(iris, starttime, endtime, minmag=5.0)
 bigOneIndex <- which(events$magnitude == max(events$magnitude))
-bigOne <- events[bigOneIndex,]
+bigOne <- events[bigOneIndex[1],]
 
 # Find US stations that are available within 10 degrees of arc of the 
 # event location during the hour after the event

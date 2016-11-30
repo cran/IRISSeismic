@@ -42,7 +42,7 @@ A new \code{Trace} object is returned.
 %%\references{ }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 %% \note{ }
@@ -56,12 +56,14 @@ signal::butter, signal::filter
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
-# Trying to match the results in figure 2a of
+# Compare to the results in figure 2a of
 #
 # "Determination of New Zealand Ocean Bottom Seismometer Orientation
 #  via Rayleigh-Wave Polarization", Stachnik et al. 
 #
-# geode.colorado.edu/~sheehan/pdf/StachnikNZorientation-SRL2012.pdf
+# http://srl.geoscienceworld.org/content/83/4/704
+#
+# (note: since publication, ZU.NZ19..BH1 has been renamed BH2 and ZU.NZ19..BH2 has been renamed BH1)
 
 starttime <- as.POSIXct("2009-02-18 22:01:07",tz="GMT")
 endtime <- starttime + 630

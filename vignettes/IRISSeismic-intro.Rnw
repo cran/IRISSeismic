@@ -216,7 +216,8 @@ The \code{Trace} object has the following slots:
   \item \code{stats} -- \code{TraceHeader} object (metadata from the trace)
   \item \code{Sensor} -- instrument equipment name
   \item \code{InstrumentSensitivity} -- instrument total sensitivity (stage 0 gain)
-  \item \code{InputUnits} -- instrument data qcquisition input units
+  \item \code{SensitivityFrequency} -- the frequency (Hz) at which the \code{InstrumentSensitivity} is correct
+  \item \code{InputUnits} -- instrument data acquisition input units
   \item \code{data} -- vector of \code{numeric} data (the actual signal)
 \end{itemize}
 
@@ -414,7 +415,7 @@ The \code{getAvailability()} method accepts the following arguments:
   \item \code{channel} -- channel code 
   \item \code{starttime} -- POSIXct starttime (GMT) 
   \item \code{endtime} -- POSIXct endtime (GMT) 
-  \item \code{restricted} -- optional flag whether to report on restricted data (default=\code{FALSE}) 
+  \item \code{includerestricted} -- optional flag whether to report on restricted data (default=\code{FALSE}) 
   \item \code{latitude} -- optional latitude when specifying location and radius 
   \item \code{longitude} -- optional longitude when specifying location and radius 
   \item \code{minradius} -- optional minimum radius when specifying location and radius 
@@ -432,9 +433,11 @@ from web services of the same name.  The suite of methods returning dataframes i
 \begin{itemize}
   \item \code{getAvailability}
   \item \code{getChannel}
+  \item \code{getDataselect}
   \item \code{getEvalresp}
   \item \code{getEvent}
   \item \code{getNetwork}
+  \item \code{getSNCL}
   \item \code{getStation}
   \item \code{getTraveltime}
   \item \code{getUnavailability}
@@ -461,7 +464,7 @@ endtime <- starttime + 3600 * 24 * 2
 # Find biggest seismic event over these two days -- it's the "Nisqually"
 events <- getEvent(iris, starttime, endtime, minmag=5.0)
 bigOneIndex <- which(events$magnitude == max(events$magnitude))
-bigOne <- events[bigOneIndex,]
+bigOne <- events[bigOneIndex[1],]
 
 # Find US stations that are available within 10 degrees of arc of the 
 # event location during the hour after the event

@@ -7,7 +7,7 @@
 \title{Retrieve Channel metadata from IRIS DMC}
 
 \description{
-The \code{getUnavailability} method obtains channel metadata for non-available channels from the IRIS DMC station web service
+The \code{getUnavailability} method obtains metadata for channels that are not available from the IRIS DMC station web service
 and returns it in a dataframe.
 }
 
@@ -62,14 +62,14 @@ The IRIS DMC station webservice:
 
   \url{http://service.iris.edu/fdsnws/station/1/}
 
-This implementation was inspired by the functionality in the obspy station() method.
+This implementation was inspired by the functionality in the obspy get_stations() method.
  
-  \url{http://docs.obspy.org/packages/autogen/obspy.iris.client.Client.station.html}
+  \url{http://docs.obspy.org/packages/autogen/obspy.clients.fdsn.client.Client.get_stations.html}
 
 }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 %% \note{ }
@@ -81,6 +81,7 @@ Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
 }
 
 \examples{
+  \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -92,15 +93,16 @@ endtime <- starttime + 2*24*3600
 events <- getEvent(iris,starttime,endtime,6.0)
 events
 
-# Event #3 is the Nisqually quake in Washington State
-e <- events[3,]
+# biggest event is Nisqually
+eIndex <- which(events$magnitude == max(events$magnitude))
+e <- events[eIndex[1],]
 
 # Find all BHZ channels that were NOT collecting data at the time of the quake 
-# and within 5 degrees of the quake epicenter?
+# and within 5 degrees of the quake epicenter (or are otherwise unavailable from IRIS).
 channels <- getUnavailability(iris,"*","*","*","BHZ",starttime,endtime,
                               lat=e$latitude,long=e$longitude,maxradius=5)
 channels
-
+  }
 }
 
 \keyword{webservices}

@@ -41,7 +41,7 @@ A dataframe containing binned values is returned with the same column names as t
 }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 %%\note{}

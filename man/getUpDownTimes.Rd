@@ -44,7 +44,7 @@ A vector of \code{POSIXct} datetimes associated with on/off transitions.
 %% \references{ }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 %% \note{ }
@@ -55,6 +55,7 @@ Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
 }
 
 \examples{
+  \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -62,14 +63,14 @@ starttime <- as.POSIXct("2012-01-24", tz="GMT")
 endtime <- as.POSIXct("2012-01-25", tz="GMT")
 
 # Get the waveform
-st <- getDataselect(iris,"AK","PIN","","VEA",starttime,endtime)
+st <- getDataselect(iris,"AK","PIN","","BHZ",starttime,endtime)
 
 # Determine up/down transitions, ignoring Traces < 3 min and gaps < 5 min
 upDownTimes <- getUpDownTimes(st, min_signal=180, min_gap=300)
 
 # Or just plot them directly
 plotUpDownTimes(st, min_signal=180, min_gap=300)
-
+  }
 }
 
 \keyword{methods}

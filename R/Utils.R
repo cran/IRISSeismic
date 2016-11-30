@@ -30,7 +30,14 @@ miniseed2Stream <- function(miniseed,
                             requestedEndtime=NULL,
                             sensor="synthetic trace",
                             scale=as.integer(NA),
-                            scaleunits="") {
+                            scalefreq=as.numeric(NA),   
+                            scaleunits="",
+                            latitude=as.numeric(NA),    
+                            longitude=as.numeric(NA),   
+                            elevation=as.numeric(NA),   
+                            depth=as.numeric(NA),       
+                            azimuth=as.numeric(NA),     
+                            dip=as.numeric(NA)) {       
   
   # Use C code to parse the bytes into a list of lists  
   result <- try( segList <- parseMiniSEED(miniseed),
@@ -41,12 +48,12 @@ miniseed2Stream <- function(miniseed,
     
     err_msg <- geterrmessage()
     if (stringr::str_detect(err_msg,"libmseed__zero traces in miniSEED record")) {
-      stop(paste("miniseed2Stream: No data found."))
+      stop(paste("miniseed2Stream: No data found.", url))
 	} else if ((stringr::str_detect(err_msg,"Data integrity check for Steim"))) {
 		# REC - May 2014 - allowing libmseed Steim coefficient errors to pass unabated
-		print(paste("miniseed2Stream:",err_msg,"- Using data anyway"))
+		print(paste("miniseed2Stream:",err_msg,"- Using data anyway",":",url))
     } else {
-      stop(paste("miniseed2Stream:",err_msg))
+      stop(paste("miniseed2Stream:",err_msg,":",url))
     } 
     
   }  
@@ -73,18 +80,27 @@ miniseed2Stream <- function(miniseed,
                        channel=segList[[i]]$channel,
                        quality=segList[[i]]$quality,
                        starttime=as.POSIXct(segList[[i]]$starttime, origin=origin, tz="GMT"),
+                       endtime=as.POSIXct(segList[[i]]$endtime, origin=origin, tz="GMT"),   
                        npts=segList[[i]]$npts,
-                       sampling_rate=segList[[i]]$sampling_rate)
+                       sampling_rate=segList[[i]]$sampling_rate,
+                       latitude=latitude,    
+                       longitude=longitude,  
+                       elevation=elevation,  
+                       depth=depth,          
+                       azimuth=azimuth,      
+                       dip=dip               
+                       )
     
     stats <- new("TraceHeader", headerList=headerList)
     traces[[i]] <- new("Trace", stats=stats,
                        Sensor=sensor, 
                        InstrumentSensitivity=scale, 
+                       SensitivityFrequency=scalefreq,  
                        InputUnits=scaleunits,
                        data=segList[[i]]$data)
   }
   
-  # Each minSEED record has one set of quality flags (currently attached to each element in segList)
+  # Each miniSEED record has one set of quality flags (currently attached to each element in segList)
   act_flags <- segList[[1]]$act_flags
   io_flags <- segList[[1]]$io_flags
   dq_flags <- segList[[1]]$dq_flags
@@ -96,7 +112,7 @@ miniseed2Stream <- function(miniseed,
   }
   if (is.null(requestedEndtime)) {
     last <- length(traces)
-    requestedEndtime <- traces[[last]]@stats@starttime + traces[[last]]@stats@npts / traces[[last]]@stats@sampling_rate
+    requestedEndtime <- traces[[last]]@stats@endtime 
   }
 
   # Create a new Stream object
@@ -113,8 +129,18 @@ miniseed2Stream <- function(miniseed,
 #
 # Reads miniSEED bytes from a file and converts them into a Stream object.
 #
-readMiniseedFile <- function(file, sensor, scale, scaleunits) {
-  
+readMiniseedFile <- function(file, 
+                             sensor="synthetic trace", 
+                             scale=as.integer(NA),     
+                             scalefreq=as.numeric(NA), 
+                             scaleunits="",            
+                             latitude=as.numeric(NA),  
+                             longitude=as.numeric(NA), 
+                             elevation=as.numeric(NA), 
+                             depth=as.numeric(NA),     
+                             azimuth=as.numeric(NA),   
+                             dip=as.numeric(NA)) {                            
+
   # Read in the binary data
   bytes <- file.info(file)$size
   miniseed <- readBin(file, "raw", n=bytes)
@@ -125,7 +151,8 @@ readMiniseedFile <- function(file, sensor, scale, scaleunits) {
   requestedEndtime <- NULL
 
   stream <- miniseed2Stream(miniseed,url,requestedStarttime,requestedEndtime,
-                            sensor,scale,scaleunits)
+                            sensor,scale,scalefreq,scaleunits,latitude,longitude, 
+                            elevation,depth,azimuth,dip)  
 
   return(stream)
 }
@@ -134,34 +161,61 @@ readMiniseedFile <- function(file, sensor, scale, scaleunits) {
 ############################################################
 # rotate2D
 #
-# Rotates non-vertical compoentns of a seismic waveform into a new coordinate system.
+# Rotates non-vertical components of a seismic waveform into a new coordinate system.
 #
-# Functionas similarly to the rotation service with "&azimuth=angle&components=ZRT"
+# Functions similarly to the rotation service with "&azimuth=angle&components=ZRT"
+# expects orthogonal traces
 #
 #   http://service.iris.edu/irisws/rotation/1/
 #   http://service.iris.edu/irisws/rotation/docs/1/help/
 
 rotate2D <- function(st1,st2,angle) {
   
-  # Make sure that all stream data is in a single trace
-#   st1 <- mergeTraces(st1)
-#   st2 <- mergeTraces(st2)
-  # TODO:  mergeTraces can introduce NA's
-  # TODO:  Figure out how to properly merge.
-  
   if (length(st1@traces) > 1) {
-    stop(paste("rotate2D: Stream st1 has more than one trace."))
+    stop(paste("Stream st1 has more than one trace."))
   }
   if (length(st2@traces) > 1) {
-    stop(paste("rotate2D: Stream st2 has more than one trace."))
+    stop(paste("Stream st2 has more than one trace."))
   }
   
-  tr1 <- st1@traces[[1]]
-  tr2 <- st2@traces[[1]]
-    
   # Sanity check
-  if (length(tr1) != length(tr2)) {
-    stop(paste("rotate2D: Incoming streams have different data lengths."))
+  if (length(st1) != length(st2)) {
+    stop(paste("Incoming streams have different data lengths."))
+  }
+
+  # need to determine which is 1 (lag, usually oriented North) and 2 (lead, usually oriented E) using metadata information
+
+  if (!is.na(st1@traces[[1]]@stats@azimuth) && !is.na(st2@traces[[1]]@stats@azimuth)){
+     az1 <- st1@traces[[1]]@stats@azimuth
+     az2 <- st2@traces[[1]]@stats@azimuth
+     
+     azdiff <- az1-az2
+     
+     if ( !( (abs(azdiff) > 87 & abs(azdiff) < 93) || (abs(azdiff) > 267 & abs(azdiff) < 273) ) ) {
+        stop(paste("Incoming streams are not orthogonal (+/- 3 degrees):", st1@traces[[1]]@id,": azimuth=",st1@traces[[1]]@stats@azimuth,";",st2@traces[[1]]@id,": azimuth=",st2@traces[[1]]@stats@azimuth))
+     }
+     
+
+     if(azdiff < 0 ) {
+        if ( azdiff <= 180 ) { 
+           tr1 <- st1@traces[[1]]
+           tr2 <- st2@traces[[1]]
+        } else {
+           tr1 <- st2@traces[[1]]
+           tr2 <- st1@traces[[1]]
+        }
+     }else if( azdiff > 0) {
+        if ( azdiff > 180 ) {
+           tr1 <- st1@traces[[1]]
+           tr2 <- st2@traces[[1]]
+        } else {
+           tr1 <- st2@traces[[1]]
+           tr2 <- st1@traces[[1]]
+        }
+     }  
+  } else { #if azimuth information is not available, assume that the first trace is lagging and the second is leading. Assume orthogonality.
+     tr1 <- st1@traces[[1]]
+     tr2 <- st2@traces[[1]]
   }
   
   # NOTE:  The azimuth circle is different from standard geometry!!!
@@ -194,10 +248,16 @@ rotate2D <- function(st1,st2,angle) {
   parts[4] <- stringr::str_replace(parts[4],'.$','R')
   stR@traces[[1]]@id <- paste(parts,collapse='.')
   stR@traces[[1]]@stats@channel <- parts[4]
-  stR@traces[[1]]@Sensor <- paste("synthetic rotation by",formatC(angle,digits=1,format="f"),"degrees")
-  # TODO:  Should we retain InstrumentSensitivity and InputUnits from N/E or 1/2 traces information
-  stR@traces[[1]]@InstrumentSensitivity <- as.integer(NA)
-  stR@traces[[1]]@InputUnits <- ""
+  if ( (tr1@stats@azimuth+angle) < 360 && (tr1@stats@azimuth+angle) >= 0) { 
+      stR@traces[[1]]@stats@azimuth <- tr1@stats@azimuth+angle 
+  } else if ((tr1@stats@azimuth+angle) > 360) { 
+      stR@traces[[1]]@stats@azimuth <- (tr1@stats@azimuth+angle)-360 
+  } else if ((tr1@stats@azimuth+angle) < 0) { 
+      stR@traces[[1]]@stats@azimuth <- (tr1@stats@azimuth+angle)+360 
+  }
+  stR@traces[[1]]@Sensor <- paste("synthetic rotation by",formatC(angle,digits=1,format="f"),"degrees",tr1@Sensor) 
+  stR@traces[[1]]@InstrumentSensitivity <- tr1@InstrumentSensitivity 
+  stR@traces[[1]]@InputUnits <- tr1@InputUnits  
     
   
   # Create a new "transverse" Stream object
@@ -208,10 +268,16 @@ rotate2D <- function(st1,st2,angle) {
   parts[4] <- stringr::str_replace(parts[4],'.$','T')
   stT@traces[[1]]@id <- paste(parts,collapse='.')
   stT@traces[[1]]@stats@channel <- parts[4]
-  stT@traces[[1]]@Sensor <- paste("synthetic rotation by",formatC(angle,digits=1,format="f"),"degrees")
-  # TODO:  Should we retain InstrumentSensitivity and InputUnits from N/E or 1/2 traces information
-  stT@traces[[1]]@InstrumentSensitivity <- as.integer(NA)
-  stT@traces[[1]]@InputUnits <- ""
+  if ( (tr2@stats@azimuth+angle) < 360 && (tr2@stats@azimuth+angle) >= 0) {   
+      stT@traces[[1]]@stats@azimuth <- tr2@stats@azimuth+angle 
+  } else if ((tr2@stats@azimuth+angle) > 360) { 
+      stT@traces[[1]]@stats@azimuth <- (tr2@stats@azimuth+angle)-360 
+  } else if ((tr2@stats@azimuth+angle) < 0) { 
+      stT@traces[[1]]@stats@azimuth <- (tr2@stats@azimuth+angle)+360 
+  }
+  stT@traces[[1]]@Sensor <- paste("synthetic rotation by",formatC(angle,digits=1,format="f"),"degrees",tr2@Sensor) 
+  stT@traces[[1]]@InstrumentSensitivity <- tr2@InstrumentSensitivity  
+  stT@traces[[1]]@InputUnits <- tr2@InputUnits  
   
   # Return the rotated data
   return(list(stR=stR, stT=stT))

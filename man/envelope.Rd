@@ -41,7 +41,7 @@ whose data have been replaced with the envelope of the seismic signal.
 }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \note{

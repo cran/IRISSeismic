@@ -29,6 +29,8 @@ getEvent(obj, starttime, endtime, minmag, maxmag, magtype,
 \details{
 The \code{getEvent} method uses the event web service to obtain data for all events that meet the criteria defined by the arguments
 and returns that data in a dataframe. Each row of the dataframe represents a unique event.
+
+\code{getEvent} calls to the IRIS event webservice now go to http://earthquake.usgs.gov/fdsnws/event/1/.
 }
 
 
@@ -51,10 +53,14 @@ used for internal consistency -- all other web services return columns named "la
 The IRIS DMC event webservice:
 
   \url{http://service.iris.edu/fdsnws/event/1/}
+
+The USGS event webservice:
+  \url{http://earthquake.usgs.gov/fdsnws/event/1/}
+
 }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 %% \note{ }

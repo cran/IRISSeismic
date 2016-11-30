@@ -56,12 +56,12 @@ A class for making data and metadata requests from IRIS DMC web services.
 %% \references{ }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \note{
-The \code{IrisClient} object is inspired by the \code{iris.client.Client} class found in the
-python ObsPy package (\url{http://docs.obspy.org/packages/autogen/obspy.iris.client.Client.html}).
+The \code{IrisClient} object is inspired by the \code{clients.fdsn.client.Client} class found in the
+python ObsPy package (\url{http://docs.obspy.org/packages/autogen/obspy.clients.fdsn.client.Client.html#obspy.clients.fdsn.client.Client}).
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
@@ -77,7 +77,7 @@ starttime <- as.POSIXct("2012-01-24", tz="GMT")
 endtime <- as.POSIXct("2012-01-25", tz="GMT")
 
 # Get the waveform
-st <- getDataselect(iris,"AK","PIN","","VEA",starttime,endtime)
+st <- getDataselect(iris,"AK","PIN","","BHZ",starttime,endtime)
 mean(st)
   }
 }

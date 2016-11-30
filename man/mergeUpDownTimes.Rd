@@ -41,7 +41,7 @@ A vector of \code{POSIXct} datetimes associated with on/off transitions.
 %% \references{ }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \note{

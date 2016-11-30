@@ -42,7 +42,7 @@ Objects are typically created by calls to \link{getDataselect}.
     \item{\code{dq_flags}:}{Object of class \code{"integer"}:
     Accumulators for the dq_flags bits in each miniSEED record. }
     \item{\code{timing_qual}:}{Object of class \code{"numeric"}:
-    Average timing quality assicuated with miniSEED records.}
+    Average timing quality associated with miniSEED records.}
     \item{\code{traces}:}{Object of class \code{"list"}:
     List of \code{Trace} objects. }
   }
@@ -104,7 +104,7 @@ Objects are typically created by calls to \link{getDataselect}.
 %% \references{ }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 \note{
 The \code{Stream} object is inspired by the \code{Stream} class found in the
@@ -154,6 +154,7 @@ The following code documentation describes how each of the flags is used within 
 %% \seealso{ }
 
 \examples{
+  \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -161,7 +162,7 @@ starttime <- as.POSIXct("2012-01-24", tz="GMT")
 endtime <- as.POSIXct("2012-01-25", tz="GMT")
 
 # Get the waveform
-st <- getDataselect(iris,"AK","PIN","","VEA",starttime,endtime)
+st <- getDataselect(iris,"AK","PIN","","BHZ",starttime,endtime)
 min(st)
 median(st)
 mean(st)
@@ -169,6 +170,7 @@ max(st)
 sd(st)
 rms(st)
 rmsVariance(st)
+  }
 }
 
 \keyword{classes}

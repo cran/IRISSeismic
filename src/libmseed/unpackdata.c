@@ -14,7 +14,7 @@
  *  (previously) ORFEUS/EC-Project MEREDIAN
  *  (currently) IRIS Data Management Center
  *
- *  modified: 2012.357
+ *  modified: 2010.012
  ************************************************************************/
 
 /*
@@ -144,7 +144,7 @@ int msr_unpack_float_32
   if (req_samples < 0) return 0;
   
   for (nd=0; nd<req_samples && nd<num_samples; nd++) {
-    memcpy (&ftmp, &fbuf[nd], sizeof(float));
+    ftmp = fbuf[nd];
     if ( swapflag ) ms_gswap4a (&ftmp);
     databuff[nd] = ftmp;
   }
@@ -174,7 +174,7 @@ int msr_unpack_float_64
   if (req_samples < 0) return 0;
   
   for (nd=0; nd<req_samples && nd<num_samples; nd++) {
-    memcpy (&dtmp, &fbuf[nd], sizeof(double));
+    dtmp = fbuf[nd];
     if ( swapflag ) ms_gswap8a (&dtmp);
     databuff[nd] = dtmp;
   }
@@ -329,6 +329,7 @@ int msr_unpack_steim1
   if (nr > 0)
     *data = *px0;
   
+
   /* Compute all but first values based on previous value               */
   prev = data - 1;
   while (--nr > 0 && --nd > 0)
@@ -339,12 +340,14 @@ int msr_unpack_steim1
   while (--nd > 0)
     last_data = *++diff + last_data;
   
-  /* Verify that the last value is identical to xn = rev. int. constant */
+/* Verify that the last value is identical to xn = rev. int. constant */
+/** REC -- remove integrity check for now -- we have annoying old data that trips this **
   if (last_data != *pxn)
     {
       ms_log (1, "%s: Warning: Data integrity check for Steim-1 failed, last_data=%d, xn=%d\n",
 	      UNPACK_SRCNAME, last_data, *pxn);
     }
+****/
   
   return ((req_samples < num_samples) ? req_samples : num_samples);
 }  /* End of msr_unpack_steim1() */
@@ -533,11 +536,13 @@ int msr_unpack_steim2
     last_data = *++diff + last_data;
   
   /* Verify that the last value is identical to xn = rev. int. constant */
+/** REC -- remove integrity check for now -- we have annoying old data that trips this **
   if (last_data != *pxn)
     {
       ms_log (1, "%s: Warning: Data integrity check for Steim-2 failed, last_data=%d, xn=%d\n",
 	      UNPACK_SRCNAME, last_data, *pxn);
     }
+*************/
   
   return ((req_samples < num_samples) ? req_samples : num_samples);
 }  /* End of msr_unpack_steim2() */

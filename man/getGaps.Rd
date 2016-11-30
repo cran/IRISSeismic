@@ -57,7 +57,7 @@ A list is returned with the following elements:
 %% \references{}
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 %% \note{}
 
@@ -66,6 +66,7 @@ Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
 %% \seealso{}
 
 \examples{
+  \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -73,7 +74,7 @@ starttime <- as.POSIXct("2012-01-24", tz="GMT")
 endtime <- as.POSIXct("2012-01-25", tz="GMT")
 
 # Get the waveform
-st <- getDataselect(iris,"AK","PIN","","VEA",starttime,endtime)
+st <- getDataselect(iris,"AK","PIN","","BHZ",starttime,endtime)
 
 # Save the gap analysis in a variable
 gapInfo <- getGaps(st)
@@ -83,8 +84,9 @@ names(gapInfo)
 
 # Look at a histogram of data dropouts
 hist(gapInfo$nsamples, breaks=50, 
-     main="Data Gaps in AK.PIN..VEA during Jan 24, 2012",
+     main="Data Gaps in AK.PIN..BHZ Jan 24, 2012",
      xlab="number of missing samples per gap")
+  }
 }
 
 \keyword{methods}

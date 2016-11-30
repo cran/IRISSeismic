@@ -31,16 +31,19 @@
 #include <stdio.h>
 #include <libmseed.h>
 
+typedef void (* R_callback)(char *);
+
 SEXP parseMiniSEED (SEXP buffer) {
 
   int debug = 0;
-  int numPROTECT = 0;
+  int numPROTECT = 0;  // number of protected elements outside the loop
+  int loopPROTECT = 0;  // the number of protected elements inside the loop
   int bufferLength = 0;
   char *bufferPtr;
   char msgPrefix[11] = "libmseed__";
   
   // Redirect libmseed logging messages to Matlab functions
-  ms_loginit( (void *)&Rprintf, msgPrefix, (void *)&Rf_error, msgPrefix);
+  ms_loginit( (R_callback)&Rprintf, msgPrefix, (R_callback)&Rf_error, msgPrefix);
 
   // Allocate space for the buffer
   PROTECT(buffer = AS_RAW(buffer));
@@ -162,49 +165,53 @@ SEXP parseMiniSEED (SEXP buffer) {
   PROTECT(returnList = NEW_LIST(id->numsegments));
   numPROTECT++;
 
+  // Set up the names that go in the returnList
+  char *names[14] = {"npts","sampling_rate","network","station","location","channel","quality",
+                     "starttime","endtime","data","act_flags","io_flags","dq_flags","timing_qual"};
+  SEXP listNames;
+  PROTECT(listNames = NEW_CHARACTER(14));
+  numPROTECT++;
+  for (int i=0; i<14; i++) {
+    SET_STRING_ELT(listNames, i, mkChar(names[i]));
+  }
+
   // Loop through the segments (continuous blocks of data), populating a segmentList
   // which is then inserted into the returnList.
   for (int segIndex=0; segIndex < id->numsegments; segIndex++ ) {
 
-    // Set up the names that go in the returnList
-    char *names[14] = {"npts","sampling_rate","network","station","location","channel","quality",
-                       "starttime","endtime","data","act_flags","io_flags","dq_flags","timing_qual"};
-    SEXP listNames;
-    PROTECT(listNames = NEW_CHARACTER(14));
-    numPROTECT++;
-    for (int i=0; i<14; i++) {
-      SET_STRING_ELT(listNames, i, mkChar(names[i]));
-    }
-  
     // Now set up the variable vectors that go into the segmentList
     SEXP npts, sampling_rate, network, station, location, channel, quality, starttime, endtime, data;
+
+    loopPROTECT = 0;
   
     PROTECT(npts = NEW_INTEGER(1));
-    numPROTECT++;
+    loopPROTECT++;
     INTEGER(npts)[0] = (int) seg->samplecnt;
   
     PROTECT(sampling_rate = NEW_NUMERIC(1));
-    numPROTECT++;
-    REAL(sampling_rate)[0] = (double) seg->samprate;
+    loopPROTECT++;
+    // REC -- modified samprate for segment
+    // -- get the mode value of a set of sample rates recorded for this segment
+    REAL(sampling_rate)[0] = get_segsamprate_mode(seg->samprate_list);
   
     PROTECT(network = NEW_CHARACTER(1));
-    numPROTECT++;
+    loopPROTECT++;
     SET_STRING_ELT(network, 0, mkChar(id->network));
   
     PROTECT(station = NEW_CHARACTER(1));
-    numPROTECT++;
+    loopPROTECT++;
     SET_STRING_ELT(station, 0, mkChar(id->station));
   
     PROTECT(location = NEW_CHARACTER(1));
-    numPROTECT++;
+    loopPROTECT++;
     SET_STRING_ELT(location, 0, mkChar(id->location));
   
     PROTECT(channel = NEW_CHARACTER(1));
-    numPROTECT++;
+    loopPROTECT++;
     SET_STRING_ELT(channel, 0, mkChar(id->channel));
   
     PROTECT(quality = NEW_CHARACTER(1));
-    numPROTECT++;
+    loopPROTECT++;
     // Extra step because R only deals with strings, not single characters.
     // Create the NULL terminated string by hand.
     char dataquality[2] = { id->dataquality, '\0' };
@@ -214,17 +221,17 @@ SEXP parseMiniSEED (SEXP buffer) {
     // NOTE:  When these values are used in R, starttime and endtime need to be converted with:
     //  s <- as.POSIXct(header$starttime, tz="GMT", origin=as.POSIXct("1970-01-01T00:00:00Z"))
     PROTECT(starttime = NEW_NUMERIC(1));
-    numPROTECT++;
+    loopPROTECT++;
     REAL(starttime)[0] = (double) MS_HPTIME2EPOCH(seg->starttime);
   
     PROTECT(endtime = NEW_NUMERIC(1));
-    numPROTECT++;
+    loopPROTECT++;
     REAL(endtime)[0] = (double) MS_HPTIME2EPOCH(seg->endtime);
   
     // TODO:  Check for non-int data types
     // // //Rprintf("Data is of type '%c'\n",seg->sampletype);
     PROTECT(data = NEW_NUMERIC(seg->samplecnt));
-    numPROTECT++;
+    loopPROTECT++;
 
     int32_t *idatasamplesPtr = (int32_t *) seg->datasamples;
     float *fdatasamplesPtr = (float *) seg->datasamples;
@@ -248,7 +255,7 @@ SEXP parseMiniSEED (SEXP buffer) {
     SEXP act_flags, io_flags, dq_flags, timing_qual;
 /*  
     PROTECT(act_flags = NEW_LOGICAL(8));
-    numPROTECT++;
+    loopPROTECT++;
     b = msr->fsdh->act_flags;
     LOGICAL(act_flags)[0] = (int) bit(b,0x01);
     LOGICAL(act_flags)[1] = (int) bit(b,0x02);
@@ -260,14 +267,14 @@ SEXP parseMiniSEED (SEXP buffer) {
     LOGICAL(act_flags)[7] = (int) bit(b,0x80);
 */
     PROTECT(act_flags = NEW_INTEGER(8));
-    numPROTECT++;
+    loopPROTECT++;
     for (int i=0; i<8; i++) {
       INTEGER(act_flags)[i] = (int) total_act_flags[i];
     }
 
 /*
     PROTECT(io_flags = NEW_LOGICAL(8));
-    numPROTECT++;
+    loopPROTECT++;
     b = msr->fsdh->io_flags;
     LOGICAL(io_flags)[0] = (int) bit(b,0x01);
     LOGICAL(io_flags)[1] = (int) bit(b,0x02);
@@ -279,14 +286,14 @@ SEXP parseMiniSEED (SEXP buffer) {
     LOGICAL(io_flags)[7] = (int) bit(b,0x80);
 */
     PROTECT(io_flags = NEW_INTEGER(8));
-    numPROTECT++;
+    loopPROTECT++;
     for (int i=0; i<8; i++) {
       INTEGER(io_flags)[i] = (int) total_io_flags[i];
     }
 
 /*
     PROTECT(dq_flags = NEW_LOGICAL(8));
-    numPROTECT++;
+    loopPROTECT++;
     b = msr->fsdh->dq_flags;
     LOGICAL(dq_flags)[0] = (int) bit(b,0x01);
     LOGICAL(dq_flags)[1] = (int) bit(b,0x02);
@@ -298,13 +305,13 @@ SEXP parseMiniSEED (SEXP buffer) {
     LOGICAL(dq_flags)[7] = (int) bit(b,0x80);
 */
     PROTECT(dq_flags = NEW_INTEGER(8));
-    numPROTECT++;
+    loopPROTECT++;
     for (int i=0; i<8; i++) {
       INTEGER(dq_flags)[i] = (int) total_dq_flags[i];
     }
 
     PROTECT(timing_qual = NEW_NUMERIC(1));
-    numPROTECT++;
+    loopPROTECT++;
     if (totalBlkt1001 > 0) {
       REAL(timing_qual)[0] = (double) totalTimingQuality / (double) totalRecords;
     } else {
@@ -314,7 +321,7 @@ SEXP parseMiniSEED (SEXP buffer) {
     // All the data have been parsed.  Now set up and fill the segmentList
     SEXP segmentList;
     PROTECT(segmentList = NEW_LIST(14));
-    numPROTECT++;
+    loopPROTECT++;
     SET_VECTOR_ELT(segmentList, 0, npts);
     SET_VECTOR_ELT(segmentList, 1, sampling_rate);
     SET_VECTOR_ELT(segmentList, 2, network);
@@ -330,10 +337,14 @@ SEXP parseMiniSEED (SEXP buffer) {
     SET_VECTOR_ELT(segmentList, 12, dq_flags);
     SET_VECTOR_ELT(segmentList, 13, timing_qual);
     setAttrib(segmentList, R_NamesSymbol, listNames);
-  
+
     // Put the segmentList inside the returnList;
     SET_VECTOR_ELT(returnList, segIndex, segmentList);
-    
+
+    // REC -- now UNPROTECT all elements built up in the loop
+    // data should now protected by returnList
+    UNPROTECT(loopPROTECT);  // pop the stack down to pre-loop count
+
     // Next segment
     seg = seg->next;
   }

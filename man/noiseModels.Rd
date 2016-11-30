@@ -7,7 +7,7 @@
 
 \description{
 The \code{noiseModels} function returns the New High Noise Model and New Low Noise Model
-from the Peterson paper. Values are returned for the specific frequencies specified in
+from the Peterson paper referenced below. Values are returned for the specific frequencies specified in
 the \code{freq} argument.
 }
 
@@ -27,13 +27,13 @@ low noise models, respectively.
 }
 
 \references{
-\href{http://www.mttmllr.com/ADS/DATA/peterson_usgs_seismic_noise_ofr93-322.pdf}{Observations of Modeling and Seismic Background Noise} (Peterson 1993)
+\href{http://pubs.usgs.gov/of/1993/0322/report.pdf}{Observations of Modeling and Seismic Background Noise} (Peterson 1993)
 
 \href{http://pubs.usgs.gov/of/2005/1438/pdf/OFR-1438.pdf}{Seismic Noise Analysis System Using Power Spectral Density Probability Density Functions} (McNamara and Boaz 2005)
 }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 %% \note{ }

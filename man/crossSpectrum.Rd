@@ -5,7 +5,7 @@
 
 \description{
 The crossSpectrum() function is based on \R's spec.pgram() function and attempts to provide
-complete results of cross-spectal FFT analysis in a programmer-friendly fashion.
+complete results of cross-spectral FFT analysis in a programmer-friendly fashion.
 }
 
 \usage{
@@ -21,7 +21,7 @@ crossSpectrum(x, spans = NULL, kernel = NULL, taper = 0.1,
   \item{kernel}{alternatively, a kernel smoother of class "tskernel"}
   \item{taper}{specifies the proportion of data to taper. A split cosine bell taper is applied to this proportion of the data at the beginning and end of the series}
   \item{pad}{proportion of data to pad. Zeros are added to the end of the series to increase its length by the proportion pad}
-  \item{fast}{logical; if TRUE, pad the series to a highly composite length}
+  \item{fast}{logical. if TRUE, pad the series to a highly composite length}
   \item{demean}{logical. If TRUE, subtract the mean of the series}
   \item{detrend}{logical. If TRUE, remove a linear trend from the series. This will also remove the mean}
   \item{na.action}{NA action function}
@@ -61,11 +61,11 @@ A dataframe with the following columns:
 
 \href{http://octave-signal.sourcearchive.com/documentation/1.0.7/pwelch_8m-source.html}{Octave pwelch() source code}
 
-\href{http://cran.r-project.org/web/packages/psd/vignettes/normalization.pdf}{Normalization of Power Spectral Density estimates}
+\href{https://CRAN.R-project.org/package=psd/vignettes/normalization.pdf}{Normalization of Power Spectral Density estimates}
 }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 %%\note{}
@@ -77,7 +77,7 @@ Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
 \examples{
   \dontrun{
 # Create a new IrisClient
-iris <- new("IrisClient", debug=TRUE)
+iris <- new("IrisClient")
 
 # Get seismic data
 starttime <- as.POSIXct("2011-05-01", tz="GMT")
@@ -88,7 +88,7 @@ st2 <- getDataselect(iris,"CI","PASC","10","BHZ",starttime,endtime)
 tr1 <- st1@traces[[1]]
 tr2 <- st2@traces[[1]]
 
-# Both traces have a smpling rate of 40 Hz
+# Both traces have a sampling rate of 40 Hz
 sampling_rate <- tr1@stats@sampling_rate
 
 ts1 <- ts(tr1@data,frequency=sampling_rate)

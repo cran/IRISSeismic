@@ -8,16 +8,18 @@
 \description{
 The \code{psdDF2NoiseMatrix} function uses the \code{snclq} identifier associated with the
 first PSD in the dataframe to obtain instrument correction information at the specified frequencies
-from the \code{\link{getEvalresp}} web service. This correction is applied to every PSD in 
+from the \code{\link{getEvalresp}} web service if instrumentation correction information is
+not supplied as an argument. This correction is applied to every PSD in 
 the dataframe and the now corrected PSD values are returned as a matrix.
 }
 
 \usage{
-psdDF2NoiseMatrix(DF)
+psdDF2NoiseMatrix(DF, evalresp=NULL)
 }
 
 \arguments{
   \item{DF}{a dataframe of PSDs obtained from the \code{getPSDMeasurements} method of \code{IrisClient}.}
+  \item{evalresp}{dataframe of freq, amp, phase information matching output of \code{getEvalresp}, optional.}
 }
 
 \details{
@@ -34,11 +36,11 @@ A \code{matrix} is returned with one row for each instrument-corrected PSD and o
 }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \note{
-The incoming dataframe is checked to make sure that it represents only a single SNCL. An error is generated if
+The incoming dataframe is checked to make sure that it represents only a single SNCL (Station-Network-Channel-Location). An error is generated if
 more than one is found.  However, the \code{psdDF} is not checked to make sure that no changes to the
 instrument correction happened during the time period covered by the \code{psdDF}. This occurs at an 'epoch'
 boundary when an instrument is replaced.

@@ -33,7 +33,7 @@ A new \code{Trace} or \code{Stream} object is returned.
 %% \references{ }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 %% \note{ }
@@ -41,24 +41,27 @@ Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
 %% \seealso{ }
 
 \examples{
+  \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
-starttime <- as.POSIXct("2012-01-24", tz="GMT")
-endtime <- as.POSIXct("2012-01-25", tz="GMT")
+starttime <- as.POSIXct("2011-01-24", tz="GMT")
+endtime <- as.POSIXct("2011-01-25", tz="GMT")
 
 # Get the waveform
-stRaw <- getDataselect(iris,"AK","PIN","","VEA",starttime,endtime)
+stRaw <- getDataselect(iris,"AK","PIN","","BHZ",starttime,endtime)
 
-# obtain an instrument sensitivity value with getChannelMetadata)
-# ...
-
-sensitivityValue <- 10.0
+# obtain an instrument sensitivity value with getChannel metadata)
+c <- getChannel(iris, "AK","PIN","","BHZ",starttime, endtime)
+sensitivityValue <- c$scale
 
 # convert raw data
-st <- multiplyBy(stRaw, sensitivityValue)
-
+st <- multiplyBy(stRaw, 1/sensitivityValue)
 rmsVariance(st)
+
+# plot trace
+plot(st, ylab=c$scaleunits)
+  }
 }
 
 \keyword{methods}

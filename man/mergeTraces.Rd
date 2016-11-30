@@ -36,7 +36,7 @@ A new \code{Stream} object containing a single \code{Trace} is returned.
 %% \references{}
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 %% \note{ }

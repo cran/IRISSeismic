@@ -15,6 +15,8 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <inttypes.h>
+#include <stdint.h>
 
 #include "libmseed.h"
 

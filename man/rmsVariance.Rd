@@ -19,7 +19,7 @@
 
 \description{
 The \code{rms} and \code{rmsVariance} methods of \code{Trace} and \code{Stream} objects compute the 
-Root Mean Square amplitude or RMS variance of the associated data in each object.
+Root Mean Square (RMS) amplitude or RMS variance of the associated data in each object.
 RMS variance removes the DC level from the seismic signal so that the zero line
 is consistent.
 }
@@ -73,7 +73,7 @@ A numeric vector is returned for \code{parallelRmsVariance}.
 %% \references{ }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 %% \note{ }
@@ -89,7 +89,7 @@ starttime <- as.POSIXct("2012-01-24", tz="GMT")
 endtime <- as.POSIXct("2012-01-25", tz="GMT")
 
 # Get the waveform
-st <- getDataselect(iris,"AK","PIN","","VEA",starttime,endtime)
+st <- getDataselect(iris,"AK","PIN","","BHZ",starttime,endtime)
 
 # Get the first trace and generate some statistics
 tr <- st@traces[[1]]

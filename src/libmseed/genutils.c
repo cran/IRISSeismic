@@ -15,6 +15,8 @@
 #include <string.h>
 #include <errno.h>
 #include <time.h>
+#include <inttypes.h>
+#include <stdint.h>
 
 #include "lmplatform.h"
 #include "libmseed.h"

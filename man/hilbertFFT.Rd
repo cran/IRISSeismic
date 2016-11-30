@@ -31,7 +31,7 @@ A complex vector containing the Hilbert FFT of \code{x}.
 }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \note{

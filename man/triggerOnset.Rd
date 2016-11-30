@@ -42,7 +42,7 @@ The returned value wil be a \code{POSIXct} time by defult or a numeric index if 
 %% \references{ }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \note{
@@ -59,6 +59,7 @@ signal.
 }
 
 \examples{
+  \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -75,6 +76,7 @@ to <- triggerOnset(tr,picker)
 
 plot(tr)
 abline(v=to, col='red', lwd=2)
+  }
 }
 
 \keyword{methods}

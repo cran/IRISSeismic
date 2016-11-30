@@ -450,6 +450,8 @@ typedef struct MSTraceSeg_s {
   void           *datasamples;       /* Data samples, 'numsamples' of type 'sampletype'*/
   int64_t         numsamples;        /* Number of data samples in datasamples */
   char            sampletype;        /* Sample type code: a, i, f, d */
+  /* REC */
+  struct MSSampRateList_s* samprate_list;     /* REC - pointer to linked list of sample rate counts */
   void           *prvtptr;           /* Private pointer for general use, unused by libmseed */
   struct MSTraceSeg_s *prev;         /* Pointer to previous segment */
   struct MSTraceSeg_s *next;         /* Pointer to next segment */
@@ -482,6 +484,14 @@ typedef struct MSTraceList_s {
   struct MSTraceID_s *last;          /* Pointer to last used trace in list */
 }
 MSTraceList;
+
+/* REC -- adding a linked list struct for MSTraceSeg */
+typedef struct MSSampRateList_s {
+	double	samprate;				/* sample rate key value for this node */
+	int		count;					/* count value for this sample rate */
+	struct MSSampRateList_s* next;			/* next node in the linked list */
+}
+MSSampRateList;
 
 /* Data selection structure time window definition containers */
 typedef struct SelectTime_s {
@@ -604,6 +614,10 @@ extern void          mstl_printtracelist ( MSTraceList *mstl, flag timeformat,
 extern void          mstl_printsynclist ( MSTraceList *mstl, char *dccid, flag subsecond );
 extern void          mstl_printgaplist (MSTraceList *mstl, flag timeformat,
 					double *mingap, double *maxgap);
+/* REC - in tracelist.c */
+MSSampRateList* add_segsamprate(MSSampRateList* srl, double samprate);
+double get_segsamprate_mode(MSSampRateList* srl);
+/*     */
 
 /* Reading Mini-SEED records from files */
 typedef struct MSFileParam_s

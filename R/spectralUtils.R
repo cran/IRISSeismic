@@ -350,7 +350,7 @@ McNamaraPSD <- function(tr, loFreq=.005, hiFreq=10, alignFreq=0.1, binned=TRUE) 
   # Average
   sp$spec <- specSum / 13
   
-  # Bin specturm if requested ----------
+  # Bin spectrum if requested ----------
   
   if (binned) {
     df <- data.frame(freq=sp$freq,spec=sp$spec)
@@ -399,25 +399,29 @@ psdList <- function(st) {
   tr_merged <- st_merged@traces[[1]]
   
   # Choose chunk size based on the chanel 'band code'(=sampling rate)
-  # See:  http://www.iris.edu/manuals/SEED_appA.htm
+  # See:  http://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf , Appendix A
   # NOTE:  This choice was recommended by Mary Templeton
+  #
+  # get the channel name
   channel <- st_merged@traces[[1]]@stats@channel
-  if (stringr::str_detect(channel,"^L")) {
+  # the high frequency boundary is set to nyquist
+  hiFreq <- 0.5 * tr_merged@stats@sampling_rate
+  # Set an alignment frequency from which octaves will be generated
+  alignFreq <- 0.1
+  if (stringr::str_detect(channel,"^V")) {  ## added by REC - Apr 2016
+    Z <- 24 * 3600
+    loFreq <- 0.0001
+	alignFreq <- 0.025  # special for VH
+  } else if (stringr::str_detect(channel,"^L")) {
     Z <- 3 * 3600
     loFreq <- 0.001
-    hiFreq <- 0.5 * tr_merged@stats@sampling_rate
   } else if (stringr::str_detect(channel,"^M")) {
     Z <- 2 * 3600
     loFreq <- 0.0025
-    hiFreq <- 0.5 * tr_merged@stats@sampling_rate
   } else {
     Z <- 3600
     loFreq <- 0.005
-    hiFreq <- 0.5 * tr_merged@stats@sampling_rate
   }
-  
-  # Set an alignment frequency from which octaves will be generated
-  alignFreq <- 0.1
   
   # Initialize
   psdList <- list()
@@ -432,14 +436,14 @@ psdList <- function(st) {
   while (secsLeft >= 0.99*Z) {
     
     # Slice a chunk out of the trace
-    tr <- slice(tr_merged,start,end)
+    tr <- IRISSeismic::slice(tr_merged,start,end)
     
     if (!isDC(tr)) {
       # NOTE:  Each psd has elements: freq, spec, snclq, starttime, endtime
       psds <- McNamaraPSD(tr, loFreq, hiFreq, alignFreq)
       if (! "-Inf" %in% psds$spec) {
           psdCount <- psdCount + 1
-          psdList[[psdCount]] <- McNamaraPSD(tr, loFreq, hiFreq, alignFreq)
+          psdList[[psdCount]] <- psds
       }
     }
     
@@ -461,8 +465,10 @@ psdList <- function(st) {
 # Create instrument corrected noiseMatrix from psdList
 
 # NOTE:  The incoming psdList contains raw, uncorrected PSDs.
+# NOTE:  Optional input evalresp is a dataframe of freq, amp, phase columns 
+#        matching output of getEvalresp function 
 # NOTE:  The returned matrix contains corrected PSDs, one per row.
-psdList2NoiseMatrix <- function(psdList) {
+psdList2NoiseMatrix <- function(psdList, evalresp=NULL) {
   
   # Need to ensure that the IrisClient object exists as R has a default
   # "iris" dataset.  See help(iris, package="datasets")
@@ -493,11 +499,15 @@ psdList2NoiseMatrix <- function(psdList) {
   nfreq <- length(psdList[[1]]$freq)
   units <- "acc"
   
-  # Get instrument response
-  evalresp <- getEvalresp(iris,network,station,location,channel,time=starttime,
+  # Get instrument response from IRIS webservices if not provided by input evalresp
+  if (is.null(evalresp)) {
+      evalresp <- getEvalresp(iris,network,station,location,channel,time=starttime+1,
                           minfreq=minfreq,maxfreq=maxfreq,nfreq=nfreq,units=units)
+  }
 
-  # NOTE:  No try block needed as getEvalresp will generate appropriate errors
+  if (!("amp" %in% colnames(evalresp) & "freq" %in% colnames(evalresp))) {
+      stop(paste("error evalresp dataframe does not have columns named 'amp' and 'freq'"))
+  }
   
   # NOTE:  Because we're operating in dB space we need to think in terms of logarithms.
   
@@ -523,7 +533,7 @@ psdList2NoiseMatrix <- function(psdList) {
   }
   
   
-  # Create a correciton matrix that matches the dimensions of noiseMatrix
+  # Create a correction matrix that matches the dimensions of noiseMatrix
   correctionMatrix <- matrix(rep(correction,times=psdCount), nrow=psdCount, byrow=TRUE)
   
   # Dividing by the correction, in dB space, is just subtracting
@@ -550,7 +560,7 @@ psdList2NoiseMatrix <- function(psdList) {
 # ... ... through all frequencies
 # ... repeated for each PSD, typically associated with an hour long chunk of signal
 
-psdDF2NoiseMatrix <- function(DF) {
+psdDF2NoiseMatrix <- function(DF, evalresp=NULL) {
   
   # Need to ensure that the IrisClient object exists as R has a default
   # "iris" dataset.  See help(iris, package="datasets")
@@ -586,10 +596,15 @@ psdDF2NoiseMatrix <- function(DF) {
   nfreq <- length(unique(DF$frequency))
   units <- "acc"
   
-  evalresp <- getEvalresp(iris,network,station,location,channel,time=starttime,
+  if (is.null(evalresp)) {
+      evalresp <- getEvalresp(iris,network,station,location,channel,time=starttime+1,
                           minfreq=minfreq,maxfreq=maxfreq,nfreq=nfreq,units=units)
-  
-  # NOTE:  No try block needed as getEvalresp will generate appropriate errors
+  }
+
+  if (!("amp" %in% colnames(evalresp) & "freq"  %in% colnames(evalresp))) {
+      stop(paste("error evalresp dataframe does not have columns named 'amp' and 'freq'"))
+  }
+ 
   
   # NOTE:  Because we're operating in dB space we need to think in terms of logarithms.
   
@@ -621,7 +636,7 @@ psdDF2NoiseMatrix <- function(DF) {
 #  INPUT:  matrix where columns are frequencies and rows are individual, corrected PSDs
 # OUTPUT:  matrix where columns are frequencies and rows are counts of how many input PSDs have that power level
 
-noiseMatrix2PdfMatrix <- function(noiseMatrix, lo=-200, hi=-50, binSize=1) {
+noiseMatrix2PdfMatrix <- function(noiseMatrix, lo=-310, hi=55, binSize=1) {
    
   # NOTE:  Define a function to convert one column of noiseMatrix into a 
   # NOTE:  column of histogram counts.  However many rows exist in noiseMatrix,
@@ -629,8 +644,8 @@ noiseMatrix2PdfMatrix <- function(noiseMatrix, lo=-200, hi=-50, binSize=1) {
   
   histCounts <- function(x, lo, hi, binSize) {
     breaks <- seq(lo,hi,binSize)
-    nbins <- length(breaks) - 1
-    discretizedValue <- .bincode(x, breaks)
+    nbins <- length(breaks) - 1 
+    discretizedValue <- .bincode(x, breaks,include.lowest=TRUE)
     return(tabulate(discretizedValue, nbins))  
   }
   
@@ -654,7 +669,7 @@ noiseModels <- function(freq) {
   period <- 1/freq
   
   # NOTE:  Original New High/Low Noise Models in Peterson paper:
-  # NOTE:    http://www.mttmllr.com/ADS/DATA/peterson_usgs_seismic_noise_ofr93-322.pdf
+  # NOTE:    https://pubs.usgs.gov/of/1993/0322/report.pdf
   # NOTE:
   # NOTE:  IRIS DMC 2005 paper
   # NOTE:    http://www.earth.northwestern.edu/people/seth/327/HV/McNamaraetal_AmbientNoise.3.0.pdf
@@ -664,6 +679,7 @@ noiseModels <- function(freq) {
   # NOTE:
   # NOTE:  Source code to compare:
   # NOTE:    https://github.com/g2e/seizmo/blob/master/noise/nlnm.m
+  # NOTE:    https://github.com/g2e/seizmo/blob/master/noise/nhnm.m
   
   # New Low Noise Model in acceleration: NLNMacc = A + B*log10(T) referred to 1 (m/s^2)^2/Hz
   # T ( minimum period)
@@ -717,7 +733,8 @@ minPeriod       A       B
       7.90  -93.37  -22.42
      15.40   73.54 -162.98
      20.00 -151.52   10.01
-    100000 -206.66   31.63       
+    354.80 -206.66   31.63
+    100000 -206.66   31.63
 ")
 
   # We create breaks based on the first column of each table to figure out
@@ -737,19 +754,19 @@ minPeriod       A       B
 
 # Calculate basic statistics on all PSDs in list or dataframe.
 
-psdStatistics <- function(PSDs) {
+psdStatistics <- function(PSDs, evalresp=NULL) {
   
   # Get list of frequencies and a noiseMatrix
   
   if (class(PSDs) == "list") {   
     
     freq <- PSDs[[1]]$freq
-    noiseMatrix <- psdList2NoiseMatrix(PSDs) 
+    noiseMatrix <- psdList2NoiseMatrix(PSDs, evalresp) 
     
   } else if (class(PSDs) == "data.frame") {  
     
     freq <- sort(unique(PSDs$freq))
-    noiseMatrix <- psdDF2NoiseMatrix(PSDs)  
+    noiseMatrix <- psdDF2NoiseMatrix(PSDs, evalresp)  
     
   }
     
@@ -775,15 +792,21 @@ psdStatistics <- function(PSDs) {
   # Calculate pctAboveNHNM and pctBelowNLNM ------------
   
   noiseModels <- noiseModels(freq)
-  
-  aboveCount <- rep(0,ncol)
-  belowCount <- rep(0,ncol)
-  
-  for (j in seq(ncol)) {    
-    aboveCount[j] <- length(which(noiseMatrix[,j] > noiseModels$nhnm[j]))
+
+  # calculate percent metrics based on frequencies that have a noise model value and a noiseMatrix value
+  notNA <- which(!is.na(noiseMatrix[1,]) & !is.na(noiseModels[,1]))  # high and low noise models have same upper and lower frequency limits, so only check one model
+
+  aboveCount <- rep(NA,ncol)
+  aboveCount[notNA] <- 0
+
+  belowCount <- rep(NA,ncol)
+  belowCount[notNA] <- 0
+
+  for (j in notNA) {
+    aboveCount[j] <- length(which(noiseMatrix[,j] > noiseModels$nhnm[j]))    
     belowCount[j] <- length(which(noiseMatrix[,j] < noiseModels$nlnm[j]))
   }
-  
+
   pct_above <- 100 * aboveCount/nrow
   pct_below <- 100 * belowCount/nrow
   
@@ -793,10 +816,12 @@ psdStatistics <- function(PSDs) {
   # For mode, we need to convert to the discretized pdfMatrix
   # that contains in each bin, the count of PSDs that have 
   # that value.  The mode is just the bin with the highest count.
-  
-  # Default dbBins = seq(-200,-50,1)
-  pdfBins <- seq(-200,-50,1)
-  pdfMatrix <- noiseMatrix2PdfMatrix(noiseMatrix)
+
+  lo <- floor(min(noiseMatrix[,which(!is.na(noiseMatrix[1,]))]))
+  hi <- ceiling(max(noiseMatrix[,which(!is.na(noiseMatrix[1,]))]))
+  pdfBins <- seq(lo,hi,1)
+
+  pdfMatrix <- noiseMatrix2PdfMatrix(noiseMatrix,lo-0.5,hi+0.5)
   
   colMode <- rep(NA,ncol)
   for (j in seq(ncol)) {
@@ -807,7 +832,7 @@ psdStatistics <- function(PSDs) {
   return(list(noiseMatrix=noiseMatrix,
               pdfMatrix=pdfMatrix,
               freq=freq,
-              pdfBins=pdfBins,
+              pdfBins=pdfBins,   # midpoint of bins
               max=colMax,
               min=colMin,
               mean=colMean,
@@ -824,7 +849,8 @@ psdStatistics <- function(PSDs) {
 
 # Plot instrument corrected noise values of PSDs in list or dataframe
 
-psdPlot <- function(PSDs, style='psd', showNoiseModel=TRUE, showMaxMin=TRUE, showMode=TRUE, showMean=FALSE, ...) {
+psdPlot <- function(PSDs, style='psd', evalresp=NULL, ylo=-200,yhi=-50, showNoiseModel=TRUE, 
+                    showMaxMin=TRUE, showMode=TRUE, showMean=FALSE, showMedian=FALSE, ...) {
   
   if (class(PSDs) == "list") {
     
@@ -866,11 +892,16 @@ psdPlot <- function(PSDs, style='psd', showNoiseModel=TRUE, showMaxMin=TRUE, sho
   }
   
   # Generate basic statics as well as noiseMatrix and pdfMatrix
-  
-  stats <- psdStatistics(PSDs)
+ 
+  if (is.null(evalresp)) { 
+     stats <- psdStatistics(PSDs)
+  } else {
+     stats <- psdStatistics(PSDs, evalresp=evalresp)
+  }
   
   noiseMatrix <- stats$noiseMatrix
   pdfMatrix <- stats$pdfMatrix
+  pdfBins <- stats$pdfBins
     
   # Choose appropriate limits for period
   period <- 1/freq
@@ -886,9 +917,7 @@ psdPlot <- function(PSDs, style='psd', showNoiseModel=TRUE, showMaxMin=TRUE, sho
                        seq(10,100,length.out=10))
   }
   
-  # Choose appropriate limits for dB
-  ylo <- -200
-  yhi <- -50
+  # Choose appropriate limits for dB, now as input variables
   ylim <- c(ylo,yhi)
   horizontalLines <- seq(ylo,yhi,10)
   
@@ -910,7 +939,8 @@ psdPlot <- function(PSDs, style='psd', showNoiseModel=TRUE, showMaxMin=TRUE, sho
   } else if (style == 'pdf') {
     
     # Set up colors and breaks
-    cols <- c('grey90', rev(grDevices::rainbow(30))[4:30])
+    # cols <- c('grey90', rev(grDevices::rainbow(30,alpha=seq(1,0.1,-1/30))[4:30])
+    cols <- c('white', rev(grDevices::rainbow(30))[4:30])
     breaks <- c(0,seq(0.001,max(pdfMatrix),length.out=length(cols)))
     
     # NOTE:  To get image() to plot with the same axes as the data displayed as a table you
@@ -920,11 +950,13 @@ psdPlot <- function(PSDs, style='psd', showNoiseModel=TRUE, showMaxMin=TRUE, sho
     # Initial plot
     graphics::image(t(pdfMatrix)[ncol(pdfMatrix):1,],
                     x=rev(period),
-                    y=seq(ylo,yhi),
+                    y=pdfBins,
+                    xlim=xlim,
+                    ylim=c(ylo,yhi),
                     breaks=breaks,
                     col=cols,
                     las=1, log="x",
-                    xlab="Period (Sec)", ylab="Power dB",
+                    xlab="Period (Sec)", ylab="Power (dB)",
                     main=paste("PDF plot of",psdCount,"corrected, hourly PSDs for",snclq),
                     ...)      
     
@@ -954,29 +986,38 @@ psdPlot <- function(PSDs, style='psd', showNoiseModel=TRUE, showMaxMin=TRUE, sho
     col <- c(col,'blue','red')
   }
   if (showMode) {
-    graphics::points(period, stats$mode, type='l', col='yellow', lwd=3)
+    graphics::points(period, stats$mode, type='l', col='black', lwd=2)
     legend <- c(legend,"mode")
-    lwd <- c(lwd,3)
-    col <- c(col,'yellow')
+    lwd <- c(lwd,2)
+    col <- c(col,'black')
   }
   if (showMean) {
-    graphics::points(period, stats$mean, type='l', col='orange', lwd=4)
+    graphics::points(period, stats$mean, type='l', col='orange', lwd=2)
     legend <- c(legend,"mean")
-    lwd <- c(lwd,4)
+    lwd <- c(lwd,2)
     col <- c(col,'orange')    
   }
+  if (showMedian) {
+    graphics::points(period, stats$median, type='l', col='yellow4', lwd=2)
+    legend <- c(legend,"median")
+    lwd <- c(lwd,2)
+    col <- c(col,'yellow4')
+  }
+
   
   # Add grid lines
   graphics::abline(h=horizontalLines, v=verticalLines, col='gray50', lty='dotted')
   
   # Add a legend
-  legend("topleft", bg='white',
+  # legend("topleft", bg='white',
+  legend("topleft", bty='n',
          legend=legend,
          lwd=lwd,
          col=col)
   
   # Add the starttime and endtime
-  legend("topright", bg='white',
+  # legend("topright", bg='white',
+  legend("topright", bty='n', inset=c(0.09,0),
          legend=c(paste(starttime,"  start "),
                   paste(endtime,"  end ")))
   
@@ -1009,6 +1050,23 @@ hilbertFFT <- function(x) {
   hfft <- stats::fft(ff*h, inverse=TRUE)/length(ff)
   
   return(hfft)
+}
+
+#' @author REC
+#' if vec represents a set of binned counts of incrementing values (ascending)
+#' return a vector of associated bin values with the proper count of each value.
+#' @param vec a histogram vector or ordered set of binned counts
+#' @param startVal the initial value of the first bin element
+#' @param incr the increment rate of each subsequent bin value
+#' @return a vector of bin values with appropriate counts of each
+unHistogram <- function(vec, startVal=1, incr=1) {
+	j <- 0
+	k <- list()
+	for (i in vec) {
+		if (i > 0) k <- c(k,rep(startVal+(j*incr),i))
+		j <- j+1
+	}
+	return(unlist(k))
 }
 
 ################################################################################

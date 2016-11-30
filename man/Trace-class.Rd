@@ -31,13 +31,15 @@ populated by calls to \link{getDataselect}.
   \describe{
     \item{\code{id}:}{Object of class \code{"character"}: 
     Unique "SNCL" identifier specifying the Network, Station, Location, Channel and Quality factor
-    associated with this trace: eg. \code{AK.PIN..VEA.B}. The \code{id} is generated automatically
+    associated with this trace: eg. \code{AK.PIN..VEA.M}. The \code{id} is generated automatically
     when the trace is first created and is intended for read only.}
     \item{\code{Sensor}:}{Object of class \code{"character"}:
-    Equipment name.}
+    Instrument name.}
     \item{\code{InstrumentSensitivity}:}{Object of class \code{"numeric"}:
     The total sensitivity for a channel, representing the complete acquisition system expressed as a scalar.
     Equivalent to SEED stage 0 gain.}
+    \item{\code{SensitivityFrequency}:}{Object of class \code{"numeric"}:
+    The frequency at which the total sensitivity is correct.}
     \item{\code{InputUnits}:}{Object of class \code{"character"}:
     The units of the data as input from the perspective of data acquisition.
     After correcting data for this response, these would be the resulting units.}
@@ -52,7 +54,7 @@ populated by calls to \link{getDataselect}.
     \item{as.vector}{\code{signature(x="Trace")}: 
     returns the data slot; equivalent to \code{x@data} }
     \item{DDT}{\code{signature(x="Trace", demean="logical", detrend="logical", taper="numeric")}: 
-    returns a new trace that has been 'cleaned up' for further processing (see \link{DDT}) }
+    returns a new trace that has been 'cleaned up' for further processing by applying demean, detrend, and taper techniques (see \link{DDT}) }
     \item{envelope}{\code{signature(x="Trace")}: 
     returns the envelope of the seismic signal (see \link{envelope}) }
     \item{isDC}{\code{signature(x="Trace")}: 
@@ -78,7 +80,7 @@ populated by calls to \link{getDataselect}.
     \item{sd}{\code{signature(x="Trace", na.rm="logical")}: 
     returns the standard deviation of the data; equivalent to \code{sd(x@data)} }
     \item{slice}{\code{signature(x="Trace", starttime="POSIXct", endtime="POSIXct")}: 
-    returns a new \code{Trace} sliced out of an existing \code{Trace} (see \link{slice})}
+    returns a new \code{Trace} subset of an existing \code{Trace} (see \link{slice})}
     \item{STALTA}{\code{signature(x="Trace",staSecs="numeric",ltaSecs="numeric",algorithm="character", ...)}: 
     returns the STALTA picker result (see \link{STALTA})}
     \item{triggerOnset}{\code{signature(x="Trace", picker="numeric", threshold="numeric", ...)}: 
@@ -89,7 +91,7 @@ populated by calls to \link{getDataselect}.
 %% \references{ }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \note{
@@ -102,6 +104,7 @@ python ObsPy package (\url{http://docs.obspy.org/packages/autogen/obspy.core.tra
 %% \seealso{ }
 
 \examples{
+  \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -110,7 +113,7 @@ starttime <- as.POSIXct("2012-01-24", tz="GMT")
 endtime <- as.POSIXct("2012-01-25", tz="GMT")
 
 # Get the waveform
-st <- getDataselect(iris,"AK","PIN","","VEA",starttime,endtime)
+st <- getDataselect(iris,"AK","PIN","","BHZ",starttime,endtime)
 
 # Get the first trace and generate some statistics
 tr1 <- st@traces[[1]]
@@ -121,6 +124,7 @@ max(tr1)
 sd(tr1)
 rms(tr1)
 rmsVariance(tr1)
+  }
 }
 
 \keyword{classes}

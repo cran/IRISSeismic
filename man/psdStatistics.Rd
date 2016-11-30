@@ -9,11 +9,12 @@ The \code{psdStatistics} function calculates a variety of information associated
 }
 
 \usage{
-psdStatistics(PSDs)
+psdStatistics(PSDs, evalresp=NULL)
 }
 
 \arguments{
   \item{PSDs}{either a list as returned by \code{psdList} or a dataframe of PSD values obtained from the BSS}
+  \item{evalresp}{dataframe of freq, amp, phase information matching output of \code{getEvalresp}, optional}
 }
 
 %%\details{ }
@@ -46,10 +47,8 @@ A variety of plots can be generated form the information in this list.
 }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
-
-%% \note{ }
 
 \seealso{
 \code{\link{McNamaraPSD}},
@@ -75,9 +74,9 @@ stats <- psdStatistics(psdList)
 
 # Just for fun plot
 logPeriod <- log10(1/stats$freq)
-plot(logPeriod,stats$max,ylim=c(-250,-50), las=1,
-     xlab="log10(period)", yalb="Power (dB)",
-     main="Model 'quiet' area and area of seismic signal.")
+plot(logPeriod,stats$max,ylim=c(-200,-50), las=1,
+     xlab="log10(period)", ylab="Power (dB)",
+     main="Model 'normal background noise' area and area of seismic signal.")
 points(logPeriod,stats$min)
 
 # Overlay a polygon showing the range between the noise models

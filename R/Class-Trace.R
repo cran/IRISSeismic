@@ -30,10 +30,10 @@
 ################################################################################
 # Class TraceHeader
 #
-# A container for additional header informaion for each Trace object.
+# A container for additional header information for each Trace object.
 #
 # A TraceHeader object contains all header information (aka metadata)
-# associated with a Trace object.
+# associated with a Trace object. 
 #
 # Documentation for attributes copied verbatim from obspy.core.trace.py:
 # 
@@ -61,6 +61,15 @@
 #        Date and time of the last data sample given in UTC
 #        (default value is "1970-01-01T00:00:00.0Z").
 #
+# It can also contain some optional metadata, not included in miniseed headers:  
+#
+#     ``latitude``  : numeric, optional    
+#     ``longitude`` : numeric, optional    
+#     ``elevation`` : numeric, optional    
+#     ``depth``     : numeric, optional    
+#     ``azimuth``   : numeric, optional    
+#     ``dip``       : numeric, optional    
+#
 ################################################################################
 
 setClass("TraceHeader", 
@@ -76,6 +85,12 @@ setClass("TraceHeader",
                  quality = "character",
                  starttime = "POSIXct",
                  endtime = "POSIXct",
+                 latitude = "numeric",     
+                 longitude = "numeric",    
+                 elevation = "numeric",    
+                 depth = "numeric",        
+                 azimuth = "numeric",      
+                 dip= "numeric",           
                  processing = "character"),
   # default values for slots
   prototype(sampling_rate = 1.0,
@@ -88,11 +103,16 @@ setClass("TraceHeader",
             channel = "",
             quality = "X",
             starttime = as.POSIXct("1900-01-01T00:00:00",format="%Y-%m-%dT%H:%M:%OS", tz="GMT"),
-            endtime = as.POSIXct("1900-01-01T00:00:00",format="%Y-%m-%dT%H:%M:%OS", tz="GMT"))
+            endtime = as.POSIXct("1900-01-01T00:00:00",format="%Y-%m-%dT%H:%M:%OS", tz="GMT"),
+            latitude = as.numeric(NA),     
+            longitude = as.numeric(NA),    
+            elevation = as.numeric(NA),    
+            depth = as.numeric(NA),        
+            azimuth = as.numeric(NA),      
+            dip= as.numeric(NA))           
 )
 
 ################################################################################
-# TODO:  Improve notes on TraceHeader initialization
 #
 # A TraceHeader can be initialized with a headerLine as returned by the IRIS DMC timeseries webservice:
 #
@@ -105,7 +125,8 @@ setClass("TraceHeader",
 # TODO:  I am currently using "Trace" to mean what libmseed calls a "Trace Segment".
 # TODO:  Each libmseed "Trace" has both "numsamples" and "samplecnt".
 # TODO:  Need to figure out what the difference is and when to bail with zero samples in the SNCL.
-# TODO:  Zero samples in a "Trace Segment" is not necessariliy a deal breaker.
+# TODO:  Zero samples in a "Trace Segment" is not necessarily a deal breaker.
+
 setMethod("initialize", "TraceHeader",
   function(.Object,
            headerList=list(),
@@ -124,13 +145,19 @@ setMethod("initialize", "TraceHeader",
       .Object@npts <- as.integer(strsplit(headerValues[2]," ")[[1]][1])
       .Object@sampling_rate <- as.numeric(strsplit(headerValues[3]," ")[[1]][1])
       .Object@starttime <- as.POSIXct(headerValues[4], format="%Y-%m-%dT%H:%M:%OS", tz="GMT") # header uses 'T' format
+      .Object@latitude <- as.numeric(NA)
+      .Object@longitude <- as.numeric(NA)
+      .Object@elevation <- as.numeric(NA)
+      .Object@depth <- as.numeric(NA)
+      .Object@azimuth <- as.numeric(NA)
+      .Object@dip <- as.numeric(NA)
     }
     
     # override with anything found in the headerList
     for (key in names(headerList)) {
       slot(.Object,key) = headerList[[key]]
     }
-  
+
     # guarantee npts and sampling_rate are non-zero numbers
     if (is.na(.Object@npts)) {
       err_msg <- paste("initialize.TraceHeader: npts=", .Object@npts, sep="")
@@ -161,7 +188,9 @@ setMethod("initialize", "TraceHeader",
       if (!is.finite(delta))
         delta = 0
     }
-    .Object@endtime = .Object@starttime + delta
+    if (is.na(.Object@endtime)) {
+      .Object@endtime = .Object@starttime + delta
+    }
 
     # return the newly created .Object
     return(.Object)
@@ -184,6 +213,12 @@ show.TraceHeader <- function(object) {
   cat (" delta:         " , object@delta, "\n")
   cat (" starttime:     " , format(object@starttime), "\n")
   cat (" endtime:       " , format(object@endtime), "\n")
+  cat (" latitude:      " , format(object@latitude), "\n")    
+  cat (" longitude:     " , format(object@longitude), "\n")   
+  cat (" elevation:     " , format(object@elevation), "\n")   
+  cat (" depth:         " , format(object@depth), "\n")       
+  cat (" azimuth:       " , format(object@azimuth), "\n")     
+  cat (" dip:           " , format(object@dip), "\n")         
   cat (" processing:    " , paste(object@processing,collapse="; "), "\n")
 }
 # NOTE:  method signature must match generic signature for 'show' with argument: 'object'
@@ -224,6 +259,10 @@ setMethod("as.headerLine", signature(obj="TraceHeader"), function(obj) as.header
 #    :var id: A SEED compatible identifier of the trace.
 #    :var stats: A container :class:`~obspy.core.trace.Stats` for additional
 #        header information of the trace.
+#    :var Sensor:                 
+#    :var InstrumentSensitivity:  
+#    :var SensitivityFrequency:   
+#    :var InputUnits:             
 #    :var data: Data samples in a :class:`~numpy.ndarray` or
 #        :class:`~numpy.ma.MaskedArray`
 #
@@ -235,6 +274,7 @@ setClass("Trace",
                  stats = "TraceHeader",
                  Sensor = "character",
                  InstrumentSensitivity = "numeric",
+                 SensitivityFrequency = "numeric",    
                  InputUnits = "character",
                  data = "numeric"),
   # default values for slots
@@ -242,17 +282,19 @@ setClass("Trace",
             stats = new("TraceHeader"),
             Sensor = "",
             InstrumentSensitivity = 1.0,
+            SensitivityFrequency = 1.0,   
             InputUnits = "",
             data = c(0))
 )
 
-# initialze method
+# initialize method
 setMethod("initialize", "Trace",
   function(.Object,
            id="",
            stats=new("TraceHeader"),
            Sensor = "",
            InstrumentSensitivity = 1.0,
+           SensitivityFrequency = 1.0,    
            InputUnits = "",
            data=c(0),
            ...) {
@@ -261,7 +303,8 @@ setMethod("initialize", "Trace",
     .Object@stats <- stats
     .Object@Sensor <- Sensor
     .Object@InstrumentSensitivity <- InstrumentSensitivity
-    .Object@InputUnits <- InputUnits
+    .Object@SensitivityFrequency <- SensitivityFrequency   
+    .Object@InputUnits <- InputUnits  
     .Object@data <- data
 
     if (.Object@id == "") {
@@ -409,11 +452,12 @@ multiplyBy.Trace <- function(x, y) {
   stats <- x@stats
   Sensor <- x@Sensor
   InstrumentSensitivity <- x@InstrumentSensitivity
+  SensitivityFrequency <- x@SensitivityFrequency    
   InputUnits <- x@InputUnits
   data <- x@data * y
   stats@processing <- append(stats@processing,paste("multiply by",y))
   
-  return( new("Trace", id, stats, Sensor, InstrumentSensitivity, InputUnits, data) )
+  return( new("Trace", id, stats, Sensor, InstrumentSensitivity, SensitivityFrequency,  InputUnits, data) )  
 }
 
 setMethod("multiplyBy", signature("Trace", y="numeric"), function(x, y) multiplyBy.Trace(x, y=y))
@@ -436,6 +480,7 @@ DDT.Trace <- function(x, demean, detrend, taper) {
   stats <- x@stats
   Sensor <- x@Sensor
   InstrumentSensitivity <- x@InstrumentSensitivity
+  SensitivityFrequency <- x@SensitivityFrequency    
   InputUnits <- x@InputUnits
   
   # NOTE:  Use the pracma::detrend() function.
@@ -462,7 +507,7 @@ DDT.Trace <- function(x, demean, detrend, taper) {
   }
   
 
-  return( new("Trace", id, stats, Sensor, InstrumentSensitivity, InputUnits, data) )
+  return( new("Trace", id, stats, Sensor, InstrumentSensitivity, SensitivityFrequency, InputUnits, data) )  
 }
 
 # All parameters specified
@@ -491,6 +536,7 @@ butterworth.Trace <- function(x, n, low, high, type) {
   stats <- x@stats
   Sensor <- x@Sensor
   InstrumentSensitivity <- x@InstrumentSensitivity
+  SensitivityFrequency <- x@SensitivityFrequency   
   InputUnits <- x@InputUnits
   
   # If neither demean nor detrend has ever been applied, demean the data
@@ -527,7 +573,7 @@ butterworth.Trace <- function(x, n, low, high, type) {
   data <- as.numeric(ts_filtered)
   stats@processing <- append(stats@processing,paste0("Butterworth filtered with (",n,",",low,",",high,",",type,")"))
   
-  return( new("Trace", id, stats, Sensor, InstrumentSensitivity, InputUnits, data) )
+  return( new("Trace", id, stats, Sensor, InstrumentSensitivity, SensitivityFrequency, InputUnits, data) )  
 }
 
 # All parameters specified
@@ -562,6 +608,7 @@ slice.Trace <- function(x, starttime, endtime) {
   stats <- x@stats
   Sensor <- x@Sensor
   InstrumentSensitivity <- x@InstrumentSensitivity
+  SensitivityFrequency <- x@SensitivityFrequency    
   InputUnits <- x@InputUnits
   data <- x@data
 
@@ -602,7 +649,7 @@ slice.Trace <- function(x, starttime, endtime) {
   if (sliced) {
     stats@npts <- as.integer(end_index - start_index + 1)
     stats@processing <- append(stats@processing,"slice")
-    return( new("Trace", id, stats, Sensor, InstrumentSensitivity, InputUnits, data=data[start_index:end_index]) )    
+    return( new("Trace", id, stats, Sensor, InstrumentSensitivity, SensitivityFrequency, InputUnits, data=data[start_index:end_index]) )     
   } else {
     return(x)
   }
@@ -870,7 +917,7 @@ setMethod("eventWindow", signature(x="Trace", picker="numeric", threshold="missi
 # NOTE:  style functions rather than S4 methods.
 
 plot.Trace <- function(x, starttime=x@stats@starttime, endtime=x@stats@endtime, 
-                       subsampling=NULL, add=FALSE, ...) {
+                       subsampling=NULL, add=FALSE, ylab="raw", xlab="", ...) {
   
   # Create subsampled indices if necessary
   max_size <- 10000
@@ -893,13 +940,11 @@ plot.Trace <- function(x, starttime=x@stats@starttime, endtime=x@stats@endtime,
   times <- seq(from=x@stats@starttime, to=x@stats@endtime, length.out=length(x@data))
 
   if (length(x) == length(indices)) {
-    xlab <- paste("(",length(x), "points )")    
+    xlab <- paste(xlab,"\n"," (",length(x), "points )")    
   } else {    
-    xlab <- paste("( ",length(x), " points, subsampling=", subsampling, " for this plot. )", sep="")
+    xlab <- paste(xlab, "\n"," ( ",length(x), " points, subsampling=", subsampling, " for this plot. )", sep="")
   }
-###  ylab <- paste(x@InputUnits)
-  ylab <- "raw"
-  
+
 #   # Set up the time range to plot
 #   if (missing(starttime)) {
 #     starttime <- x@stats@starttime

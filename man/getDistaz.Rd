@@ -24,8 +24,7 @@ getDistaz(obj, latitude, longitude, staLatitude, staLongitude)
 
 \details{
 The distance-azimuth service will calculate the great-circle angular distance, azimuth,
-and backazimuth between two geographic coordinate pairs. All results are reported in
-degrees, with azimuth and backazimuth measured clockwise from North.
+and back azimuth between two geographic coordinate pairs. Azimuth and back azimuth are measured clockwise from North.
 }
 
 
@@ -33,10 +32,16 @@ degrees, with azimuth and backazimuth measured clockwise from North.
 A dataframe with the following columns:
 
 \preformatted{
-azimuth, backAzimuth, distance
+ellipsoid.semiMajorAxis, ellipsoid.flattening, ellipsoid.name, fromlat, fromlon, tolat, tolon,
+  azimuth,backAzimuth, distance, distanceMeters
 }
 
+Where \code{fromlat} is the event latitude, \code{fromlon} is the event longitude, \code{tolat} is the station latitude, and \code{tolon}
+is the station longitude. \code{azimuth}, \code{backAzimuth}, and \code{distance} are measured in degrees. \code{distanceMeters} is distance in meters.
+\code{ellipsoid.semiMajorAxis}, \code{ellipsoid.flattening}, and \code{ellipsoid.name} refer to the World Geodetic System standard coordinate system version used to correct for ellipticity when converting to geocentric latitudes.
+
 Only a single row is returned.
+
 }
 
 \references{
@@ -46,7 +51,7 @@ The IRIS DMC distaz webservice:
 }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 %% \note{ }

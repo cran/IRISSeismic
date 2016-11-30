@@ -110,7 +110,7 @@ a numeric vector is returned of the same length as \code{Stream@traces}.
 %% \references{ }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \note{
@@ -126,6 +126,7 @@ between \code{Traces} are not counted.
 %% \seealso{ }
 
 \examples{
+  \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -133,7 +134,7 @@ starttime <- as.POSIXct("2012-01-24", tz="GMT")
 endtime <- as.POSIXct("2012-01-25", tz="GMT")
 
 # Get the waveform
-st <- getDataselect(iris,"AK","PIN","","VEA",starttime,endtime)
+st <- getDataselect(iris,"AK","PIN","","BHZ",starttime,endtime)
 
 # Get the first trace and generate some statistics
 tr1 <- st@traces[[1]]
@@ -141,6 +142,7 @@ length(tr1)
 max(tr1)
 mean(tr1)
 sd(tr1)
+  }
 }
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the

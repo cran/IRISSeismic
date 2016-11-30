@@ -6,7 +6,7 @@
 \title{Apply McNamara PSD algorithm to a seismic signal}
 
 \description{
-The \code{psdList} function breaks up a seismic \code{Stream} object into a series of
+The \code{psdList} function subsets a seismic \code{Stream} object into a series of
 shorter segments with 50\% overlap and uses the \code{McNamaraPSD} method to return a smoothed (aka binned)
 Power Spectral Density (PSD) for each segment.
 }
@@ -20,7 +20,7 @@ psdList(st)
 }
 
 \details{
-A \code{Stream} will be broken up into segments depending upon the snclq identifier associated
+A \code{Stream} will be subset into segments depending upon the channel identifier (@stats@channel) associated
 with this seismic data.  The binning frequencies are also channel dependent as exemplified in 
 this code extract where \code{Z} is the segment length in seconds:
 
@@ -31,7 +31,7 @@ if (stringr::str_detect(channel,"^L")) {
   Z <- 3 * 3600
   loFreq <- 0.001
   hiFreq <- 0.5 * tr_merged@stats@sampling_rate
-} else if (stringr::str_detect(channel,"M")) {
+} else if (stringr::str_detect(channel,"^M")) {
   Z <- 2 * 3600
   loFreq <- 0.0025
   hiFreq <- 0.5 * tr_merged@stats@sampling_rate
@@ -61,7 +61,7 @@ freq, spec, snclq, starttime, endtime
 }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 %% \note{ }

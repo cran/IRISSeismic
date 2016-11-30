@@ -38,7 +38,7 @@ A \code{matrix} is returned with one row for each power level (-250:-50 dB) and 
 }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 %% \note{ }

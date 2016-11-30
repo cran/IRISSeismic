@@ -340,62 +340,66 @@ getGaps.Stream <- function(x, min_gap) {
   headers <- lapply(x@traces, slot, "stats")
   num_headers <- length(headers)
   
-  # Sanity check -- single sampling_rate
   sampling_rates <- sapply(headers, slot, "sampling_rate")
-  num_rates <- length(unique(round(sampling_rates,digits=4)))
-  if (num_rates > 1) {
-    stop(paste("getGaps.Stream:",num_rates,"unique sampling rates encountered in Stream."))    
-  }
-  sampling_rate <- sampling_rates[1]
-  
+
   # Set up arrays for information about gaps/overlaps
   gaps <- numeric(num_headers+1)
-  nsamples <- integer(num_headers+1)   
+  nsamples <- integer(num_headers+1)     
   
-  # Set min_gap and make sure it is at least 1/sampling_rate
-  min_gap <- ifelse(is.null(min_gap), 1/sampling_rate, min_gap)
-  min_gap <- max(min_gap, 1/sampling_rate)
+  for ( i in seq(from=1, to=num_headers)) {
 
-  # NOTE:  The delta we calculate here has a valid datapoint at it's start and end.
-  # NOTE:  For the purposes of calculating the correct number of missing points we
-  # NOTE:  will calculate delta as the total time between points minus 1/sampling rate.
-  # NOTE:  That is how many extra points could be shoved into this gap.
+    # NOTE:  The delta we calculate here has a valid datapoint at it's start and end.
+    # NOTE:  For the purposes of calculating the correct number of missing points we
+    # NOTE:  will calculate delta as the total time between points minus 1/sampling rate.
+    # NOTE:  That is how many extra points could be shoved into this gap.
   
-  # Initial gap (no overlap possible)
-  delta <- as.numeric(difftime(headers[[1]]@starttime, x@requestedStarttime, units="secs")) - 1/sampling_rate
-  if (abs(delta) > min_gap) {
-    gaps[1] <- delta
-    nsamples[1] <- as.integer(round(abs(delta) * sampling_rate))     
-  } else {
-    gaps[1] <- 0
-    nsamples[1] <- 0
-  }
-  
-  # Inter-trace gaps and overlaps
-  if (num_headers > 1) {
-    for ( i in seq(from=2, to=num_headers) ) {
-      h1 <- headers[[i-1]]
-      h2 <- headers[[i]]
-      delta <- difftime(h2@starttime, h1@endtime, units="secs") - 1/sampling_rate
-      if (abs(delta) > min_gap) {
-        gaps[i] <- delta
-        nsamples[i] <- as.integer(round(abs(delta) * sampling_rate))     
-      } else {
-        gaps[i] <- 0
-        nsamples[i] <- 0
-      }
-    }    
-  }
-  
-  # Final gap (no overlap possible)
-  delta <- as.numeric(difftime(x@requestedEndtime, headers[[num_headers]]@endtime, units="secs")) - 1/sampling_rate
-  if (abs(delta) > min_gap) {
-    gaps[num_headers+1] <- delta
-    nsamples[num_headers+1] <- as.integer(round(abs(delta) * sampling_rate))     
-  } else {
-    gaps[num_headers+1] <- 0
-    nsamples[num_headers+1] <- 0
-  }
+    if (i == 1) {
+    # Initial gap (no overlap possible)
+        sampling_rate <- sampling_rates[1]
+        # Set min_gap and make sure it is at least 1/sampling_rate
+        min_gap_new <- ifelse(is.null(min_gap), 1/sampling_rate, min_gap)
+        min_gap_new <- max(min_gap_new, 1/sampling_rate)
+
+        delta <- as.numeric(difftime(headers[[1]]@starttime, x@requestedStarttime, units="secs")) - 1/sampling_rate
+        if (delta > min_gap_new - 0.5/sampling_rate) { 
+          gaps[1] <- delta + 1/sampling_rate
+          nsamples[1] <- as.integer(round(gaps[1] * sampling_rate))     
+        } else {
+          gaps[1] <- 0
+          nsamples[1] <- 0
+        }
+    } else {
+    # Inter-trace gaps and overlaps
+        sampling_rate <- sampling_rates[[i-1]]
+        min_gap_new <- ifelse(is.null(min_gap), 1/sampling_rate, min_gap)
+        min_gap_new <- max(min_gap_new, 1/sampling_rate)
+        h1 <- headers[[i-1]]
+        h2 <- headers[[i]]
+        delta <- difftime(h2@starttime, h1@endtime, units="secs") - 1/sampling_rate
+        if (abs(delta) > min_gap_new - 0.5/sampling_rate) {
+           gaps[i] <- delta
+           nsamples[i] <- as.integer(round(abs(delta) * sampling_rate))    
+        } else {
+           gaps[i] <- 0
+           nsamples[i] <- 0
+        }
+    }     
+    if (i == num_headers) {
+    # Final gap (no overlap possible)
+        sampling_rate <- sampling_rates[[i]]
+        min_gap_new <- ifelse(is.null(min_gap), 1/sampling_rate, min_gap)
+        min_gap_new <- max(min_gap_new, 1/sampling_rate)
+        delta <- as.numeric(difftime(x@requestedEndtime, headers[[num_headers]]@endtime, units="secs")) - 1/sampling_rate
+        if (delta > min_gap_new - 0.5/sampling_rate) {
+           gaps[num_headers+1] <- delta
+           nsamples[num_headers+1] <- as.integer(round(delta * sampling_rate))
+        } else {
+           gaps[num_headers+1] <- 0
+           nsamples[num_headers+1] <- 0
+        }
+    }
+
+  } 
   
   gap_list <- list(gaps=gaps,
                    nsamples=nsamples)    
@@ -579,15 +583,21 @@ mergeTraces.Stream <- function(x, fillMethod) {
   gapInfo <- getGaps(x)
   num_gaps <- length(gapInfo$nsamples)
   
-  # Sanity check
+  # Sanity checks
   if (num_gaps != num_traces+1) {
     stop(paste("mergeTraces.Stream: num_gaps (",num_gaps,") should be one more than num_traces (",num_traces,")", sep=""))
   }
+ 
+  headers <- lapply(x@traces, slot, "stats")
+  sampling_rates <- sapply(headers, slot, "sampling_rate")
+  num_rates <- length(unique(round(sampling_rates,digits=4)))
+  #if (num_rates > 1) {
+  if ( ! all(stats::dist(unique(sampling_rates)) < 0.0002 )) { # slightly more forgiving criteria for acceptable sample rate jitter than round(sampling_rates,digits=4) 
+    stop(paste("mergeTraces.Stream:",num_rates,"unique sampling rates encountered in Stream."))
+  }
   
-  # NOTE:  Increment totalPoints by one to account for point at the very end.
-  # NOTE:  For example, the sequence *--*--*--* has 4 points but only three time intervals.
   totalSecs <- as.numeric(difftime(x@requestedEndtime, x@requestedStarttime, units="secs"))
-  totalPoints <- as.integer(round(totalSecs) * x@traces[[1]]@stats@sampling_rate) + 1
+  totalPoints <- as.integer(round(totalSecs) * x@traces[[1]]@stats@sampling_rate)  
 
   # NOTE:  Setting up a list of vectors that we will concatenate in one fell swoop at the end.
   # NOTE:  This avoids the incremental growth and copying that is incredibly slow.
@@ -643,9 +653,10 @@ mergeTraces.Stream <- function(x, fillMethod) {
   id <- x@traces[[1]]@id
   Sensor <- x@traces[[1]]@Sensor
   InstrumentSensitivity <- x@traces[[1]]@InstrumentSensitivity
+  SensitivityFrequency <- x@traces[[1]]@SensitivityFrequency  
   InputUnits <- x@traces[[1]]@InputUnits
   
-  traces <- list( new("Trace", id, stats, Sensor, InstrumentSensitivity, InputUnits, data=data[1:totalPoints]) )
+  traces <- list( new("Trace", id, stats, Sensor, InstrumentSensitivity, SensitivityFrequency, InputUnits, data=data[1:totalPoints]) ) 
      
   return( new("Stream", url=x@url, requestedStarttime=x@requestedStarttime, requestedEndtime=x@requestedEndtime,
               act_flags=x@act_flags, io_flags=x@io_flags, dq_flags=x@dq_flags, timing_qual=x@timing_qual,

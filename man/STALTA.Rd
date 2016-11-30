@@ -109,7 +109,7 @@ Bulletin of the Seismological Society of America, Vol. 84, No. 2, pp. 366-376, A
 }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \note{
@@ -130,8 +130,6 @@ For higher resolution channels, picking an increment of \code{2/sampling_rate} c
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
-# NOTE:  The following trace has 1.728 million points.
-# NOTE:  Downloading and calculating STALTA may take a while.
 starttime <- as.POSIXct("2010-02-27",tz="GMT")
 endtime <- as.POSIXct("2010-02-28",tz="GMT")
   

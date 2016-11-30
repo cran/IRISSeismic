@@ -3,6 +3,7 @@
 ############################################################
 
 import(methods)     # for methods used in defining S4 classes
+import(stringr)
 
 ############################################################
 # Load dynamic libraries (shared object files)
@@ -110,7 +111,8 @@ export("crossSpectrum",
        "psdList",
        "psdList2NoiseMatrix",
        "psdPlot",
-       "psdStatistics"
+       "psdStatistics",
+       "unHistogram"
 )
 
 

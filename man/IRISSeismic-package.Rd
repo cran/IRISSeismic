@@ -17,7 +17,7 @@ are inspired by the functionality available in the python ObsPy package (\url{ht
 }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \references{
@@ -27,6 +27,130 @@ IRIS DMC web services: \url{http://service.iris.edu/}
 }
 
 \section{History}{
+  version 1.3.8
+  \itemize{
+    \item{\code{getDataselect} does not add a quality indicator to url by default. IRIS webservices itself defaults to quality="M"}
+    \item{\code{getStation} and \code{getChannel} do not add includerestricted indicator to url by default. IRIS webservices itself defaults to \code{TRUE}}
+    \item{better handling of textConnections}
+  }
+  version 1.3.7
+  \itemize{
+    \item{users can now supply instrument response information in the form of frequency, amplitude, phase
+          to the functions \code{psdStatistics}, \code{psdList2NoiseMatrix}, \code{psdPlot}, 
+          in place of the getEvalresp webservice call. Function argument order for \code{psdPlot} is changed.}
+    \item{added \code{showMedian} option to \code{psdPlot}}
+  }
+
+  version 1.3.5 
+  \itemize{
+    \item{added ignoreEpoch option to getDataselect}
+  }
+
+  version 1.3.4 -- webservices and plotting
+  \itemize{
+    \item{\code{getEvent} forwards http://service.iris.edu/fdsnws/event/1/ calls to http://earthquake.usgs.gov/fdsnws/event/1/}
+    \item{\code{getDistaz} changes output dataframe column name ellipsoid..attrs to ellipsoid.name}
+    \item{\code{plot.Trace} allows for user supplied ylab and xlab input}
+  }
+
+  version 1.3.3 -- documentation
+  \itemize{
+    \item{Updated documentation and corrected outdated links}
+  }
+
+  version 1.3.2 -- bug fix
+  \itemize{
+    \item{noiseModels(), minor correction to the New High Noise Model}
+  }
+
+  version 1.3.1 -- bug fixes
+  \itemize{
+    \item{psdStatistics() correctly handles NA values when calculating high and low PDF bin limits
+          and returns pct_above and pct_below vectors of correct length}
+  }
+
+  version 1.3.0 -- compatibility with IRIS webservices
+  \itemize{
+    \item{getDistaz() returns new variables from output of http://services.iris.edu/irisws/distaz/1/}
+  }
+
+  version 1.2.2 -- PDF bug fix
+  \itemize{
+    \item{psdList2NoiseMatrix() adds 1 second to start time in getEvalresp call to work around a quirk in http://services.iris.edu/irisws/evalresp/1/ 
+          webservice that will not return a response if the start time is exactly on a metadata epoch boundary.}
+  }
+  
+  version 1.2.1 -- PDF
+  \itemize{
+    \item{psdPlot() now compatible with changes to psdStatistics() in previous version. Adds ylo, yhi arguments to customize y-axis limits in plot.}
+  }
+
+  version 1.2.0 -- PDF
+  \itemize{
+    \item{psdStatistics() changes method of setting PDF bins from fixed values to bins based on the high and low PSD values 
+          and shifts bin centers by 0.5 dB. The result now matches output from http://services.iris.edu/mustang/noise-pdf.}
+  }
+
+  verison 1.1.7 -- improved error handling
+  \itemize{
+    \item{getDataselect(), getNetwork(),  getStation(), getChannel(), getAvailability(), getEvalresp(), getTraveltime() error handling 
+          now report unexpected http status codes.}
+  }
+
+  version 1.1.6 -- bug fixes
+  \itemize{
+    \item{getGaps() fixes issues with multiple sample rates and setting minimum gap length.}
+    \item{mergeTraces.Stream() relaxes criteria for acceptable sample rate jitter.}
+  }
+
+  version 1.1.5 -- trace rotation
+  \itemize{
+    \item{rotate2D() changes orthogonality test tolerance from 5 degrees to 3 degrees.}
+  }
+
+  version 1.1.4 -- trace rotation
+  \itemize{
+    \item{rotate2D() exits if traces are not orthogonal.}
+  }
+
+  version 1.1.3 -- bug fix
+  \itemize{
+    \item{psdStatistics() fixes bug in calculation of pct_above and pct_below.}
+  }
+
+  version 1.1.1 -- bug fixes
+  \itemize{
+    \item{getGaps() minor bug fix.}
+    \item{mergeTraces.Stream() minor bug fix.}
+  }
+
+  version 1.0.10 -- new data request argument and bug fixes
+  \itemize{
+    \item{Imports seismicRoll (>= 1.1.0).}
+    \item{getGaps() fixes bugs in calculation of initial and final gap of Trace.}
+    \item{getDataselect(), getSNCL() adds "inclusiveEnd" argument, a logical that determines whether a data point that falls exactly on the requested endtime 
+          is included in the Trace.}
+    \item{libmseed change, when multiple sample rates exist in miniseed records use the mode of all sample rates instead of using the sample rate in the first record.}
+    \item{psdList() added rule for octave generation for channel codes that start with "V".}
+  }
+
+  version 1.0.9 -- Trace class expansion and bug fixes
+  \itemize{
+    \item{Improved error handling for getAvailability(), getChannel(), getDataselect(), getEvalresp(), miniseed2Stream().}
+    \item{parseMiniSEED.c, unpackdata.c  updated. Fixes protection stack overflow issue.}
+    \item{getGaps() includes a 0.5/sampling_rate tolerance factor.}
+    \item{miniseed2Stream() uses endtime from parseMiniSEED instead of calculating from the sample rate.}
+    \item{Trace class now contains slots for optional metadata "latitude", "longitude", "elevation", "depth", "azimuth", "dip", "SensitivityFrequency".}
+    \item{rotate2D() uses Trace class "azimuth" slot information to identify channel orientation before rotation instead of assuming lead and lag channel 
+          from trace input order.}
+  }
+
+  version 1.0.8 -- fixes required by ISPAQ
+  \itemize{
+    \item{Removed 'maps' and 'mapdata' from Suggested: packages.}
+    \item{Changed URL syntax for FDSN web services to use "format=..." instead of "output=...".}
+    \item{Fixed bug in getSNCL() so that it works when the "quality" argument is missing.}
+  }
 
   version 1.0.6 -- CRAN updates required
   \itemize{
@@ -172,6 +296,7 @@ IRIS DMC web services: \url{http://service.iris.edu/}
 }
 
 \examples{
+  \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient", debug=TRUE)
 
@@ -185,6 +310,7 @@ st <- getDataselect(iris,"IU","ANMO","00","BHZ",starttime,endtime)
 tr1 <- st@traces[[1]]
 show(tr1@stats)
 plot(tr1)
+  }
 }
 
 %% Optional keywords

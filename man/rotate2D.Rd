@@ -3,11 +3,11 @@
 \alias{rotate2D}
 
 
-\title{Rotate horiztonal components of a seismic signal}
+\title{Rotate horizontal components of a seismic signal}
 
 \description{
 The rotate2D() function rotates the two horizontal components of a
-seismic signal into Radial and Transverse compoents returned as a list of 2 \code{Stream} objects.
+seismic signal into Radial and Transverse components returned as a list of 2 \code{Stream} objects.
 }
 
 \usage{
@@ -15,8 +15,8 @@ rotate2D(st1, st2, angle)
 }
 
 \arguments{
-  \item{st1}{horizontal ('N' or '1') \code{Stream} from a channel set}
-  \item{st2}{horizontal ('E' or '2') \code{Stream} from a channel set}
+  \item{st1}{horizontal \code{Stream} from a channel set (channel name usually ending in "N", "E", "1", or "2")}
+  \item{st2}{horizontal \code{Stream} from a channel set, complementary to st1}
   \item{angle}{angle (degrees) of the rotation}
 }
 
@@ -31,14 +31,20 @@ The rotation service uses the following transformation matrix to change the outp
 \deqn{ \left[ \begin{array}{c} R \cr T \end{array} \right] = M_{2D} \left[ \begin{array}{c} N \cr E \end{array} \right] }
 
 where :
-
- N and E represent data from the original (horizontal) orientations
- R and T represent the Radial and Transverse components.
- \eqn{\alpha} is the azimuth angle measured clockwise from north
+ \preformatted{
+   N and E represent data from the original (horizontal) orientations.
+   R and T represent the Radial and Transverse components.
+   \eqn{\alpha} is the azimuth angle measured clockwise from north.
+  }
 }
 
 \value{
 A list of two \code{Stream} objects \code{stR} and \code{stT} is returned.
+}
+
+\note{
+N and E are determined by the \code{Stream} @stats@azimuth values. If \code{Stream} @stats@azimuth values are not defined, 
+st1 is assumed to be N and st2 is assumed to be E. Orthogonality is also assumed to be correct.
 }
 
 \references{
@@ -49,7 +55,7 @@ IRIS DMC rotation web service documentation:
 }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 %% \note{ }

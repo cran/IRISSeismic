@@ -47,7 +47,7 @@ The IRIS DMC traveltime web service:
 }
 
 \author{
-Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
+Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 %% \note{ }
@@ -68,7 +68,7 @@ endtime <- starttime + 3600 * 24 * 2
 # Find biggest seismic event over these two days -- it's the "Nisqually"
 events <- getEvent(iris, starttime, endtime, minmag=5.0)
 bigOneIndex <- which(events$magnitude == max(events$magnitude))
-bigOne <- events[bigOneIndex,]
+bigOne <- events[bigOneIndex[1],]
 
 # Find US stations that are available within an hour of the event
 start <- bigOne$time
