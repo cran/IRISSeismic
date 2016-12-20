@@ -73,8 +73,8 @@ install:
 
 # Standard object building
 .c.o:
-	$(CC) $(CFLAGS) -Wno-pedantic-ms-format -fPIC -c $< -o $@
+	$(CC) $(CFLAGS) $(CPICFLAGS) -c $< -o $@
 
 # Standard object building for dynamic library components using -fPIC
 .c.lo:
-	$(CC) $(CFLAGS) -Wno-pedantic-ms-format -fPIC -c $< -o $@
+	$(CC) $(CFLAGS) $(CPICFLAGS) -c $< -o $@

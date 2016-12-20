@@ -126,7 +126,7 @@ For higher resolution channels, picking an increment of \code{2/sampling_rate} c
 }
 
 \examples{
-  \dontrun{
+   \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -144,7 +144,7 @@ par(new=TRUE)
 plot(picker, type='l', col='red', axes=FALSE, xlab="", ylab="")
 mtext("Picker", side=1, line=-8, adj=0.05, col='red')
 par(new=FALSE)
-  }
+    }
 }
 
 \keyword{methods}

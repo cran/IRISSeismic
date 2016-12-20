@@ -157,7 +157,7 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
   if (! is.null(irisNetrc)) {
         h <-  RCurl::basicTextGatherer()
         result <- try( dataselectResponse <- RCurl::getBinaryURL(url, useragent=obj@useragent, 
-				  netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update, followlocation=TRUE)), silent=TRUE)
+				  netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update)), silent=TRUE)
           # Handle error response
 	  if (class(result) == "try-error" ) {
 

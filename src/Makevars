@@ -4,11 +4,12 @@
 PKG_CFLAGS=
 PKG_CPPFLAGS=-Ilibmseed
 PKG_LIBS=-Llibmseed -lmseed
+PKG_CPICFLAGS=-fPIC
 
 $(SHLIB): libmseed/libmseed.a
 
 libmseed/libmseed.a:
-	@(cd libmseed && $(MAKE) static CC="$(CC)" CFLAGS="$(CFLAGS)")
+	@(cd libmseed && $(MAKE) static CC="$(CC)" CFLAGS="$(CFLAGS)" CPICFLAGS="$(CPICFLAGS)")
 
 clean:
 	@(cd libmseed && $(MAKE) clean)

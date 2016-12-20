@@ -7,7 +7,7 @@
  * ORFEUS/EC-Project MEREDIAN
  * IRIS Data Management Center
  *
- * modified: 2015.108
+ * modified REC: 2016.12.02
  ***************************************************************************/
 
 #include <stdio.h>
@@ -15,8 +15,6 @@
 #include <string.h>
 #include <errno.h>
 #include <time.h>
-#include <inttypes.h>
-#include <stdint.h>
 
 #include "lmplatform.h"
 #include "libmseed.h"
@@ -26,6 +24,7 @@ static hptime_t ms_time2hptime_int (int year, int day, int hour,
 
 static struct tm *ms_gmtime_r (int64_t *timep, struct tm *result);
 
+int64_t scan_d64(char *str, int offset, char **endptr);
 
 /* A constant number of seconds between the NTP and Posix/Unix time epoch */
 #define NTPPOSIXEPOCHDELTA 2208988800LL
@@ -1165,6 +1164,7 @@ ms_readleapsecondfile (char *filename)
   LeapSecond *lastls = NULL;
   int64_t expires;
   char readline[200];
+  char *endptr;
   char *cp;
   int64_t leapsecond;
   int TAIdelta;
@@ -1197,7 +1197,10 @@ ms_readleapsecondfile (char *filename)
       if ( ! strncmp (readline, "#@", 2) )
         {
           expires = 0;
-          fields = sscanf (readline, "#@ %"SCNd64, &expires);
+          /*(replacing) fields = sscanf (readline, "#@ %"SCNd64, &expires);*/
+          fields = 0;
+          expires = scan_d64(readline,2,&endptr);
+          if (endptr - readline + 2 > 0) fields++;
           
           if ( fields == 1 )
             {
@@ -1221,7 +1224,11 @@ ms_readleapsecondfile (char *filename)
       if ( *readline == '#' )
         continue;
       
-      fields = sscanf (readline, "%"SCNd64" %d ", &leapsecond, &TAIdelta);
+      /*(replacing) fields = sscanf (readline, "%"SCNd64" %d ", &leapsecond, &TAIdelta);*/
+      fields = 0;
+      leapsecond = scan_d64(readline,0,&endptr);
+      if (endptr - readline > 0) fields++;
+      fields += scanf(endptr, " %d ", &TAIdelta);
       
       if ( fields == 2 )
         {
@@ -1549,3 +1556,32 @@ ms_gmtime_r (int64_t *timep, struct tm *result)
   
   return result;
 }  /* End of ms_gmtime_r() */
+
+
+/******************************************
+ * scan_d64 -- scan string for 64-bit int
+ * read string starting at character offset
+ *     and convert to a 64 bit long long int.
+ * return the long long int.
+ * set endptr to where we stopped the scan.
+ * REC - 2016-12-02
+ *******************************************/
+int64_t scan_d64(char *str, int offset, char **endptr) {
+
+    /* implementation based on die.net strtol(3) man page example */
+    int base = 10;
+    int64_t val = 0;
+
+    /* conversion to unsigned long long */
+    errno = 0;
+    val = strtoull(str+offset, endptr, base);
+
+    if (errno != 0 && val == 0) {
+        perror("strtoull");
+        exit(EXIT_FAILURE);
+    }
+
+    return val;
+}
+
+

@@ -81,7 +81,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 %% \seealso{ }
 
 \examples{
-  \dontrun{
+   \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -94,7 +94,7 @@ st <- getDataselect(iris,"AK","PIN","","BHZ",starttime,endtime)
 # Get the first trace and generate some statistics
 tr <- st@traces[[1]]
 rmsVariance(tr)
-  }
+   }
 }
 
 \keyword{methods}

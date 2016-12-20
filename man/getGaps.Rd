@@ -66,7 +66,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 %% \seealso{}
 
 \examples{
-  \dontrun{
+    \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -86,7 +86,7 @@ names(gapInfo)
 hist(gapInfo$nsamples, breaks=50, 
      main="Data Gaps in AK.PIN..BHZ Jan 24, 2012",
      xlab="number of missing samples per gap")
-  }
+    }
 }
 
 \keyword{methods}

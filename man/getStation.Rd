@@ -81,7 +81,6 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \examples{
-  \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -101,7 +100,6 @@ e <- events[eIndex[1],]
 stations <- getStation(iris,"US","*","*","BHZ",starttime,endtime,
                        lat=e$latitude,long=e$longitude,maxradius=5)
 stations
-  }
 }
 
 \keyword{webservices}

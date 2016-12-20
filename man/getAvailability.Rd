@@ -97,7 +97,6 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 
 %% max preformatted length ---------------------------------------------------
 \examples{
-  \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -119,7 +118,6 @@ channels <- getAvailability(iris,"*","*","*","BHZ",starttime,endtime,
                             lat=e$latitude,long=e$longitude,maxradius=5)
 channels
 
-  }
 }
 
 \keyword{webservices}

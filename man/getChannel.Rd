@@ -90,7 +90,6 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \examples{
-  \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -114,7 +113,6 @@ stations
 # Get some detailed information on any BHZ channels at the "Octopus Mountain" station
 channels <- getChannel(iris,"US","OCWA","*","BHZ",starttime,endtime)
 channels
-  }
 }
 
 \keyword{webservices}

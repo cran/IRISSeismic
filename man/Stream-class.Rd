@@ -154,7 +154,7 @@ The following code documentation describes how each of the flags is used within 
 %% \seealso{ }
 
 \examples{
-  \dontrun{
+    \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -170,7 +170,7 @@ max(st)
 sd(st)
 rms(st)
 rmsVariance(st)
-  }
+    }
 }
 
 \keyword{classes}

@@ -52,7 +52,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \examples{
-  \dontrun{
+    \dontrun{
 # Create a new IrisClient
 iris <- new("IrisClient", debug=TRUE)
 
@@ -76,7 +76,7 @@ pdfMatrix <- noiseMatrix2PdfMatrix(noiseMatrix)
 image(t(pdfMatrix[,ncol(pdfMatrix):1]),
       col=c('gray90',rainbow(9)),
       axes=FALSE)
-  }
+    }
 }
 
 \keyword{spectra}

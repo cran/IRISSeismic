@@ -736,6 +736,7 @@ typedef struct LeapSecond_s
 extern LeapSecond *leapsecondlist;
 extern int ms_readleapseconds (char *envvarname);
 extern int ms_readleapsecondfile (char *filename);
+extern int64_t scan_d64(char *str, int offset, char **endptr); /* REC */
 
 /* Generic byte swapping routines */
 extern void     ms_gswap2 ( void *data2 );

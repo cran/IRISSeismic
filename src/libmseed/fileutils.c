@@ -5,7 +5,7 @@
  * Written by Chad Trabant
  *   IRIS Data Management Center
  *
- * modified: 2015.108
+ * modified - REC: 2016.12.02
  ***************************************************************************/
 
 #include <stdio.h>
@@ -15,8 +15,6 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <inttypes.h>
-#include <stdint.h>
 
 #include "libmseed.h"
 
@@ -233,6 +231,7 @@ ms_readmsr_main (MSFileParam **ppmsfp, MSRecord **ppmsr, const char *msfile,
   int readsize = 0;
   int readcount = 0;
   int retcode = MS_NOERROR;
+  char *endptr;
   
   if ( ! ppmsr )
     return MS_GENERROR;
@@ -474,7 +473,9 @@ ms_readmsr_main (MSFileParam **ppmsfp, MSRecord **ppmsr, const char *msfile,
 	  memset (hdrstr, 0, sizeof(hdrstr));
 	  memcpy (hdrstr, MSFPREADPTR(msfp) + (packtypes[msfp->packtype][0] + packskipsize - packtypes[msfp->packtype][1]),
 		  packtypes[msfp->packtype][1]);
-	  sscanf (hdrstr, " %"SCNd64, &datasize);
+	  /*(replacing) sscanf (hdrstr, " %"SCNd64, &datasize);*/
+          datasize = scan_d64(hdrstr,0,&endptr);
+
 	  packdatasize = (off_t) datasize;
 	  
 	  /* Next pack header = File position + skipsize + header size + data size

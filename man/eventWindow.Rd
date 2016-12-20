@@ -64,7 +64,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \examples{
-  \dontrun{
+   \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -95,7 +95,7 @@ abline(v=length(closeup2)/2, col='red')
 
 # Restore default layout
 layout(1)
-  }
+   }
 }
 
 \keyword{methods}

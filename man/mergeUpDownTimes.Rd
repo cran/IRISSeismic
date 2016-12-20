@@ -93,6 +93,6 @@ plotUpDownTimes(udtAny); title("ANY channel up")
 
 # Restore default layout
 layout(1)
-  }
+    }
 }
 
