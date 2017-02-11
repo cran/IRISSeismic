@@ -41,5 +41,4 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 
 %% \seealso{ }
 
-%% \examples{ }
 

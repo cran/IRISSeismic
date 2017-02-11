@@ -117,7 +117,6 @@ e <- events[eIndex[1],]
 channels <- getAvailability(iris,"*","*","*","BHZ",starttime,endtime,
                             lat=e$latitude,long=e$longitude,maxradius=5)
 channels
-
 }
 
 \keyword{webservices}

@@ -53,7 +53,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \examples{
-   \dontrun{
+  \dontrun{
 # Create a new IrisClient
 iris <- new("IrisClient", debug=TRUE)
 
@@ -70,7 +70,7 @@ psdPlot(psdList,style='psd',type='l',col=adjustcolor('black',0.3))
 
 # McNamara 'pdf' plot
 psdPlot(psdList,style='pdf')
-    }
+  }
 }
 
 \keyword{spectra}

@@ -69,7 +69,7 @@ python ObsPy package (\url{http://docs.obspy.org/packages/autogen/obspy.clients.
 %% \seealso{ }
 
 \examples{
-   \dontrun{
+  \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient", debug=TRUE)
 

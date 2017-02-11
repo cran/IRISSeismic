@@ -4,19 +4,21 @@
  * 
  * Interface declarations for the Mini-SEED library (libmseed).
  *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public License
- * as published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 3 of the
+ * License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License (GNU-LGPL) for more details.  The
- * GNU-LGPL and further information can be found here:
- * http://www.gnu.org/
+ * Lesser General Public License (GNU-LGPL) for more details.
  *
- * Written by Chad Trabant
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software.
+ * If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Copyright (C) 2016 Chad Trabant
  * IRIS Data Management Center
  ***************************************************************************/
 
@@ -30,8 +32,8 @@ extern "C" {
 
 #include "lmplatform.h"
 
-#define LIBMSEED_VERSION "2.16"
-#define LIBMSEED_RELEASE "2015.108"
+#define LIBMSEED_VERSION "2.18"
+#define LIBMSEED_RELEASE "2016.286"
 
 #define MINRECLEN   128      /* Minimum Mini-SEED record length, 2^7 bytes */
                              /* Note: the SEED specification minimum is 256 */
@@ -487,9 +489,9 @@ MSTraceList;
 
 /* REC -- adding a linked list struct for MSTraceSeg */
 typedef struct MSSampRateList_s {
-	double	samprate;				/* sample rate key value for this node */
-	int		count;					/* count value for this sample rate */
-	struct MSSampRateList_s* next;			/* next node in the linked list */
+        double  samprate;                               /* sample rate key value for this node */
+        int             count;                                  /* count value for this sample rate */
+        struct MSSampRateList_s* next;                  /* next node in the linked list */
 }
 MSSampRateList;
 
@@ -614,6 +616,7 @@ extern void          mstl_printtracelist ( MSTraceList *mstl, flag timeformat,
 extern void          mstl_printsynclist ( MSTraceList *mstl, char *dccid, flag subsecond );
 extern void          mstl_printgaplist (MSTraceList *mstl, flag timeformat,
 					double *mingap, double *maxgap);
+
 /* REC - in tracelist.c */
 MSSampRateList* add_segsamprate(MSSampRateList* srl, double samprate);
 double get_segsamprate_mode(MSSampRateList* srl);
@@ -672,6 +675,7 @@ extern hptime_t ms_btime2hptime (BTime *btime);
 extern char*    ms_btime2isotimestr (BTime *btime, char *isotimestr);
 extern char*    ms_btime2mdtimestr (BTime *btime, char *mdtimestr);
 extern char*    ms_btime2seedtimestr (BTime *btime, char *seedtimestr);
+extern int      ms_hptime2tomsusecoffset (hptime_t hptime, hptime_t *toms, int8_t *usecoffset);
 extern int      ms_hptime2btime (hptime_t hptime, BTime *btime);
 extern char*    ms_hptime2isotimestr (hptime_t hptime, char *isotimestr, flag subsecond);
 extern char*    ms_hptime2mdtimestr (hptime_t hptime, char *mdtimestr, flag subsecond);
@@ -684,6 +688,7 @@ extern int      ms_genfactmult (double samprate, int16_t *factor, int16_t *multi
 extern int      ms_ratapprox (double real, int *num, int *den, int maxval, double precision);
 extern int      ms_bigendianhost (void);
 extern double   ms_dabs (double val);
+extern double   ms_rsqrt64 (double val);
 
 
 /* Lookup functions */

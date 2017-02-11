@@ -35,11 +35,6 @@ A \code{Trace}
 whose data have been replaced with the envelope of the seismic signal.
 }
 
-\references{
-%% ~put references to the literature/web site here ~
-\href{http://www.spgindia.org/2008/398.pdf}{Seismic Attributes - A Review}
-}
-
 \author{
 Jonathan Callahan \email{jonathan@mazamascience.com}
 }
@@ -48,12 +43,9 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 This algorithm is adapted from code in the \pkg{seewave} package.
 }
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-%% \seealso{ }
 
 \examples{
-   \dontrun{
+  \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -73,7 +65,7 @@ trenv <- envelope(tr)
 # Plot signal data and envelope data
 plot(tr@data, type='l', col='gray80')
 points(trenv@data, type='l', col='blue')
-    }
+  }
 }
 
 \keyword{methods}

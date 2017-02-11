@@ -57,7 +57,7 @@ A dataframe with the following columns:
 }
 
 \references{
-\href{http://www.ltrr.arizona.edu/~dmeko/notes_6.pdf}{Spectral Analysis -- Smoothed Periodogram Method}
+\href{http://terascan.smast.umassd.edu/nasdata/archive/achaudhu.old/docs/TIMESERIES/notes_6.pdf}{Spectral Analysis -- Smoothed Periodogram Method}
 
 \href{http://octave-signal.sourcearchive.com/documentation/1.0.7/pwelch_8m-source.html}{Octave pwelch() source code}
 
@@ -116,7 +116,7 @@ plot(1/DF$freq,transferPhase,type='l',log='x',
 
 # Restore default layout
 layout(1)
-   }
+  }
 }
 
 \keyword{spectra}

@@ -50,7 +50,6 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 \code{\link{McNamaraPSD}}
 }
 
-%% \examples{ }
 
 \keyword{spectra}
 

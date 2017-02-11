@@ -5,7 +5,7 @@
 #   CFLAGS : Specify compiler options to use
 
 MAJOR_VER = 2
-MINOR_VER = 13
+MINOR_VER = 18
 CURRENT_VER = $(MAJOR_VER).$(MINOR_VER)
 COMPAT_VER = $(MAJOR_VER).$(MINOR_VER)
 
@@ -49,8 +49,13 @@ $(LIB_DYN): $(LIB_DOBJS)
 	$(CC) $(CFLAGS) -dynamiclib -compatibility_version $(COMPAT_VER) -current_version $(CURRENT_VER) -install_name $(LIB_DYN_ALIAS) -o $(LIB_DYN) $(LIB_DOBJS)
 	ln -sf $(LIB_DYN) $(LIB_DYN_ALIAS)
 
+test: static FORCE
+	@$(MAKE) -C test test
+
 clean:
-	rm -f $(LIB_OBJS) $(LIB_DOBJS) $(LIB_A) $(LIB_SO_FILENAME) $(LIB_SO) $(LIB_SO_ALIAS) $(LIB_DYN) $(LIB_DYN_ALIAS)
+	@rm -f $(LIB_OBJS) $(LIB_DOBJS) $(LIB_A) $(LIB_SO_FILENAME) $(LIB_SO) $(LIB_SO_ALIAS) $(LIB_DYN) $(LIB_DYN_ALIAS)
+	@$(MAKE) -C test clean
+	@echo "All clean."
 
 install:
 	@echo
@@ -60,17 +65,6 @@ install:
 
 .SUFFIXES: .c .o .lo
 
-# NOTE:  Callahan added '-fPIC' to the .c.o: target because R's creation of shared object libraries
-# NOTE:  from static libraries was failing on 64 bit machines with the following error:
-# NOTE:
-# NOTE:    relocation R_X86_64_32 against `.rodata.str1.8' can not be used when making a shared object; recompile with -fPIC
-# NOTE:
-# NOTE:  Adding -fPIC to PKG_CFLAGS in the src/Makevars file didn't seem to solve the problem.
-# NOTE:
-# NOTE:  The following stackoverflow thread makes clear what is going on:
-# NOTE:
-# NOTE:    http://stackoverflow.com/questions/19768267/relocation-r-x86-64-32s-against-linking-error
-
 # Standard object building
 .c.o:
 	$(CC) $(CFLAGS) $(CPICFLAGS) -c $< -o $@
@@ -78,3 +72,5 @@ install:
 # Standard object building for dynamic library components using -fPIC
 .c.lo:
 	$(CC) $(CFLAGS) $(CPICFLAGS) -c $< -o $@
+
+FORCE:

@@ -74,7 +74,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \examples{
-    \dontrun{
+  \dontrun{
 # Create a new IrisClient
 iris <- new("IrisClient", debug=TRUE)
 
@@ -95,7 +95,7 @@ plot(period, psdList[[1]]$spec, log='x', type='l',
 for (i in seq(2:length(psdList))) {
   points(period, psdList[[i]]$spec, type='l')
 }
-   }
+  }
 }
 
 \keyword{spectra}

@@ -42,6 +42,5 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 \code{\link{psdStatistics}},
 }
 
-%% \examples{ }
 
 \keyword{spectra}

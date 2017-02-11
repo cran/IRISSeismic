@@ -49,5 +49,4 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
   \code{\link{miniseed2Stream}}
 }
 
-%% \examples{ }
 

@@ -165,6 +165,10 @@ SEXP parseMiniSEED (SEXP buffer) {
   PROTECT(returnList = NEW_LIST(id->numsegments));
   numPROTECT++;
 
+  if (debug) {
+    Rprintf("numsegments %d\n", id->numsegments);
+  }
+
   // Set up the names that go in the returnList
   char *names[14] = {"npts","sampling_rate","network","station","location","channel","quality",
                      "starttime","endtime","data","act_flags","io_flags","dq_flags","timing_qual"};
@@ -179,6 +183,10 @@ SEXP parseMiniSEED (SEXP buffer) {
   // which is then inserted into the returnList.
   for (int segIndex=0; segIndex < id->numsegments; segIndex++ ) {
 
+    if (debug) {
+      Rprintf("segIndex %d\n", segIndex);
+    }
+
     // Now set up the variable vectors that go into the segmentList
     SEXP npts, sampling_rate, network, station, location, channel, quality, starttime, endtime, data;
 
@@ -187,7 +195,7 @@ SEXP parseMiniSEED (SEXP buffer) {
     PROTECT(npts = NEW_INTEGER(1));
     loopPROTECT++;
     INTEGER(npts)[0] = (int) seg->samplecnt;
-  
+   
     PROTECT(sampling_rate = NEW_NUMERIC(1));
     loopPROTECT++;
     // REC -- modified samprate for segment
@@ -347,6 +355,10 @@ SEXP parseMiniSEED (SEXP buffer) {
 
     // Next segment
     seg = seg->next;
+
+    if (seg==NULL){
+       break;
+    }
   }
 
   /* Make sure the miniSEED stuff is cleaned up */
@@ -355,6 +367,7 @@ SEXP parseMiniSEED (SEXP buffer) {
 
   /* Unprotect and return */
   UNPROTECT(numPROTECT);
+
   return(returnList);
 }
 

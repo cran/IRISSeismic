@@ -42,7 +42,7 @@ miniseed2Stream <- function(miniseed,
   # Use C code to parse the bytes into a list of lists  
   result <- try( segList <- parseMiniSEED(miniseed),
                  silent=TRUE  )
-  
+ 
   # Handle error response
   if (class(result) == "try-error" ) {
     
@@ -74,7 +74,8 @@ miniseed2Stream <- function(miniseed,
   
   traces <- list()
   for ( i in seq_along(segList) )  {
-    headerList <- list(network=segList[[i]]$network,
+    if(!is.null(segList[[i]])){
+        headerList <- list(network=segList[[i]]$network,
                        station=segList[[i]]$station,
                        location=segList[[i]]$location,
                        channel=segList[[i]]$channel,
@@ -91,13 +92,14 @@ miniseed2Stream <- function(miniseed,
                        dip=dip               
                        )
     
-    stats <- new("TraceHeader", headerList=headerList)
-    traces[[i]] <- new("Trace", stats=stats,
+        stats <- new("TraceHeader", headerList=headerList)
+        traces[[i]] <- new("Trace", stats=stats,
                        Sensor=sensor, 
                        InstrumentSensitivity=scale, 
                        SensitivityFrequency=scalefreq,  
                        InputUnits=scaleunits,
                        data=segList[[i]]$data)
+    }
   }
   
   # Each miniSEED record has one set of quality flags (currently attached to each element in segList)

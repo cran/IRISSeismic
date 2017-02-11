@@ -62,6 +62,4 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 \code{\link{IrisClient-class}}
 }
 
-%% \examples{ }
-
 \keyword{webservices}

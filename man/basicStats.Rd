@@ -126,7 +126,7 @@ between \code{Traces} are not counted.
 %% \seealso{ }
 
 \examples{
-   \dontrun{
+  \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -142,7 +142,7 @@ length(tr1)
 max(tr1)
 mean(tr1)
 sd(tr1)
-   }
+  }
 }
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the

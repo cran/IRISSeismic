@@ -25,11 +25,6 @@ This function is intended for internal use by the hilbert() and envelope() metho
 A complex vector containing the Hilbert FFT of \code{x}.
 }
 
-\references{
-%% ~put references to the literature/web site here ~
-\href{http://www.spgindia.org/2008/398.pdf}{Seismic Attributes - A Review}
-}
-
 \author{
 Jonathan Callahan \email{jonathan@mazamascience.com}
 }
@@ -38,12 +33,8 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 This algorithm is adapted from code in the \pkg{seewave} package.
 }
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-%% \seealso{ }
-
 \examples{
-   \dontrun{
+  \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -75,7 +66,7 @@ ccf(tr@data,Im(hfft),lag.max=200,main="90 deg phase shift with Hilber transform"
 
 # Restore default layout
 layout(1)
-   }
+  }
 }
 
 \keyword{methods}

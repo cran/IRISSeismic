@@ -115,12 +115,12 @@ setClass("IrisClient",
 ################################################################################
 
 if (!isGeneric("getDataselect")) {
-  setGeneric("getDataselect", function(obj, network, station, location, channel, starttime, endtime, quality, inclusiveEnd, ignoreEpoch) {
+  setGeneric("getDataselect", function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch) {
     standardGeneric("getDataselect")
   })
 }
 
-getDataselect.IrisClient <- function(obj, network, station, location, channel, starttime, endtime, quality, inclusiveEnd, ignoreEpoch) {
+getDataselect.IrisClient <- function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch) {
 
   # allow authenticated access.
   # if we have a netrc definition, then use queryauth to access data
@@ -147,6 +147,14 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
   }
   if (!is.null(quality)){
     url <- paste(url,"&quality=",quality,sep="")
+  }
+  if (!is.null(repository)){
+    if (repository %in% c("realtime","primary","bud","primary,realtime","realtime,primary")){
+      url <- paste(url,"&repository=",repository,sep="")
+    } else {
+      err_msg <- c("Invalid repository, acceptable values are 'realtime' and 'primary'. To search both, do not specify a repository.")
+      stop(paste("getDataselect.IrisClient:",err_msg))   
+    }
   }
 
   if (obj@debug) {
@@ -240,149 +248,253 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
 }
 
 # All arguments specified
-setMethod("getDataselect", signature(obj="IrisClient", 
-                                     network="character", station="character", location="character",
+setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
                                      channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="character", inclusiveEnd="logical", ignoreEpoch="logical"), 
-          function(obj, network, station, location, channel, starttime, endtime, quality, inclusiveEnd, ignoreEpoch)
+                                     quality="character", repository="character", inclusiveEnd="logical", ignoreEpoch="logical"), 
+          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
             getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality, inclusiveEnd, ignoreEpoch))
+                                     quality, repository, inclusiveEnd, ignoreEpoch))
 
+# All optional arguments missing
 # quality="missing", default to NULL, ignoreEpoch="missing", default to FALSE, inclusiveEnd="missing", default to TRUE
-setMethod("getDataselect", signature(obj="IrisClient",
-                                     network="character", station="character", location="character",
+setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
                                      channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="missing", inclusiveEnd="missing", ignoreEpoch="missing"),
-          function(obj, network, station, location, channel, starttime, endtime, quality, inclusiveEnd, ignoreEpoch)
+                                     quality="missing", repository="missing", inclusiveEnd="missing", ignoreEpoch="missing"),
+          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
             getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality=NULL, inclusiveEnd=TRUE, ignoreEpoch=FALSE))
+                                     quality=NULL, repository=NULL, inclusiveEnd=TRUE, ignoreEpoch=FALSE))
 
+# One argument is missing
 # ignoreEpoch="missing", default to FALSE
-setMethod("getDataselect", signature(obj="IrisClient",
-                                     network="character", station="character", location="character",
+setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
                                      channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="character", inclusiveEnd="logical", ignoreEpoch="missing"),
-          function(obj, network, station, location, channel, starttime, endtime, quality, inclusiveEnd, ignoreEpoch)
+                                     quality="character", repository="character", inclusiveEnd="logical", ignoreEpoch="missing"),
+          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
             getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality, inclusiveEnd, ignoreEpoch=FALSE))
+                                     quality, repository, inclusiveEnd, ignoreEpoch=FALSE))
 
 # inclusiveEnd="missing", default to TRUE
-setMethod("getDataselect", signature(obj="IrisClient",
-                                     network="character", station="character", location="character",
+setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
                                      channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="character", inclusiveEnd="missing", ignoreEpoch="logical"),
-          function(obj, network, station, location, channel, starttime, endtime, quality, inclusiveEnd, ignoreEpoch)
+                                     quality="character", repository="character", inclusiveEnd="missing", ignoreEpoch="logical"),
+          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
             getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality, inclusiveEnd=TRUE, ignoreEpoch))
+                                     quality, repository, inclusiveEnd=TRUE, ignoreEpoch))
 
 # quality="missing", default to NULL
-setMethod("getDataselect", signature(obj="IrisClient",
-                                     network="character", station="character", location="character",
+setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
                                      channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="missing", inclusiveEnd="logical", ignoreEpoch="logical"),
-          function(obj, network, station, location, channel, starttime, endtime, quality, inclusiveEnd, ignoreEpoch)
+                                     quality="missing", repository="character", inclusiveEnd="logical", ignoreEpoch="logical"),
+          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
             getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality=NULL, inclusiveEnd, ignoreEpoch))
+                                     quality=NULL, repository, inclusiveEnd, ignoreEpoch))
 
-# inclusiveEnd="missing", default to TRUE, ignoreEpoch="missing", default to FALSE
-setMethod("getDataselect", signature(obj="IrisClient",
-                                     network="character", station="character", location="character",
+# repository="missing", default to NULL
+setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
                                      channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="character", inclusiveEnd="missing", ignoreEpoch="missing"),
-          function(obj, network, station, location, channel, starttime, endtime, quality, inclusiveEnd, ignoreEpoch)
+                                     quality="character", repository="missing", inclusiveEnd="logical", ignoreEpoch="logical"),
+          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
             getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality, inclusiveEnd=TRUE, ignoreEpoch=FALSE))
+                                     quality, repository=NULL, inclusiveEnd, ignoreEpoch))
+
+# Two arguments are missing
+# inclusiveEnd="missing", default to TRUE, ignoreEpoch="missing", default to FALSE
+setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
+                                     channel="character", starttime="POSIXct", endtime="POSIXct",
+                                     quality="character", repository="character", inclusiveEnd="missing", ignoreEpoch="missing"),
+          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
+            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
+                                     quality,repository, inclusiveEnd=TRUE, ignoreEpoch=FALSE))
 
 # quality="missing", default to NULL, inclusiveEnd="missing", default to TRUE
-setMethod("getDataselect", signature(obj="IrisClient",
-                                     network="character", station="character", location="character",
+setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
                                      channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="missing", inclusiveEnd="missing", ignoreEpoch="logical"),
-          function(obj, network, station, location, channel, starttime, endtime, quality, inclusiveEnd, ignoreEpoch)
+                                     quality="missing",repository="character", inclusiveEnd="missing", ignoreEpoch="logical"),
+          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
             getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality=NULL, inclusiveEnd=TRUE, ignoreEpoch))
+                                     quality=NULL,repository, inclusiveEnd=TRUE, ignoreEpoch))
 
 # quality="missing", default to NULL, ignoreEpoch="missing", default to FALSE
-setMethod("getDataselect", signature(obj="IrisClient",
-                                     network="character", station="character", location="character",
+setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
                                      channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="missing", inclusiveEnd="logical", ignoreEpoch="missing"),
-          function(obj, network, station, location, channel, starttime, endtime, quality, inclusiveEnd, ignoreEpoch)
+                                     quality="missing",repository="character", inclusiveEnd="logical", ignoreEpoch="missing"),
+          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
             getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality=NULL, inclusiveEnd, ignoreEpoch=FALSE))
+                                     quality=NULL, repository, inclusiveEnd, ignoreEpoch=FALSE))
+
+# quality="missing", default to NULL, repository="missing", default to NULL
+setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
+                                     channel="character", starttime="POSIXct", endtime="POSIXct",
+                                     quality="missing",repository="missing", inclusiveEnd="logical", ignoreEpoch="logical"),
+          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
+            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
+                                     quality=NULL,repository=NULL, inclusiveEnd, ignoreEpoch))
+
+# repository="missing", default to NULL, ignoreEpoch="missing", default to FALSE
+setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
+                                     channel="character", starttime="POSIXct", endtime="POSIXct",
+                                     quality="character",repository="missing", inclusiveEnd="logical", ignoreEpoch="missing"),
+          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
+            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
+                                     quality, repository=NULL, inclusiveEnd, ignoreEpoch=FALSE))
+
+# repository="missing", default to NULL, inclusiveEnd="missing", default to TRUE
+setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
+                                     channel="character", starttime="POSIXct", endtime="POSIXct",
+                                     quality="character",repository="missing", inclusiveEnd="missing", ignoreEpoch="logical"),
+          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
+            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
+                                     quality,repository=NULL, inclusiveEnd=TRUE, ignoreEpoch))
+
+# Three arguments are missing
+# repository="missing", default to NULL, inclusiveEnd="missing", default to TRUE, ignoreEpoch="missing", default to FALSE
+setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
+                                     channel="character", starttime="POSIXct", endtime="POSIXct",
+                                     quality="character",repository="missing", inclusiveEnd="missing", ignoreEpoch="missing"),
+          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
+            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
+                                     quality,repository=NULL, inclusiveEnd=TRUE, ignoreEpoch=FALSE))
+
+# quality="missing", default to NULL, inclusiveEnd="missing", default to TRUE, ignoreEpoch="missing", default to FALSE
+setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
+                                     channel="character", starttime="POSIXct", endtime="POSIXct",
+                                     quality="missing",repository="character", inclusiveEnd="missing", ignoreEpoch="missing"),
+          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
+            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
+                                     quality=NULL,repository, inclusiveEnd=TRUE, ignoreEpoch=FALSE))
+
+# quality="missing", default to NULL, repository="missing", default to NULL, inclusiveEnd="missing", default to TRUE
+setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
+                                     channel="character", starttime="POSIXct", endtime="POSIXct",
+                                     quality="missing",repository="missing", inclusiveEnd="missing", ignoreEpoch="logical"),
+          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
+            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
+                                     quality=NULL,repository=NULL, inclusiveEnd=TRUE, ignoreEpoch))
+
+# quality="missing", default to NULL, repository="missing", default to NULL, ignoreEpoch="missing", default to FALSE
+setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
+                                     channel="character", starttime="POSIXct", endtime="POSIXct",
+                                     quality="missing",repository="missing", inclusiveEnd="logical", ignoreEpoch="missing"),
+          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
+            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
+                                     quality=NULL,repository=NULL, inclusiveEnd, ignoreEpoch=FALSE))
 
 ################################################################################
 # getSNCL method is a convenience wrapper for getDataselect
 ################################################################################
 
 if (!isGeneric("getSNCL")) {
-  setGeneric("getSNCL", function(obj, sncl, starttime, endtime, quality, inclusiveEnd, ignoreEpoch) {
+  setGeneric("getSNCL", function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch) {
     standardGeneric("getSNCL")
   })
 }
 
-getSNCL.IrisClient <- function(obj, sncl, starttime, endtime, quality, inclusiveEnd, ignoreEpoch) {
+getSNCL.IrisClient <- function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch) {
   parts <- unlist(stringr::str_split(sncl,'\\.'))
-  return( getDataselect.IrisClient(obj, parts[1], parts[2], parts[3], parts[4], starttime, endtime, quality, inclusiveEnd, ignoreEpoch) )
+  return( getDataselect.IrisClient(obj, parts[1], parts[2], parts[3], parts[4], starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch) )
 }
 
 # All arguments specified
-setMethod("getSNCL", signature(obj="IrisClient",
-                               sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="character", inclusiveEnd="logical",ignoreEpoch="logical"),
-          function(obj, sncl, starttime, endtime, quality,inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality,inclusiveEnd,ignoreEpoch))
+setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
+                               quality="character", repository="character", inclusiveEnd="logical",ignoreEpoch="logical"),
+          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
+            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality,repository,inclusiveEnd,ignoreEpoch))
 
-# quality="missing", use "B" for "Best", ignoreEpoch="missing", default to FALSE, inclusiveEnd="missing", default to TRUE
-setMethod("getSNCL", signature(obj="IrisClient",
-                               sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="missing", inclusiveEnd="missing",ignoreEpoch="missing"),
-          function(obj, sncl, starttime, endtime, quality,inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality="B",inclusiveEnd=TRUE,ignoreEpoch=FALSE))
+# All optional arguments missing
+# quality="missing", default to NULL, repository="missing", default to NULL, ignoreEpoch="missing", default to FALSE, inclusiveEnd="missing", default to TRUE
+setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
+                               quality="missing", repository="missing", inclusiveEnd="missing",ignoreEpoch="missing"),
+          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
+            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality=NULL, repository=NULL, inclusiveEnd=TRUE,ignoreEpoch=FALSE))
 
+# One argument missing
 # ignoreEpoch="missing", default to FALSE
-setMethod("getSNCL", signature(obj="IrisClient",
-                               sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="character", inclusiveEnd="logical",ignoreEpoch="missing"),
-          function(obj, sncl, starttime, endtime, quality,inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality,inclusiveEnd,ignoreEpoch=FALSE))
+setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
+                               quality="character", repository="character", inclusiveEnd="logical",ignoreEpoch="missing"),
+          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
+            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch=FALSE))
 
 # inclusiveEnd="missing", default to TRUE
-setMethod("getSNCL", signature(obj="IrisClient",
-                               sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="character", inclusiveEnd="missing",ignoreEpoch="logical"),
-          function(obj, sncl, starttime, endtime, quality,inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality,inclusiveEnd=TRUE,ignoreEpoch))
+setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
+                               quality="character", repository="character", inclusiveEnd="missing",ignoreEpoch="logical"),
+          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
+            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd=TRUE,ignoreEpoch))
 
-# quality="missing", use "B" for "Best"
-setMethod("getSNCL", signature(obj="IrisClient",
-                               sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="missing",inclusiveEnd="logical",ignoreEpoch="logical"),
-          function(obj, sncl, starttime, endtime, quality,inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality="B",inclusiveEnd,ignoreEpoch))
+# quality="missing", default to NULL
+setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
+                               quality="missing", repository="character", inclusiveEnd="logical",ignoreEpoch="logical"),
+          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
+            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality=NULL, repository, inclusiveEnd,ignoreEpoch))
 
+# repository="missing", default to NULL
+setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
+                               quality="character", repository="missing", inclusiveEnd="logical",ignoreEpoch="logical"),
+          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
+            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality, repository=NULL, inclusiveEnd,ignoreEpoch))
+
+
+# Two arguments missing
 # inclusiveEnd="missing", default to TRUE, ignoreEpoch="missing", default to FALSE
-setMethod("getSNCL", signature(obj="IrisClient",
-                               sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="character", inclusiveEnd="missing",ignoreEpoch="missing"),
-          function(obj, sncl, starttime, endtime, quality,inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality,inclusiveEnd=TRUE,ignoreEpoch=FALSE))
+setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
+                               quality="character", repository="character", inclusiveEnd="missing",ignoreEpoch="missing"),
+          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
+            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd=TRUE,ignoreEpoch=FALSE))
 
-# quality="missing", use "B" for "Best", inclusiveEnd="missing", default to TRUE
-setMethod("getSNCL", signature(obj="IrisClient",
-                               sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="missing", inclusiveEnd="missing",ignoreEpoch="logical"),
-          function(obj, sncl, starttime, endtime, quality,inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality="B",inclusiveEnd=TRUE,ignoreEpoch))
+# quality="missing", default to NULL, inclusiveEnd="missing", default to TRUE
+setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
+                               quality="missing", repository="character", inclusiveEnd="missing", ignoreEpoch="logical"),
+          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
+            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality=NULL, repository, inclusiveEnd=TRUE, ignoreEpoch))
 
-# quality="missing", use "B" for "Best", ignoreEpoch="missing", default to FALSE
-setMethod("getSNCL", signature(obj="IrisClient",
-                               sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="missing", inclusiveEnd="logical",ignoreEpoch="missing"),
-          function(obj, sncl, starttime, endtime, quality,inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality="B",inclusiveEnd,ignoreEpoch=FALSE))
+# quality="missing", default to NULL, ignoreEpoch="missing", default to FALSE
+setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
+                               quality="missing", repository="character", inclusiveEnd="logical", ignoreEpoch="missing"),
+          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
+            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality=NULL, repository, inclusiveEnd, ignoreEpoch=FALSE))
 
+# repository="missing", default to NULL, quality="missing", default to NULL
+setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
+                               quality="missing", repository="missing", inclusiveEnd="logical", ignoreEpoch="logical"),
+          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
+            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality=NULL, repository=NULL, inclusiveEnd, ignoreEpoch))
 
+# repository="missing", default to NULL, ignoreEpoch="missing", default to FALSE
+setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
+                               quality="character", repository="missing", inclusiveEnd="logical", ignoreEpoch="missing"),
+          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
+            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality, repository=NULL, inclusiveEnd, ignoreEpoch=FALSE))
+
+# repository="missing", default to NULL, inclusiveEnd="missing", default to TRUE
+setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
+                               quality="character", repository="missing", inclusiveEnd="missing", ignoreEpoch="logical"),
+          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
+            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality, repository=NULL, inclusiveEnd=TRUE, ignoreEpoch))
+
+# Three arguments missing
+
+# repository="missing", default to NULL, inclusiveEnd="missing", default to TRUE, ignoreEpoch="missing", default to FALSE
+setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
+                               quality="character", repository="missing", inclusiveEnd="missing", ignoreEpoch="missing"),
+          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
+            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality, repository=NULL, inclusiveEnd=TRUE, ignoreEpoch=FALSE))
+
+# quality="missing", default to NULL, inclusiveEnd="missing", default to TRUE, ignoreEpoch="missing", default to FALSE
+setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
+                               quality="missing", repository="character", inclusiveEnd="missing", ignoreEpoch="missing"),
+          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
+            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality=NULL, repository, inclusiveEnd=TRUE, ignoreEpoch=FALSE))
+
+# quality="missing", default to NULL, repository="missing", default to NULL, inclusiveEnd="missing", default to TRUE
+setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
+                               quality="missing", repository="missing", inclusiveEnd="missing", ignoreEpoch="logical"),
+          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
+            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality=NULL, repository=NULL, inclusiveEnd=TRUE, ignoreEpoch))
+
+# quality="missing", default to NULL, repository="missing", default to NULL, ignoreEpoch="missing", default to FALSE
+setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
+                               quality="missing", repository="missing", inclusiveEnd="logical", ignoreEpoch="missing"),
+          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
+            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality=NULL, repository=NULL, inclusiveEnd, ignoreEpoch=FALSE))
 
 ################################################################################
 # getRotation method returns a list of three Stream objects

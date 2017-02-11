@@ -81,7 +81,7 @@ confusion in the context of R. Instead, the name
 %% \seealso{ }
 
 \examples{
-   \dontrun{
+  \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -94,7 +94,7 @@ st <- getDataselect(iris,"AK","PIN","","BHZ",starttime,endtime)
 # Get the first trace and show the associated metadata
 tr1 <- st@traces[[1]]
 show(tr1@stats)
-   }
+  }
 }
 
 \keyword{classes}

@@ -97,7 +97,7 @@ abline(v=verticalLines,col='gray50',lty=2)
 
 # Restore default layout
 layout(1)
-   }
+  }
 }
 
 \keyword{methods}

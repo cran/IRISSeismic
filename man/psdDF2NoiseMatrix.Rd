@@ -54,6 +54,5 @@ boundary when an instrument is replaced.
 \code{\link{psdStatistics}}
 }
 
-%% \examples{ }
 
 \keyword{spectra}

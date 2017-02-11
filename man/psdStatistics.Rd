@@ -57,7 +57,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \examples{
-    \dontrun{
+  \dontrun{
 # Create a new IrisClient
 iris <- new("IrisClient", debug=TRUE)
 
@@ -89,7 +89,7 @@ polygon(x,y,col=transparentBlack)
 y <- c(stats$max,rev(stats$min),stats$max[1])
 transparentBlue <- adjustcolor('blue',0.6)
 polygon(x,y,col=transparentBlue)  
-    }
+  }
 }
 
 \keyword{spectra}

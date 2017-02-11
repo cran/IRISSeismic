@@ -41,7 +41,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 %% \seealso{ }
 
 \examples{
-    \dontrun{
+  \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -61,7 +61,7 @@ rmsVariance(st)
 
 # plot trace
 plot(st, ylab=c$scaleunits)
-     }
+  }
 }
 
 \keyword{methods}

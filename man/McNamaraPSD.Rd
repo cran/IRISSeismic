@@ -97,6 +97,5 @@ This is equivalent to averaging of power levels before conversion to dB using a 
 \code{\link{psdList}}
 }
 
-%% \examples{ }
 
 \keyword{spectra}
