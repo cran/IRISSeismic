@@ -1334,7 +1334,7 @@ setMethod("getEvalresp", signature(obj="IrisClient",
 ################################################################################
 # getEvent method returns seismic event data from the event webservice:
 #
-#   http://earthquake.usgs.gov/fdsnws/event/1/
+#   https://earthquake.usgs.gov/fdsnws/event/1/
 #
 # TODO:  The getEvent method could be fleshed out with a more complete list
 # TODO:  of arguments to be used as ws-event parameters.
@@ -1351,7 +1351,7 @@ getEvent.IrisClient <- function(obj, starttime, endtime, minmag, maxmag, magtype
                                 mindepth, maxdepth) {
   
   if(stringr::str_detect(obj@site,regex("service.*.iris.edu"))) {
-    url <- paste("http://earthquake.usgs.gov","/fdsnws/event/1/query?",sep="")
+    url <- paste("https://earthquake.usgs.gov","/fdsnws/event/1/query?",sep="")
   } else {
     url <- paste(obj@site,"/fdsnws/event/1/query?",sep="")
   }
@@ -1382,7 +1382,7 @@ getEvent.IrisClient <- function(obj, starttime, endtime, minmag, maxmag, magtype
     write(paste("<debug>URL =",url), stdout())
   }
   
-  # http://earthquake.usgs.gov/fdsnws/event/1/query?starttime=2013-02-01T00:00:00&endtime=2013-02-02T00:00:00&minmag=5&format=text
+  # https://earthquake.usgs.gov/fdsnws/event/1/query?starttime=2013-02-01T00:00:00&endtime=2013-02-02T00:00:00&minmag=5&format=text
   #
   # #EventID | Time | Latitude | Longitude | Depth | Author | Catalog | Contributor | ContributorID | MagType | Magnitude | MagAuthor | EventLocationName
   # 4075900|2013-02-01T22:18:33|-11.12|165.378|10.0|NEIC|NEIC PDE|NEIC PDE-Q||MW|6.4|GCMT|SANTA CRUZ ISLANDS

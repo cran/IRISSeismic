@@ -122,4 +122,3 @@ export("crossSpectrum",
 
 # mseed functions
 ###export("parseMiniSEED")
-

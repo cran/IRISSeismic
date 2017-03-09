@@ -57,7 +57,7 @@ Basic statistics on the data in \code{Trace} and \code{Stream} objects.
 # length(x)
 # max(x, ...)
 mean(x, ...)
-median(x, na.rm)
+# median(x, na.rm)
 # min(x, ...)
 sd(x, na.rm)
 parallelLength(x)

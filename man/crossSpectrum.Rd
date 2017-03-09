@@ -75,7 +75,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \examples{
-  \dontrun{
+   \dontrun{
 # Create a new IrisClient
 iris <- new("IrisClient")
 

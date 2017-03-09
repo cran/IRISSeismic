@@ -7,7 +7,8 @@
  * ORFEUS/EC-Project MEREDIAN
  * IRIS Data Management Center
  *
- * modified: REC: 2017.02.09
+ * modified: 2017.053
+ * modified: REC: 2017.055
  ***************************************************************************/
 
 #include <errno.h>
@@ -17,7 +18,6 @@
 #include <time.h>
 
 #include "libmseed.h"
-#include "lmplatform.h"
 
 static hptime_t ms_time2hptime_int (int year, int day, int hour,
                                     int min, int sec, int usec);
@@ -1213,8 +1213,8 @@ ms_readleapsecondfile (char *filename)
     if (!strncmp (readline, "#@", 2))
     {
       expires = 0;
-      
-      /*(replacing)fields  = sscanf (readline, "#@ %" SCNd64, &expires);*/
+
+      /*(replacing)fields  = sscanf (readline, "#@ %" SCNd64, &expires); REC*/
       fields = 0;
       expires = scan_d64(readline,2,&endptr);
       if (endptr - readline + 2 > 0) fields++;
@@ -1241,7 +1241,7 @@ ms_readleapsecondfile (char *filename)
     if (*readline == '#')
       continue;
 
-    /*(replacing) fields = sscanf (readline, "%" SCNd64 " %d ", &leapsecond, &TAIdelta);*/
+    /*(replacing) fields = sscanf (readline, "%" SCNd64 " %d ", &leapsecond, &TAIdelta); REC*/
     fields = 0;
     leapsecond = scan_d64(readline,0,&endptr);
     if (endptr - readline > 0) fields++;
@@ -1584,7 +1584,7 @@ ms_rsqrt64 (double val)
   x2 = val * 0.5;
   y  = val;
   memcpy (&i, &y, sizeof(i));
-  i  = 0x5fe6eb50c7b537a9 - (i >> 1);
+  i  = 0x5fe6eb50c7b537a9ULL - (i >> 1);
   memcpy (&y, &i, sizeof(y));
   y  = y * (1.5 - (x2 * y * y));
   y  = y * (1.5 - (x2 * y * y));

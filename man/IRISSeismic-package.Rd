@@ -27,6 +27,14 @@ IRIS DMC web services: \url{http://service.iris.edu/}
 }
 
 \section{History}{
+  version 1.4.3
+  \itemize{
+    \item{changed getEvent default url from http://earthquake.usgs.gov/fdsnws/event/1/ to https://earthquake.usgs.gov/fdsnws/event/1/}
+  }
+  version 1.4.2
+  \itemize{
+    \item{updated libmseed version to 2.19}
+  }
   version 1.4.1
   \itemize{
     \item{updated libmseed version to 2.18}
@@ -310,7 +318,6 @@ IRIS DMC web services: \url{http://service.iris.edu/}
 }
 
 \examples{
- \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient", debug=TRUE)
 
@@ -324,7 +331,6 @@ st <- getDataselect(iris,"IU","ANMO","00","BHZ",starttime,endtime)
 tr1 <- st@traces[[1]]
 show(tr1@stats)
 plot(tr1)
-  }
 }
 
 %% Optional keywords

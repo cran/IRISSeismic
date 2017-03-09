@@ -5,6 +5,7 @@
  *
  * Written by Chad Trabant, IRIS Data Management Center
  *
+ * modified: 2015.108
  * modified: 2016/04/28 - Robert Casey, IRIS DMC - (REC)
  ***************************************************************************/
 
@@ -654,7 +655,7 @@ mstl_msr2seg (MSRecord *msr, hptime_t endtime)
    * segment sample rate
    */
    seg->samprate_list = add_segsamprate(seg->samprate_list,seg->samprate);
-  
+
   return seg;
 } /* End of mstl_msr2seg() */
 
@@ -750,7 +751,7 @@ mstl_addmsrtoseg (MSTraceSeg *seg, MSRecord *msr, hptime_t endtime, flag whence)
    * the first initial sample rate it encountered ( see mstl_msr2seg() )
    */
   seg->samprate_list = add_segsamprate(seg->samprate_list,msr->samprate);
-
+  
   return seg;
 } /* End of mstl_addmsrtoseg() */
 

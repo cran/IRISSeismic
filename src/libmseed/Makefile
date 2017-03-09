@@ -5,7 +5,7 @@
 #   CFLAGS : Specify compiler options to use
 
 MAJOR_VER = 2
-MINOR_VER = 18
+MINOR_VER = 19
 CURRENT_VER = $(MAJOR_VER).$(MINOR_VER)
 COMPAT_VER = $(MAJOR_VER).$(MINOR_VER)
 
