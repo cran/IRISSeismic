@@ -75,7 +75,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \examples{
-   \dontrun{
+\dontrun{
 # Create a new IrisClient
 iris <- new("IrisClient")
 
@@ -116,7 +116,7 @@ plot(1/DF$freq,transferPhase,type='l',log='x',
 
 # Restore default layout
 layout(1)
-  }
+}
 }
 
 \keyword{spectra}

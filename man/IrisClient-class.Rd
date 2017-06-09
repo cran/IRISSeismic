@@ -69,7 +69,7 @@ python ObsPy package (\url{http://docs.obspy.org/packages/autogen/obspy.clients.
 %% \seealso{ }
 
 \examples{
-  \dontrun{
+\dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient", debug=TRUE)
 
@@ -79,7 +79,7 @@ endtime <- as.POSIXct("2012-01-25", tz="GMT")
 # Get the waveform
 st <- getDataselect(iris,"AK","PIN","","BHZ",starttime,endtime)
 mean(st)
-  }
+}
 }
 
 \keyword{classes}

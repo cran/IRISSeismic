@@ -43,7 +43,6 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 %% \seealso{ }
 
 \examples{
-  \dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -64,7 +63,6 @@ mtext("Demean - Detrend - Cosine Taper",line=-2,side=3,adj=0.05,col='red')
 
 # Restore default layout
 layout(1)
-  }
 }
 
 \keyword{methods}

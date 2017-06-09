@@ -52,7 +52,7 @@ boundary when an instrument is replaced.
 }
 
 \examples{
-  \dontrun{
+\dontrun{
 # Create a new IrisClient
 iris <- new("IrisClient", debug=TRUE)
 
@@ -77,7 +77,7 @@ plot(period, noiseMatrix[1,], log='x', type='l',
 for (i in seq(2:nrow(noiseMatrix))) {
   points(period, noiseMatrix[i,], type='l')
 }
-  }
+}
 }
 
 \keyword{spectra}

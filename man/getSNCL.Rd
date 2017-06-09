@@ -73,7 +73,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \examples{ 
-  \dontrun{
+\dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -90,6 +90,6 @@ str(st)
 
 # Plot trace
 plot(st)
-  }
+}
 }
 \keyword{webservices}

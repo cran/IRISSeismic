@@ -104,7 +104,7 @@ python ObsPy package (\url{http://docs.obspy.org/packages/autogen/obspy.core.tra
 %% \seealso{ }
 
 \examples{
-  \dontrun{
+\dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -124,7 +124,7 @@ max(tr1)
 sd(tr1)
 rms(tr1)
 rmsVariance(tr1)
-  }
+}
 }
 
 \keyword{classes}

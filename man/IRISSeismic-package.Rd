@@ -27,6 +27,17 @@ IRIS DMC web services: \url{http://service.iris.edu/}
 }
 
 \section{History}{
+
+  version 1.4.5
+  \itemize{
+    \item{fixed bug in noiseModels for low noise model results at periods > 10000 seconds}
+    \item{retry if getEvent returns a service unavailable message}
+  }
+
+  version 1.4.4
+  \itemize{
+    \item{modified error messages for getEvalresp() and getDistaz()}
+  }
   version 1.4.3
   \itemize{
     \item{changed getEvent default url from http://earthquake.usgs.gov/fdsnws/event/1/ to https://earthquake.usgs.gov/fdsnws/event/1/}

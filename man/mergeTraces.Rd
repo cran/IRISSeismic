@@ -44,7 +44,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 %% \seealso{ }
 
 \examples{
-  \dontrun{
+\dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -56,7 +56,7 @@ stm4 <- mergeTraces(st4)
 # plot merged trace
 plot(stm4@traces[[1]])
 mtext(paste(length(st4@traces),"traces"), side=3, line=0.5, adj=0.05, cex=1.5)      
-  }
+}
 }
 
 \keyword{methods}

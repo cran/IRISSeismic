@@ -45,7 +45,7 @@ This algorithm is adapted from code in the \pkg{seewave} package.
 
 
 \examples{
-  \dontrun{
+\dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -65,7 +65,7 @@ trenv <- envelope(tr)
 # Plot signal data and envelope data
 plot(tr@data, type='l', col='gray80')
 points(trenv@data, type='l', col='blue')
-  }
+}
 }
 
 \keyword{methods}

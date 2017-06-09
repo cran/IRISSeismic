@@ -59,7 +59,7 @@ See \code{\link{getUpDownTimes}}.
 }
 
 \examples{
-  \dontrun{
+\dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -93,6 +93,6 @@ plotUpDownTimes(udtAny); title("ANY channel up")
 
 # Restore default layout
 layout(1)
-  }
+}
 }
 

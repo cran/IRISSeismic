@@ -55,7 +55,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \examples{
-  \dontrun{
+\dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -70,7 +70,7 @@ upDownTimes <- getUpDownTimes(st, min_signal=180, min_gap=300)
 
 # Or just plot them directly
 plotUpDownTimes(st, min_signal=180, min_gap=300)
-  }
+}
 }
 
 \keyword{methods}

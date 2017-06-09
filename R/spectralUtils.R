@@ -408,10 +408,10 @@ psdList <- function(st) {
   hiFreq <- 0.5 * tr_merged@stats@sampling_rate
   # Set an alignment frequency from which octaves will be generated
   alignFreq <- 0.1
-  if (stringr::str_detect(channel,"^V")) {  ## added by REC - Apr 2016
+  if (stringr::str_detect(channel,"^V")) {  
     Z <- 24 * 3600
     loFreq <- 0.0001
-	alignFreq <- 0.025  # special for VH
+    alignFreq <- 0.025  # special for VH
   } else if (stringr::str_detect(channel,"^L")) {
     Z <- 3 * 3600
     loFreq <- 0.001
@@ -708,7 +708,8 @@ minPeriod       A       B
    154.00 -168.34   -7.61
    328.00 -217.43   11.90
    600.00 -258.28   26.60
-   100000 -346.88   48.75
+ 10000.00 -346.88   48.75
+100000.00 -346.88   48.75
 ")
 
   # We create breaks based on the first column of each table to figure out

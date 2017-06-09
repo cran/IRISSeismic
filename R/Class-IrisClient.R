@@ -1287,6 +1287,14 @@ getEvalresp.IrisClient <- function(obj, network, station, location, channel, tim
       stop(paste("getEvalresp.IrisClient: URL Not Found",url))
     } else if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
       stop(paste("getEvalresp.IrisClient: Cannot open connection",url))
+    } else if (stringr::str_detect(err_msg, regex("Internal Server Error",ignore_case=TRUE))) {
+      err_msg <- RCurl::getURL(url,useragent=obj@useragent)
+      if (stringr::str_detect(err_msg, regex("Error 500: Internal Server Error"))){ 
+          err_msg <- stringr::str_replace_all(err_msg, "[\r\n\t]","")
+          stop(paste("getEvalresp.IrisClient: Internal Server Error:", stringr::str_match(err_msg,"Error 500: Internal Server Error(.+)Usage")[,2], url))
+      } else {
+          stop(paste("getEvalresp.IrisClient: Internal Server Error:", url))
+      }
     } else {
       stop(paste("getEvalresp.IrisClient:", err_msg, url))
     }
@@ -1398,7 +1406,13 @@ getEvent.IrisClient <- function(obj, starttime, endtime, minmag, maxmag, magtype
   result <- try(gurlc <- RCurl::getURLContent(url,useragent=obj@useragent,header=TRUE),silent=TRUE) 
   if (class(result) == "try-error") {
     err_msg <- geterrmessage()
-    if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
+    if (stringr::str_detect(err_msg, regex("service unavailable",ignore_case=TRUE))) {
+      Sys.sleep(2)
+      result <- try(gurlc <- RCurl::getURLContent(url,useragent=obj@useragent,header=TRUE),silent=TRUE)
+      if (class(result) == "try-error") {
+         stop(paste("getEvent.IrisClient:",err_msg, url))
+      }
+    } else if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
       stop(paste("getEvent.IrisClient: Cannot open connection",url))
     } else if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE))) {
       stop(paste("getEvent.IrisClient: URL Not Found",url))
@@ -1597,18 +1611,21 @@ getDistaz.IrisClient <- function(obj, latitude, longitude, staLatitude, staLongi
                  silent=TRUE)
   
   # Handle error response
-  if (class(result) == "try-error" ) {
-    
+  if (class(result) == "try-error" ) { 
     err_msg <- geterrmessage()
-    if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE))) {
-      stop(paste("getDistaz.IrisClient: URL Not Found:",url))
-    } else if (stringr::str_detect(err_msg, regex("couldn't connect to host",ignore_case=TRUE))) {
-      stop(paste("getDistaz.IrisClient: Couldn't connect to host", url))
-    } else {
-      stop(paste("getDistaz.IrisClient:",err_msg, url))
-    } 
-    
+    stop(paste("getDistaz.IrisClient:", err_msg))
   }
+
+  if (stringr::str_detect(distazXml, regex("Not Found",ignore_case=TRUE))) {
+      stop(paste("getDistaz.IrisClient: URL Not Found:",url))
+  } else if (stringr::str_detect(distazXml, regex("connect to host",ignore_case=TRUE))) {
+      stop(paste("getDistaz.IrisClient: Could not connect to host", url))
+  } else if (stringr::str_detect(distazXml, regex("Error", ignore_case=TRUE))) {
+      err_msg <- stringr::str_extract(distazXml,"Error (.+)")
+      stop(paste("getDistaz.IrisClient: Error",err_msg, url))
+  } 
+    
+  
   
   # No errors so proceed
   

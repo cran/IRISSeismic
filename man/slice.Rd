@@ -44,7 +44,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 %% \seealso{ }
 
 \examples{
-  \dontrun{
+\dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -70,7 +70,7 @@ length(stSlice@traces)
 stSlice@traces[[1]]@stats
 # And a better look at the quake signal
 plot(stSlice@traces[[1]])
-  }
+}
 }
 
 \keyword{methods}
