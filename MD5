@@ -1,8 +1,8 @@
-133ea5b919f552ebb2a925fbafc19ef4 *DESCRIPTION
+69a477a8ee2598b674d1235e4293efeb *DESCRIPTION
 feb4a581263e4aa18b1535c0f7f63dde *NAMESPACE
 5792861145d45dd6a04d10b7207b8f63 *R/Class-IrisClient.R
 60e3778ead5f65ae20fccaa14cd60c2d *R/Class-Stream.R
-c6d6dfc9a5d2b2f5f6409afee552c75c *R/Class-Trace.R
+a03fdaea6c418aa1ce04aabb350ee22b *R/Class-Trace.R
 884619e7253c3037340ec0b725eaca04 *R/Utils.R
 17258addfe8d9ef274ac38a1964572af *R/mseedWrappers.R
 eedb23187ed6462e0a68d68e093cc2df *R/spectralUtils.R
@@ -11,7 +11,7 @@ cc4cdbfab2f40242859aba4aa45e66b6 *inst/doc/IRISSeismic-intro.R
 10b264a03f3e0c391474f8d4abfc76f6 *inst/doc/IRISSeismic-intro.Rmd
 18435c3833c126206042609bc86efc9c *inst/doc/IRISSeismic-intro.html
 b1346e5656dd2a3cb6996891b8e3c487 *man/DDT.Rd
-2e046f486b587f49629387d5e962b310 *man/IRISSeismic-package.Rd
+f4a78de430f30097e8b0774dfd136163 *man/IRISSeismic-package.Rd
 ced7f854cb6bfe134f4f1ff8080a0f53 *man/IrisClient-class.Rd
 7017b6bb847e8fe56768c5ccd8fcc042 *man/McNamaraBins.Rd
 e2a904b2e92a17e376ae3d73a72b29e6 *man/McNamaraPSD.Rd

@@ -593,8 +593,8 @@ setMethod("butterworth", signature("Trace", n="numeric", low="missing", high="nu
 # Slice out a portion of a Trace ---------------------------
 
 # NOTE:  Unlike the ObsPy method, this method does no padding.  The returned 
-# NOTE:  Trace will always be a subset of the original Trace.  Slicing is rounded
-# NOTE:  to the nearest second.
+# NOTE:  Trace will always be a subset of the original Trace.
+# NOTE:  Slicing is to the nearest sample as of version 1.4.6
 
 if (!isGeneric("slice")) {
   setGeneric("slice", function(x, starttime, endtime) {
@@ -631,18 +631,20 @@ slice.Trace <- function(x, starttime, endtime) {
   # Modify the startime and startIndex if needed
   if (starttime > stats@starttime ) {    
     # NOTE:  Use difftime() instead of just subtracting to guarantee that units are "secs"
-    offset_secs <- as.numeric(round( difftime(starttime, stats@starttime, units="secs") ))
+    offset_secs <- as.numeric(difftime(starttime, stats@starttime, units="secs"))
+    offset_secs <- round(offset_secs, digits=6)
     start_index <- start_index + as.integer(floor(offset_secs * stats@sampling_rate))
-    stats@starttime <- starttime
+    stats@starttime <- stats@starttime + offset_secs
     sliced <- TRUE
   } # else leave the start as is
   
   # Modify the endtime and end_index if needed
   if (endtime < stats@endtime) {    
     # NOTE:  Use difftime() instead of just subtracting to guarantee that units are "secs"
-    offset_secs <- as.numeric(round( difftime(stats@endtime, endtime, units="secs") ))
+    offset_secs <- as.numeric(difftime(stats@endtime, endtime, units="secs"))
+    offset_secs <- round(offset_secs, digits=6)
     end_index <- end_index - as.integer(floor(offset_secs * stats@sampling_rate))
-    stats@endtime <- endtime       
+    stats@endtime <- stats@endtime - offset_secs       
     sliced <- TRUE
   } # else leave the end as is
   

@@ -28,6 +28,11 @@ IRIS DMC web services: \url{http://service.iris.edu/}
 
 \section{History}{
 
+  version 1.4.6
+  \itemize{
+    \item{bug fix for IRISSeismic::slice}
+  }
+
   version 1.4.5
   \itemize{
     \item{fixed bug in noiseModels for low noise model results at periods > 10000 seconds}
