@@ -72,10 +72,10 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \examples{
-  \dontrun{
+ # \dontrun{
 # NOTE:  'maps' and 'mapdata' packages must be installed
-require(maps)
-require(mapdata)
+#require(maps)
+#require(mapdata)
 
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
@@ -89,11 +89,11 @@ events <- getEvent(iris, starttime, endtime, minmag=5.0)
 print(paste(nrow(events),"earthquakes found with magnitude > 5.0"))
   
 # Plot events on a map
-map('world')
-points(events$longitude, events$latitude, pch=16, cex=1.5, col='red')
-labels <- paste(" ", as.character(round(events$magnitude,1)), sep="")
-text(events$longitude, events$latitude, labels=labels, pos=4, cex=1.2, col='red3')
-  }
+#map('world')
+#points(events$longitude, events$latitude, pch=16, cex=1.5, col='red')
+#labels <- paste(" ", as.character(round(events$magnitude,1)), sep="")
+#text(events$longitude, events$latitude, labels=labels, pos=4, cex=1.2, col='red3')
+ # }
 }
 
 \keyword{webservices}

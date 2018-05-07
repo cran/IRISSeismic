@@ -632,7 +632,7 @@ msr_decode_geoscope (char *input, int samplecount, float *output,
       mantissa = sample32.i;
 
       /* Take 2's complement for mantissa for overflow */
-      if (mantissa > MAX24)
+      if ((unsigned long)mantissa > MAX24)
         mantissa -= 2 * (MAX24 + 1);
 
       /* Store */
@@ -855,7 +855,7 @@ msr_decode_sro (int16_t *input, int samplecount, int32_t *output,
     gainrange = (sint & SRO_GAINRANGE_MASK) >> SRO_SHIFT;
 
     /* Take 2's complement for mantissa */
-    if (mantissa > MAX12)
+    if ((unsigned long)mantissa > MAX12)
       mantissa -= 2 * (MAX12 + 1);
 
     /* Calculate exponent, SRO exponent = 0..10 */
@@ -906,7 +906,7 @@ msr_decode_dwwssn (int16_t *input, int samplecount, int32_t *output,
     sample = (int32_t)sint;
 
     /* Take 2's complement for sample */
-    if (sample > MAX16)
+    if ((unsigned long)sample > MAX16)
       sample -= 2 * (MAX16 + 1);
 
     /* Save sample in output array */

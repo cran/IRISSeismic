@@ -27,9 +27,9 @@ low noise models, respectively.
 }
 
 \references{
-\href{http://pubs.usgs.gov/of/1993/0322/report.pdf}{Observations of Modeling and Seismic Background Noise} (Peterson 1993)
+\href{https://pubs.er.usgs.gov/publication/ofr93322}{Observations of Modeling and Seismic Background Noise} (Peterson 1993)
 
-\href{http://pubs.usgs.gov/of/2005/1438/pdf/OFR-1438.pdf}{Seismic Noise Analysis System Using Power Spectral Density Probability Density Functions} (McNamara and Boaz 2005)
+\href{https://pubs.usgs.gov/of/2005/1438/pdf/OFR-1438.pdf}{Seismic Noise Analysis System Using Power Spectral Density Probability Density Functions} (McNamara and Boaz 2005)
 }
 
 \author{

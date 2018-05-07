@@ -28,6 +28,28 @@ IRIS DMC web services: \url{http://service.iris.edu/}
 
 \section{History}{
 
+  version 1.4.8
+  \itemize{
+    \item{ updated src/libmseed to version 2.19.5 }
+    \item{ fix bug related to leap seconds }
+    \item{ functions that call web services now follow redirects }
+    \item{ some error outputs have changed slightly }
+    \item{ rmsVariance function, na.rm=TRUE calculates data length minus NA values }
+    \item{ rmsVariance.Stream now honors na.rm=TRUE }
+    \item{ getGaps() error handling now checks for negative sample rates }
+    \item{ getEvent, getEvalresp now truncates start and end input times to seconds 
+          (time format OS0 instead of OS) to fix error when user set options(digits.secs=) > 3 } 
+  }
+
+  version 1.4.7
+  \itemize{
+    \item{ additional error handling for getDistaz }
+    \item{ added input service_type to IrisClient, defaults to fdsnws}
+    \item{ plot.Trace x-axis labels are "MM dd" instead of days of week for traces > 1 day and < 1 week}
+    \item{ getDataselect will retry once if it encounters http code 401}
+    \item{ additional error handling for spectralUtils }
+  }
+
   version 1.4.6
   \itemize{
     \item{bug fix for IRISSeismic::slice}

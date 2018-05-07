@@ -281,8 +281,12 @@ if (!isGeneric("rmsVariance")) {
 rmsVariance.Stream <- function(x, na.rm) {
   data <- unlist(lapply(x@traces, slot, "data"))
   mean <- mean(data, na.rm=na.rm)
-  n <- length(data)
-  return( sqrt( sum( (data-mean)^2 ) / n ) )
+  if (na.rm) {
+    n <- length(data)-length(which(is.na(data)))
+  } else {
+    n <- length(data)
+  }
+  return( sqrt( sum((data-mean)^2,na.rm=na.rm) / n ) )
 }
 setMethod("rmsVariance", signature("Stream", na.rm="logical"), function(x, na.rm) rmsVariance.Stream(x, na.rm=na.rm))
 setMethod("rmsVariance", signature("Stream", na.rm="missing"), function(x, na.rm) rmsVariance.Stream(x, na.rm=FALSE))
@@ -341,6 +345,10 @@ getGaps.Stream <- function(x, min_gap) {
   num_headers <- length(headers)
   
   sampling_rates <- sapply(headers, slot, "sampling_rate")
+ 
+  if (any(sampling_rates < 0 )) {
+    stop(paste("getGaps.Stream: encountered sampling rate < 0"))
+  }
 
   # Set up arrays for information about gaps/overlaps
   gaps <- numeric(num_headers+1)
@@ -561,9 +569,8 @@ slice.Stream <- function(x, starttime, endtime) {
 setMethod("slice", signature(x="Stream", starttime="POSIXct", endtime="POSIXct"),
           function(x, starttime, endtime) slice.Stream(x, starttime=starttime, endtime=endtime))
 
-
 ################################################################################
-# Method to merge Traces in a Stream into a single Trace, replacing gaps with 
+# Method to merge Traces in a Stream into a single Trace, replacing gaps with
 # values determined by the fillMethod.
 ################################################################################
 
@@ -571,7 +578,7 @@ if (!isGeneric("mergeTraces")) {
   setGeneric("mergeTraces", function(x, fillMethod) {
     standardGeneric("mergeTraces")
   })
-} 
+}
 
 mergeTraces.Stream <- function(x, fillMethod) {
   
@@ -645,8 +652,16 @@ mergeTraces.Stream <- function(x, fillMethod) {
   # Create a new TraceHeader
   stats <- x@traces[[1]]@stats
   stats@npts <- as.integer(totalPoints)
-  stats@starttime <- x@requestedStarttime
-  stats@endtime <- x@requestedEndtime
+  if (gapInfo$nsamples[1] == 0) {
+    stats@starttime <- x@traces[[1]]@stats@starttime
+  } else { 
+    stats@starttime <- x@requestedStarttime
+  }
+  if (gapInfo$nsamples[length(gapInfo$nsamples)] == 0) {
+    stats@endtime <- x@traces[[length(x@traces)]]@stats@endtime
+  } else {
+    stats@endtime <- x@requestedEndtime
+  }
   stats@processing <- append(stats@processing,paste(num_traces," traces merged into a single trace using method '",fillMethod,"'",sep=""))
   
   # Other Trace info
@@ -669,6 +684,7 @@ setMethod("mergeTraces", signature(x="Stream", fillMethod="character"),
 # fillMethod missing
 setMethod("mergeTraces", signature(x="Stream", fillMethod="missing"),
           function(x, fillMethod) mergeTraces.Stream(x, fillMethod="fillNA"))
+
 
 ################################################################################
 # Various methods and functions for upDownTimes

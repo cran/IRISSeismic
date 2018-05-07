@@ -1117,7 +1117,7 @@ mstl_printsynclist (MSTraceList *mstl, char *dccid, flag subsecond)
   MSTraceSeg *seg = 0;
   char starttime[30];
   char endtime[30];
-  char yearday[10];
+  char yearday[24];
   time_t now;
   struct tm *nt;
 

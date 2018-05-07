@@ -3,6 +3,7 @@
 \docType{class}
 
 \alias{IrisClient-class}
+\alias{initialize,IrisClient-method}
 
 \title{ Class \code{"IrisClient"} }
 
@@ -14,12 +15,8 @@ A class for making data and metadata requests from IRIS DMC web services.
   \describe{
     \item{\code{site}:}{Object of class \code{"character"}:
     defaults to \code{http://service.iris.edu} which should be very stable }
-    %%\item{\code{user}:}{Object of class \code{"character"}:
-    %%user name for web authentication \b{not implemented}}
-    %%\item{\code{password}:}{Object of class \code{"character"}:
-    %%password for web authentication \b{not implemented}}
-    %%\item{\code{timeout}:}{Object of class \code{"integer"}:
-    %%connection timeout \b{not implemented}}
+    \item{\code{service_type}:}{Object of class \code{"character"}:
+    defaults to \code{fdsnws} }
     \item{\code{debug}:}{Object of class \code{"logical"}:
     when set to TRUE will cause any web service requestURL to be printed }
     \item{\code{useragent}:}{Object of class \code{"character"}:

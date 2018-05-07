@@ -42,15 +42,8 @@
 #    :type site: str, optional
 #    :param site: Base URL of the IRIS Web service (default
 #        is ``'http://service.iris.edu/'``).
-#    :type user: str, optional
-#    :param user: The user name used for authentication with the Web
-#        service (default an empty string).
-#    :type password: str, optional
-#    :param password: A password used for authentication with the Web
-#        service (default is an empty string).
-#    :type timeout: int, optional
-#    :param timeout: Seconds before a connection timeout is raised (default
-#        is ``10`` seconds). This works only for Python >= 2.6.x.
+#    :type service_type: str, optional
+#    :param service_type: second element of URL, usually fdsnws
 #    :type debug: bool, optional
 #    :param debug: Enables verbose output (default is ``False``).
 #    :type user_agent: str, optional
@@ -62,7 +55,9 @@
 #
 ################################################################################
 
-# REC - check for a user R profile for the IRIS Client site URL
+#options(RCurlOptions = list(followlocation = TRUE, timeout=300, connecttimeout=60))
+
+# check for a user R profile for the IRIS Client site URL
 # otherwise, use the default URL
 irisSite <- "http://service.iris.edu"
 if (Sys.getenv("IrisClient_site") != "") {
@@ -85,23 +80,33 @@ if (Sys.getenv("IrisClient_agent") != "") {
 	irisUserAgent <- Sys.getenv("IrisClient_agent")
 }
 
+useragent1 = paste0("IRISSeismic/",
+                    ifelse("IRISSeismic" %in% rownames(installed.packages()),
+                           installed.packages()["IRISSeismic","Version"], "local code"),
+                    " RCurl/",
+                     ifelse("RCurl" %in% rownames(installed.packages()),
+                           installed.packages()["RCurl","Version"], "local code"),
+                    " R/", R.version$major,".",R.version$minor,
+                    " ", version$platform,
+                     " (",irisUserAgent,")")
+
+
 setClass("IrisClient", 
          # typed slots (aka attributes) for class IrisClient
          representation(site = "character",
+                        service_type = "character",
                         debug = "logical",
-                        useragent = "character"),
-         prototype(site = irisSite,
-                   debug = FALSE,
-                   useragent = paste0("IRISSeismic/",
-                                      ifelse("IRISSeismic" %in% rownames(installed.packages()),
-                                             installed.packages()["IRISSeismic","Version"], "local code"),
-                                      " RCurl/",
-                                      ifelse("RCurl" %in% rownames(installed.packages()),
-                                             installed.packages()["RCurl","Version"], "local code"),
-                                      " R/", R.version$major,".",R.version$minor,
-                                      " ", version$platform,
-                                      " (",irisUserAgent,")"))
+                        useragent = "character")
 )
+
+setMethod("initialize","IrisClient",
+          function(.Object, site=irisSite,debug=FALSE, useragent=useragent1, service_type="fdsnws"){
+              .Object@site=site
+              .Object@service_type=service_type
+              .Object@debug=debug
+              .Object@useragent=useragent
+              .Object
+          })
 
 
 ################################################################################
@@ -115,23 +120,34 @@ setClass("IrisClient",
 ################################################################################
 
 if (!isGeneric("getDataselect")) {
-  setGeneric("getDataselect", function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch) {
+  setGeneric("getDataselect", function(obj, network, station, location, channel, starttime, endtime, ...) {
     standardGeneric("getDataselect")
   })
 }
 
-getDataselect.IrisClient <- function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch) {
+getDataselect.IrisClient <- function(obj, network, station, location, channel, starttime, endtime, quality=NULL,
+                                     repository=NULL, inclusiveEnd=TRUE, ignoreEpoch=FALSE) {
 
+  if (!is.logical(inclusiveEnd)) {
+     stop(paste("getDataselect.IrisClient: option inclusiveEnd must be TRUE or FALSE"))
+  }
+  if (!is.logical(ignoreEpoch)) {
+     stop(paste("getDataselect.IrisClient: option inclusiveEnd must be TRUE or FALSE"))
+  }
   # allow authenticated access.
   # if we have a netrc definition, then use queryauth to access data
   # else, use standard query call
   url <- NULL
   if (! is.null(irisNetrc)) {
-    	url <- paste(obj@site,"/fdsnws/dataselect/1/queryauth?",sep="")
+    	url <- paste(obj@site,obj@service_type,"dataselect/1/queryauth?",sep="/")
   } else {
-    	url <- paste(obj@site,"/fdsnws/dataselect/1/query?",sep="")
+    	url <- paste(obj@site,obj@service_type,"dataselect/1/query?",sep="/")
   }
-  url <- paste(url,"net=", network,sep="")
+  if (obj@service_type == "ph5ws") {
+     url <- paste(url,"reqtype=fdsn&net=", network,sep="")
+  } else {
+     url <- paste(url,"net=", network,sep="")
+  }
   url <- paste(url,"&sta=", station,sep="")
   # NOTE:  Locations with blanks must be converted into "--" when creating the URL
   # NOTE:  For getDataselect only, convert "" to "--"
@@ -145,10 +161,10 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
   } else {
       url <- paste(url,"&end=", format(endtime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
   }
-  if (!is.null(quality)){
+  if (!is.null(quality) && obj@service_type != "ph5ws" ){
     url <- paste(url,"&quality=",quality,sep="")
   }
-  if (!is.null(repository)){
+  if (!is.null(repository) && obj@service_type != "ph5ws"){
     if (repository %in% c("realtime","primary","bud","primary,realtime","realtime,primary")){
       url <- paste(url,"&repository=",repository,sep="")
     } else {
@@ -165,47 +181,86 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
   if (! is.null(irisNetrc)) {
         h <-  RCurl::basicTextGatherer()
         result <- try( dataselectResponse <- RCurl::getBinaryURL(url, useragent=obj@useragent, 
-				  netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update)), silent=TRUE)
-          # Handle error response
-	  if (class(result) == "try-error" ) {
+				             netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update,followlocation = TRUE, timeout=300, connecttimeout=60)), 
+                       silent=TRUE)
 
+        # Handle error response
+        if (class(result) == "try-error" ) {
 	    err_msg <- geterrmessage()
-	    if (stringr::str_detect(err_msg, regex("Bad Request",ignore_case=TRUE))) {
-		stop(paste("getDataselect.IrisClient: Bad Request:",url))
-	    } else if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE))) {
-		stop(paste("getDataselect.IrisClient: Not Found:",url))
-	    } else {
-		stop(paste("getDataselect.IrisClient:",err_msg, url))
-	    }
-	  }
+            stop(paste("getDataselect.IrisClient:",err_msg, url))
+	}
 
         header <- RCurl::parseHTTPHeader(h$value())
-   } else {
-  	result <- try( dataselectResponse <- RCurl::getURLContent(url, useragent=obj@useragent, header=TRUE),
-                 silent=TRUE)
-          # Handle error response
-          if (class(result) == "try-error" ) {
 
-            err_msg <- geterrmessage()
-            if (stringr::str_detect(err_msg, regex("Bad Request",ignore_case=TRUE))) {
-                stop(paste("getDataselect.IrisClient: Bad Request:",url))
-            } else if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE))) {
-                stop(paste("getDataselect.IrisClient: URL Not Found:",url))
-            } else {
-                stop(paste("getDataselect.IrisClient:",err_msg,url))
+        if (header["status"] == "401") {  # authentication error, try again
+            Sys.sleep(1)
+            h <-  RCurl::basicTextGatherer()
+            result <- try( dataselectResponse <- RCurl::getBinaryURL(url, useragent=obj@useragent,
+                                                 netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update,followlocation = TRUE, timeout=300, connecttimeout=60)), 
+                           silent=TRUE)
+            # Handle error response
+            if (class(result) == "try-error" ) {
+               err_msg <- geterrmessage()
+               stop(paste("getDataselect.IrisClient:",err_msg, url))
             }
-          }
+            header <- RCurl::parseHTTPHeader(h$value())
+        }
+        if (header["status"] == "500") {  # internal server error, try again
+            Sys.sleep(3)
+            h <-  RCurl::basicTextGatherer()
+            result <- try( dataselectResponse <- RCurl::getBinaryURL(url, useragent=obj@useragent,
+                                                 netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update,followlocation = TRUE, timeout=300, connecttimeout=60)),
+                           silent=TRUE)
+            # Handle error response
+            if (class(result) == "try-error" ) {
+               err_msg <- geterrmessage()
+               stop(paste("getDataselect.IrisClient:",err_msg, url))
+            }
+            header <- RCurl::parseHTTPHeader(h$value())
+        }
 
-        header <- dataselectResponse$header
-        dataselectResponse <- dataselectResponse$body
-   }
-  
+  } else {
+        h <-  RCurl::basicTextGatherer()
+  	result <- try( dataselectResponse <- RCurl::getBinaryURL(url, useragent=obj@useragent, .opts = list(headerfunction = h$update,followlocation = TRUE, timeout=300, connecttimeout=60)),
+                       silent=TRUE)
+
+        # Handle error response
+        if (class(result) == "try-error" ) {
+            err_msg <- geterrmessage()
+            stop(paste("getDataselect.IrisClient:",err_msg,url))
+        }
+
+        header <- RCurl::parseHTTPHeader(h$value())
+
+        if (header["status"] == "500") {  # internal server error, try again
+            Sys.sleep(3)
+            h <-  RCurl::basicTextGatherer()
+            result <- try( dataselectResponse <- RCurl::getBinaryURL(url, useragent=obj@useragent,
+                                                 netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update,followlocation = TRUE, timeout=300, connecttimeout=60)),
+                           silent=TRUE)
+            # Handle error response
+            if (class(result) == "try-error" ) {
+               err_msg <- geterrmessage()
+               stop(paste("getDataselect.IrisClient:",err_msg, url))
+            }
+            header <- RCurl::parseHTTPHeader(h$value())
+        }
+
+  }
+
+
   if (header["status"] == "204") {  #fdsnws dataselect returned nothing
       stop(paste("getDataselect.IrisClient: No Data:",header["status"],url))
   }
 
-  if (header["status"] != "200") {  #fdsnws dataselect returned something unexpected, not caught by error
-      stop(paste("getDataselect.IrisClient: Unexpected http status code:",header["status"],url))
+  if (header["status"] != "200") {  #fdsnws dataselect returned something unexpected
+      if (header["status"] == "400") {
+           stop(paste("getDataselect.IrisClient: Bad Request:",url))
+      } else if (header["status"] == "404") {
+           stop(paste("getDataselect.IrisClient: URL Not Found:",url))
+      } else {
+           stop(paste("getDataselect.IrisClient: Unexpected http status code",header["status"],header["statusMessage"],url))
+      }
   }
 
   # No errors so proceed
@@ -216,14 +271,8 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
   
   # Handle error response
   if (class(result) == "try-error" ) {
-    
     err_msg <- geterrmessage()
-    if (stringr::str_detect(err_msg, regex("Bad Request",ignore_case=TRUE))) {
-      stop(paste("getDataselect.IrisClient: Bad Request:",url))
-    } else {
-      stop(paste("getDataselect.IrisClient:",err_msg, url))
-    } 
-    
+    stop(paste("getDataselect.IrisClient:",err_msg, url))
   }  
   
   # NOTE:  Sometimes, the station webservice will return multiple records for the same SNCL
@@ -231,6 +280,7 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
   # NOTE:  What to do about multiple scales in the following getChannel request?
   # Solution 1: if ignoreEpoch==TRUE, then just take the first epoch presented
   # http://service.iris.edu/fdsnws/station/1/query?net=H2&sta=H2O&loc=00&cha=LHZ&starttime=2001-02-28T18:29:44&endtime=2001-02-28T19:29:44&includerestricted=false&format=text&level=channel
+
   sncls <- paste(channels$network,channels$station,channels$location,channels$channel)
   if (nrow(channels) > 1 && !ignoreEpoch) {
     stop(paste("getDataselect.IrisClient: Multiple epochs: getChannel returned",length(sncls),"records"))
@@ -249,252 +299,30 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
 
 # All arguments specified
 setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
-                                     channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="character", repository="character", inclusiveEnd="logical", ignoreEpoch="logical"), 
-          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
-            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality, repository, inclusiveEnd, ignoreEpoch))
-
-# All optional arguments missing
-# quality="missing", default to NULL, ignoreEpoch="missing", default to FALSE, inclusiveEnd="missing", default to TRUE
-setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
-                                     channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="missing", repository="missing", inclusiveEnd="missing", ignoreEpoch="missing"),
-          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
-            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality=NULL, repository=NULL, inclusiveEnd=TRUE, ignoreEpoch=FALSE))
-
-# One argument is missing
-# ignoreEpoch="missing", default to FALSE
-setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
-                                     channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="character", repository="character", inclusiveEnd="logical", ignoreEpoch="missing"),
-          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
-            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality, repository, inclusiveEnd, ignoreEpoch=FALSE))
-
-# inclusiveEnd="missing", default to TRUE
-setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
-                                     channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="character", repository="character", inclusiveEnd="missing", ignoreEpoch="logical"),
-          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
-            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality, repository, inclusiveEnd=TRUE, ignoreEpoch))
-
-# quality="missing", default to NULL
-setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
-                                     channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="missing", repository="character", inclusiveEnd="logical", ignoreEpoch="logical"),
-          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
-            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality=NULL, repository, inclusiveEnd, ignoreEpoch))
-
-# repository="missing", default to NULL
-setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
-                                     channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="character", repository="missing", inclusiveEnd="logical", ignoreEpoch="logical"),
-          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
-            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality, repository=NULL, inclusiveEnd, ignoreEpoch))
-
-# Two arguments are missing
-# inclusiveEnd="missing", default to TRUE, ignoreEpoch="missing", default to FALSE
-setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
-                                     channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="character", repository="character", inclusiveEnd="missing", ignoreEpoch="missing"),
-          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
-            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality,repository, inclusiveEnd=TRUE, ignoreEpoch=FALSE))
-
-# quality="missing", default to NULL, inclusiveEnd="missing", default to TRUE
-setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
-                                     channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="missing",repository="character", inclusiveEnd="missing", ignoreEpoch="logical"),
-          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
-            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality=NULL,repository, inclusiveEnd=TRUE, ignoreEpoch))
-
-# quality="missing", default to NULL, ignoreEpoch="missing", default to FALSE
-setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
-                                     channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="missing",repository="character", inclusiveEnd="logical", ignoreEpoch="missing"),
-          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
-            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality=NULL, repository, inclusiveEnd, ignoreEpoch=FALSE))
-
-# quality="missing", default to NULL, repository="missing", default to NULL
-setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
-                                     channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="missing",repository="missing", inclusiveEnd="logical", ignoreEpoch="logical"),
-          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
-            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality=NULL,repository=NULL, inclusiveEnd, ignoreEpoch))
-
-# repository="missing", default to NULL, ignoreEpoch="missing", default to FALSE
-setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
-                                     channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="character",repository="missing", inclusiveEnd="logical", ignoreEpoch="missing"),
-          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
-            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality, repository=NULL, inclusiveEnd, ignoreEpoch=FALSE))
-
-# repository="missing", default to NULL, inclusiveEnd="missing", default to TRUE
-setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
-                                     channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="character",repository="missing", inclusiveEnd="missing", ignoreEpoch="logical"),
-          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
-            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality,repository=NULL, inclusiveEnd=TRUE, ignoreEpoch))
-
-# Three arguments are missing
-# repository="missing", default to NULL, inclusiveEnd="missing", default to TRUE, ignoreEpoch="missing", default to FALSE
-setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
-                                     channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="character",repository="missing", inclusiveEnd="missing", ignoreEpoch="missing"),
-          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
-            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality,repository=NULL, inclusiveEnd=TRUE, ignoreEpoch=FALSE))
-
-# quality="missing", default to NULL, inclusiveEnd="missing", default to TRUE, ignoreEpoch="missing", default to FALSE
-setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
-                                     channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="missing",repository="character", inclusiveEnd="missing", ignoreEpoch="missing"),
-          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
-            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality=NULL,repository, inclusiveEnd=TRUE, ignoreEpoch=FALSE))
-
-# quality="missing", default to NULL, repository="missing", default to NULL, inclusiveEnd="missing", default to TRUE
-setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
-                                     channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="missing",repository="missing", inclusiveEnd="missing", ignoreEpoch="logical"),
-          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
-            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality=NULL,repository=NULL, inclusiveEnd=TRUE, ignoreEpoch))
-
-# quality="missing", default to NULL, repository="missing", default to NULL, ignoreEpoch="missing", default to FALSE
-setMethod("getDataselect", signature(obj="IrisClient", network="character", station="character", location="character",
-                                     channel="character", starttime="POSIXct", endtime="POSIXct",
-                                     quality="missing",repository="missing", inclusiveEnd="logical", ignoreEpoch="missing"),
-          function(obj, network, station, location, channel, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
-            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime,
-                                     quality=NULL,repository=NULL, inclusiveEnd, ignoreEpoch=FALSE))
+                                     channel="character", starttime="POSIXct", endtime="POSIXct"),
+          function(obj, network, station, location, channel, starttime, endtime, ...)
+            getDataselect.IrisClient(obj, network, station, location, channel, starttime, endtime, ...))
 
 ################################################################################
 # getSNCL method is a convenience wrapper for getDataselect
 ################################################################################
 
 if (!isGeneric("getSNCL")) {
-  setGeneric("getSNCL", function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch) {
+  setGeneric("getSNCL", function(obj, sncl, starttime, endtime, ...) {
     standardGeneric("getSNCL")
   })
 }
 
-getSNCL.IrisClient <- function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch) {
+getSNCL.IrisClient <- function(obj, sncl, starttime, endtime, quality=NULL, repository=NULL, inclusiveEnd=TRUE, ignoreEpoch=FALSE) {
   parts <- unlist(stringr::str_split(sncl,'\\.'))
-  return( getDataselect.IrisClient(obj, parts[1], parts[2], parts[3], parts[4], starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch) )
+  return( getDataselect.IrisClient(obj, parts[1], parts[2], parts[3], parts[4], starttime, endtime, 
+                                   quality=quality, repository=repository, inclusiveEnd=inclusiveEnd, ignoreEpoch=ignoreEpoch) )
 }
 
 # All arguments specified
-setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="character", repository="character", inclusiveEnd="logical",ignoreEpoch="logical"),
-          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality,repository,inclusiveEnd,ignoreEpoch))
-
-# All optional arguments missing
-# quality="missing", default to NULL, repository="missing", default to NULL, ignoreEpoch="missing", default to FALSE, inclusiveEnd="missing", default to TRUE
-setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="missing", repository="missing", inclusiveEnd="missing",ignoreEpoch="missing"),
-          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality=NULL, repository=NULL, inclusiveEnd=TRUE,ignoreEpoch=FALSE))
-
-# One argument missing
-# ignoreEpoch="missing", default to FALSE
-setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="character", repository="character", inclusiveEnd="logical",ignoreEpoch="missing"),
-          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch=FALSE))
-
-# inclusiveEnd="missing", default to TRUE
-setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="character", repository="character", inclusiveEnd="missing",ignoreEpoch="logical"),
-          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd=TRUE,ignoreEpoch))
-
-# quality="missing", default to NULL
-setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="missing", repository="character", inclusiveEnd="logical",ignoreEpoch="logical"),
-          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality=NULL, repository, inclusiveEnd,ignoreEpoch))
-
-# repository="missing", default to NULL
-setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="character", repository="missing", inclusiveEnd="logical",ignoreEpoch="logical"),
-          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality, repository=NULL, inclusiveEnd,ignoreEpoch))
-
-
-# Two arguments missing
-# inclusiveEnd="missing", default to TRUE, ignoreEpoch="missing", default to FALSE
-setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="character", repository="character", inclusiveEnd="missing",ignoreEpoch="missing"),
-          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd=TRUE,ignoreEpoch=FALSE))
-
-# quality="missing", default to NULL, inclusiveEnd="missing", default to TRUE
-setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="missing", repository="character", inclusiveEnd="missing", ignoreEpoch="logical"),
-          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality=NULL, repository, inclusiveEnd=TRUE, ignoreEpoch))
-
-# quality="missing", default to NULL, ignoreEpoch="missing", default to FALSE
-setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="missing", repository="character", inclusiveEnd="logical", ignoreEpoch="missing"),
-          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality=NULL, repository, inclusiveEnd, ignoreEpoch=FALSE))
-
-# repository="missing", default to NULL, quality="missing", default to NULL
-setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="missing", repository="missing", inclusiveEnd="logical", ignoreEpoch="logical"),
-          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality=NULL, repository=NULL, inclusiveEnd, ignoreEpoch))
-
-# repository="missing", default to NULL, ignoreEpoch="missing", default to FALSE
-setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="character", repository="missing", inclusiveEnd="logical", ignoreEpoch="missing"),
-          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality, repository=NULL, inclusiveEnd, ignoreEpoch=FALSE))
-
-# repository="missing", default to NULL, inclusiveEnd="missing", default to TRUE
-setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="character", repository="missing", inclusiveEnd="missing", ignoreEpoch="logical"),
-          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality, repository=NULL, inclusiveEnd=TRUE, ignoreEpoch))
-
-# Three arguments missing
-
-# repository="missing", default to NULL, inclusiveEnd="missing", default to TRUE, ignoreEpoch="missing", default to FALSE
-setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="character", repository="missing", inclusiveEnd="missing", ignoreEpoch="missing"),
-          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality, repository=NULL, inclusiveEnd=TRUE, ignoreEpoch=FALSE))
-
-# quality="missing", default to NULL, inclusiveEnd="missing", default to TRUE, ignoreEpoch="missing", default to FALSE
-setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="missing", repository="character", inclusiveEnd="missing", ignoreEpoch="missing"),
-          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality=NULL, repository, inclusiveEnd=TRUE, ignoreEpoch=FALSE))
-
-# quality="missing", default to NULL, repository="missing", default to NULL, inclusiveEnd="missing", default to TRUE
-setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="missing", repository="missing", inclusiveEnd="missing", ignoreEpoch="logical"),
-          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality=NULL, repository=NULL, inclusiveEnd=TRUE, ignoreEpoch))
-
-# quality="missing", default to NULL, repository="missing", default to NULL, ignoreEpoch="missing", default to FALSE
-setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct",
-                               quality="missing", repository="missing", inclusiveEnd="logical", ignoreEpoch="missing"),
-          function(obj, sncl, starttime, endtime, quality, repository, inclusiveEnd,ignoreEpoch)
-            getSNCL.IrisClient(obj, sncl, starttime, endtime, quality=NULL, repository=NULL, inclusiveEnd, ignoreEpoch=FALSE))
+setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct"),
+          function(obj, sncl, starttime, endtime, ...)
+            getSNCL.IrisClient(obj, sncl, starttime, endtime, ...))
 
 ################################################################################
 # getRotation method returns a list of three Stream objects
@@ -532,7 +360,7 @@ getRotation.IrisClient <- function(obj, network, station, location, channelSet, 
     write(paste("<debug>URL =",url), stdout())
   }
   
-  # Download the rotation serivce response (zip file) to a tempoary file
+  # Download the rotation service response (zip file) to a temporary file
   temp <- tempfile()
   utils::download.file(url,temp,quiet=TRUE)
   
@@ -603,7 +431,7 @@ getNetwork.IrisClient <- function(obj, network, station, location, channel,
                                        latitude, longitude, minradius, maxradius) {
   
   # Parameters common to all 'station' webservice requests
-  url <- paste(obj@site,"/fdsnws/station/1/query?",sep="")
+  url <- paste(obj@site,obj@service_type,"station/1/query?",sep="/")
   url <- paste(url,"net=",ifelse(network=="","*",network),sep="")
   url <- paste(url,"&sta=",ifelse(station=="","*",station),sep="")
   # NOTE:  Blank locations containing two spaces must be converted to "--"
@@ -612,7 +440,9 @@ getNetwork.IrisClient <- function(obj, network, station, location, channel,
   url <- paste(url,"&cha=",ifelse(channel=="","*",channel),sep="")
   url <- paste(url,"&starttime=",format(starttime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
   url <- paste(url,"&endtime=",format(endtime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
-  url <- paste(url,"&includerestricted=",ifelse(includerestricted,"true","false"),sep="")
+  if (obj@service_type != "ph5ws") {
+    url <- paste(url,"&includerestricted=",ifelse(includerestricted,"true","false"),sep="")
+  }
   url <- paste(url,"&format=text",sep="")
   
   # Add optional geographic constraints if they are passed in
@@ -645,26 +475,28 @@ getNetwork.IrisClient <- function(obj, network, station, location, channel,
   # Make webservice request
   # NOTE:  Be sure to set na.strings="" as "NA" is a valid network name  
 
-  result <- try(gurlc <- RCurl::getURLContent(url,useragent=obj@useragent,header=TRUE),silent=TRUE)
+  h <-  RCurl::basicTextGatherer()
+  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update,followlocation = TRUE, timeout=300, connecttimeout=60,timeout=300, connecttimeout=60)),silent=TRUE)
 
-  if (class(result) == "try-error" ) {
-    err_msg <- geterrmessage()
-    if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE))) {
+  if (class(result) == "try-error" ) { 
+     err_msg <- geterrmessage()
+     stop(paste("getNetwork.IrisClient:",err_msg,url))
+  }
+
+  header <- RCurl::parseHTTPHeader(h$value())
+
+
+  if (header["status"] != "200" && header["status"] != "204") {
+    err_msg <- gurlc
+    if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE)) || header["status"] == "404") {
       stop(paste("getNetwork.IrisClient: URL Not Found",url))
     } else if (stringr::str_detect(err_msg, regex("couldn't connect to host",ignore_case=TRUE))) {
       stop(paste("getNetwork.IrisClient: Couldn't connect to host", url))
     } else if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
       stop(paste("getNetwork.IrisClient: Cannot open connection",url))
     } else {
-      stop(paste("getNetwork.IrisClient:",err_msg,url))
+      stop(paste("getNetwork.IrisClient: Unexpected http status code",header["status"],strtrim(err_msg,500),url))
     }
-  }
-
-  header <- gurlc$header
-  gurlc <- gurlc$body
-
-  if (header["status"] != "200" && header["status"] != "204") {
-    stop(paste("getNetwork.IrisClient: Unexpected http status code", header["status"],url))
   }
   if(length(gurlc) == 0) { gurlc <- "" }
 
@@ -740,7 +572,7 @@ getStation.IrisClient <- function(obj, network, station, location, channel,
                                   latitude, longitude, minradius, maxradius) {
   
   # Parameters common to all 'station' webservice requests
-  url <- paste(obj@site,"/fdsnws/station/1/query?",sep="")
+  url <- paste(obj@site,obj@service_type,"station/1/query?",sep="/")
   url <- paste(url,"net=",ifelse(network=="","*",network),sep="")
   url <- paste(url,"&sta=",ifelse(station=="","*",station),sep="")
   # NOTE:  Blank locations containing two spaces must be converted to "--"
@@ -749,7 +581,7 @@ getStation.IrisClient <- function(obj, network, station, location, channel,
   url <- paste(url,"&cha=",ifelse(channel=="","*",channel),sep="")
   url <- paste(url,"&starttime=",format(starttime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
   url <- paste(url,"&endtime=",format(endtime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
-  if(!is.null(includerestricted)) {
+  if(!is.null(includerestricted) && obj@service_type != "ph5ws") {
     url <- paste(url,"&includerestricted=",includerestricted,sep="")
   }
   url <- paste(url,"&format=text",sep="")
@@ -784,24 +616,25 @@ getStation.IrisClient <- function(obj, network, station, location, channel,
   # Make webservice request
   # NOTE:  Be sure to set na.strings="" as "NA" is a valid network name  
   
-  result <- try(gurlc <- RCurl::getURLContent(url,useragent=obj@useragent,header=TRUE),silent=TRUE)
-  if (class(result) == "try-error" ) {
-    if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE))) {
-      stop(paste("getStation.IrisClient: URL Not Found",url))
-    } else if (stringr::str_detect(err_msg, regex("couldn't connect to host",ignore_case=TRUE))) {
-      stop(paste("getStation.IrisClient: couldn't connect to host", url))
-    } else if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
-      stop(paste("getStation.IrisClient: Cannot open connection",url))
-    } else {
-      stop(paste("getStation.IrisClient:",err_msg, url))
-    } 
-  }
+  h <-  RCurl::basicTextGatherer()
+  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update,followlocation = TRUE, timeout=300, connecttimeout=60)),silent=TRUE)
 
-  header <- gurlc$header
-  gurlc <- gurlc$body
-  
-  if (header["status"] != "200" && header["status"] != "204") {
-    stop(paste("getStation.IrisClient: Unexpected http status code", header["status"],url))
+  if (class(result) == "try-error" ) { 
+     stop(paste("getStation.IrisClient:",err_msg, url))
+  }
+  header <- RCurl::parseHTTPHeader(h$value())
+
+  if (header["status"] != "200" && header["status"] != "204" ) {
+    err_msg <- gurlc
+    if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE)) || header["status"] == "404") {
+        stop(paste("getStation.IrisClient: URL Not Found",url))
+    } else if (stringr::str_detect(err_msg, regex("couldn't connect to host",ignore_case=TRUE))) {
+        stop(paste("getStation.IrisClient: couldn't connect to host", url))
+    } else if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
+        stop(paste("getStation.IrisClient: Cannot open connection",url))
+    } else {
+        stop(paste("getStation.IrisClient: Unexpected http status code",header["status"],strtrim(err_msg,500), url))
+    }
   }
 
   if(length(gurlc) == 0) { gurlc <- "" }
@@ -878,7 +711,7 @@ getChannel.IrisClient <- function(obj, network, station, location, channel,
                                   latitude, longitude, minradius, maxradius) {
   
   # Parameters common to all 'station' webservice requests
-  url <- paste(obj@site,"/fdsnws/station/1/query?",sep="")
+  url <- paste(obj@site,obj@service_type,"station/1/query?",sep="/")
   url <- paste(url,"net=",ifelse(network=="","*",network),sep="")
   url <- paste(url,"&sta=",ifelse(station=="","*",station),sep="")
   # NOTE:  Blank locations containing two spaces must be converted to "--"
@@ -887,8 +720,10 @@ getChannel.IrisClient <- function(obj, network, station, location, channel,
   url <- paste(url,"&cha=",ifelse(channel=="","*",channel),sep="")
   url <- paste(url,"&starttime=",format(starttime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
   url <- paste(url,"&endtime=",format(endtime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
-  if (!is.null(includerestricted)) {
-     url <- paste(url,"&includerestricted=",includerestricted,sep="")
+  if (obj@service_type == "fdsnws") {
+    if (!is.null(includerestricted)) {
+       url <- paste(url,"&includerestricted=",tolower(includerestricted),sep="")
+    }
   }
   url <- paste(url,"&format=text",sep="")
   
@@ -924,26 +759,25 @@ getChannel.IrisClient <- function(obj, network, station, location, channel,
   # Make webservice request
   # NOTE:  Be sure to set na.strings="" as "NA" is a valid network name  
   
-  result <- try(gurlc <- RCurl::getURLContent(url,useragent=obj@useragent,header=TRUE),silent=TRUE)
+  h <-  RCurl::basicTextGatherer()
+  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, timeout=300, connecttimeout=60)),silent=TRUE)
 
   if (class(result) == "try-error" ) {
     err_msg <- geterrmessage()
-    if (stringr::str_detect(err_msg, regex("couldn't connect to host",ignore_case=TRUE))) {
-        stop(paste("getChannel.IrisClient: Couldn't connect to host", url))
-    } else if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE))) {
-        stop(paste("getChannel.IrisClient: URL Not Found",url))
-    } else if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
-        stop(paste("getChannel.IrisClient: Cannot open connection",url))
-    } else {
-        stop(paste("getChannel.IrisClient:",err_msg, url))
-    }
+    stop(paste("getChannel.IrisClient:",err_msg, url))
   }
 
-  header <- gurlc$header
-  gurlc <- gurlc$body
+  header <- RCurl::parseHTTPHeader(h$value())
 
   if (header["status"] != "200" && header["status"] != "204") {
-      stop(paste("getChannel.IrisClient: Unexpected http status code", header["status"],url))
+      err_msg <- gurlc
+      if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE)) || header["status"] == "404") {
+          stop(paste("getChannel.IrisClient: URL Not Found",url))
+      } else if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
+          stop(paste("getChannel.IrisClient: Cannot open connection",url))
+      } else {
+          stop(paste("getChannel.IrisClient: Unexpected http status code", header["status"], strtrim(err_msg,500), url))
+      }
   }
 
   if(length(gurlc) == 0) { gurlc <- "" }
@@ -1031,7 +865,7 @@ getAvailability.IrisClient <- function(obj, network, station, location, channel,
                                        latitude, longitude, minradius, maxradius) {
 
   # Parameters common to all 'station' webservice requests
-  url <- paste(obj@site,"/fdsnws/station/1/query?",sep="")
+  url <- paste(obj@site,obj@service_type,"station/1/query?",sep="/")
   url <- paste(url,"net=",ifelse(network=="","*",network),sep="")
   url <- paste(url,"&sta=",ifelse(station=="","*",station),sep="")
   # NOTE:  Blank locations containing two spaces must be converted to "--"
@@ -1040,7 +874,9 @@ getAvailability.IrisClient <- function(obj, network, station, location, channel,
   url <- paste(url,"&cha=",ifelse(channel=="","*",channel),sep="")
   url <- paste(url,"&starttime=",format(starttime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
   url <- paste(url,"&endtime=",format(endtime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
-  url <- paste(url,"&includerestricted=",ifelse(includerestricted,"true","false"),sep="")
+  if (obj@service_type != "ph5ws") {
+    url <- paste(url,"&includerestricted=",ifelse(includerestricted,"true","false"),sep="")
+  }
   url <- paste(url,"&format=text",sep="")
   
   # Add optional geographic constraints if they are passed in
@@ -1058,8 +894,10 @@ getAvailability.IrisClient <- function(obj, network, station, location, channel,
   }
     
   # Parameters specific to the getAvailability() method
-  url <- paste(url,"&includeavailability=true",sep="")
-  url <- paste(url,"&matchtimeseries=true",sep="")
+  if (obj@service_type != "ph5ws") {
+    url <- paste(url,"&includeavailability=true",sep="")
+    url <- paste(url,"&matchtimeseries=true",sep="")
+  }
   url <- paste(url,"&level=channel",sep="")
 
   # Write debug output
@@ -1077,25 +915,27 @@ getAvailability.IrisClient <- function(obj, network, station, location, channel,
   # Make webservice request
   # NOTE:  Be sure to set na.strings="" as "NA" is a valid network name
 
-  result <- try(gurlc <- RCurl::getURLContent(url,useragent=obj@useragent,header=TRUE),silent=TRUE)
+  h <-  RCurl::basicTextGatherer()
+  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, timeout=300, connecttimeout=60)),silent=TRUE)
+
   if (class(result) == "try-error" ) {   
-    err_msg <- geterrmessage()
-    if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE))) {
-       stop(paste("getAvailability.IrisClient: URL Not Found",url))
-    } else if (stringr::str_detect(err_msg, regex("couldn't connect to host",ignore_case=TRUE))) {
-       stop(paste("getAvailability.IrisClient: couldn't connect to host", url))
-    } else if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
-       stop(paste("getAvailability.IrisClient: Cannot open connection",url))
-    } else {
-       stop(paste("getAvailability.IrisClient:",err_msg, url))
-    }
+     err_msg <- geterrmessage()
+     stop(paste("getAvailability.IrisClient:",err_msg, url))
   }
 
-  header <- gurlc$header
-  gurlc <- gurlc$body
+  header <- RCurl::parseHTTPHeader(h$value())
 
-  if (header["status"] != "200" && header["status"] != "204") {
-      stop(paste("getAvailability.IrisClient: Unexpected http status code", header["status"],url))
+  if (header["status"] != "200" && header["status"] != "204" ) {
+     err_msg <- gurlc
+     if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE)) || header["status"] == "404") {
+          stop(paste("getAvailability.IrisClient: URL Not Found",url))
+     } else if (stringr::str_detect(err_msg, regex("couldn't connect to host",ignore_case=TRUE))) {
+          stop(paste("getAvailability.IrisClient: couldn't connect to host", url))
+     } else if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
+          stop(paste("getAvailability.IrisClient: Cannot open connection",url))
+     } else {
+          stop(paste("getAvailability.IrisClient: Unexpected http status code",header["status"],strtrim(err_msg,500), url))
+     }
   }
 
   if(length(gurlc) == 0) { gurlc <- "" }
@@ -1114,7 +954,6 @@ getAvailability.IrisClient <- function(obj, network, station, location, channel,
 
   # No errors so proceed
 
-  # REC Feb 2014
   # Filter out unwanted channels -- first to come to mind is LOG, but others get added by recommendation.
   DF <- DF[!(DF$channel %in% c("LOG", "ACE", "OCF")),]
   
@@ -1244,7 +1083,7 @@ getEvalresp.IrisClient <- function(obj, network, station, location, channel, tim
   url <- paste(url,"&loc=", stringr::str_replace(location,"  ","--"),sep="")
   url <- paste(url,"&cha=",channel,sep="")
   # NOTE:  a single 'time' parameter is used rather than 'starttime' and 'endtime'
-  url <- paste(url,"&time=",format(time,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="") # ws_evalresp requires "T" format
+  url <- paste(url,"&time=",format(time,"%Y-%m-%dT%H:%M:%OS0", tz="GMT"),sep="") # ws_evalresp requires "T" format
   if (missing(output)) {
     output <- "fap"
   }
@@ -1280,31 +1119,28 @@ getEvalresp.IrisClient <- function(obj, network, station, location, channel, tim
   
   # Conversion of URL into a data frame is a single line with utils::read.table().
 
-  result <- try(gurlc <- RCurl::getURLContent(url,useragent=obj@useragent,header=TRUE),silent=TRUE)
-  if (class(result) == "try-error") {
-    err_msg <- geterrmessage()
-    if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE))) {
-      stop(paste("getEvalresp.IrisClient: URL Not Found",url))
-    } else if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
-      stop(paste("getEvalresp.IrisClient: Cannot open connection",url))
-    } else if (stringr::str_detect(err_msg, regex("Internal Server Error",ignore_case=TRUE))) {
-      err_msg <- RCurl::getURL(url,useragent=obj@useragent)
-      if (stringr::str_detect(err_msg, regex("Error 500: Internal Server Error"))){ 
-          err_msg <- stringr::str_replace_all(err_msg, "[\r\n\t]","")
-          stop(paste("getEvalresp.IrisClient: Internal Server Error:", stringr::str_match(err_msg,"Error 500: Internal Server Error(.+)Usage")[,2], url))
-      } else {
-          stop(paste("getEvalresp.IrisClient: Internal Server Error:", url))
-      }
-    } else {
-      stop(paste("getEvalresp.IrisClient:", err_msg, url))
-    }
+  h <-  RCurl::basicTextGatherer()
+  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, timeout=300, connecttimeout=60)),silent=TRUE)
+
+  if (class(result) == "try-error") {  
+     err_msg <- geterrmessage()
+     stop(paste("getEvalresp.IrisClient:", strtrim(err_msg,500), url))
   }
 
-  header <- gurlc$header
-  gurlc <- gurlc$body
-  
+  header <- RCurl::parseHTTPHeader(h$value())
+
   if (header["status"] != "200" && header["status"] != "204") {
-    stop(paste("getEvalresp.IrisClient: Unexpected http status code", header["status"],url))
+    err_msg <- gurlc
+    if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE)) || header["status"] == "404") {
+        stop(paste("getEvalresp.IrisClient: URL Not Found",url))
+    } else if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
+        stop(paste("getEvalresp.IrisClient: Cannot open connection",url))
+    } else if (stringr::str_detect(err_msg, regex("Error 500: Internal Server Error"))) {
+        err_msg <- stringr::str_replace_all(err_msg, "[\r\n\t]","")
+        stop(paste("getEvalresp.IrisClient: Internal Server Error:", stringr::str_match(err_msg,"Error 500: Internal Server Error(.+)Usage")[,2], url))
+    } else {
+        stop(paste("getEvalresp.IrisClient: Unexpected http status code", header["status"], strtrim(err_msg,500),url))
+    }
   }
   
   if(length(gurlc) == 0) { gurlc <- "" }
@@ -1359,13 +1195,13 @@ getEvent.IrisClient <- function(obj, starttime, endtime, minmag, maxmag, magtype
                                 mindepth, maxdepth) {
   
   if(stringr::str_detect(obj@site,regex("service.*.iris.edu"))) {
-    url <- paste("https://earthquake.usgs.gov","/fdsnws/event/1/query?",sep="")
+     url <- "https://earthquake.usgs.gov/fdsnws/event/1/query?"
   } else {
-    url <- paste(obj@site,"/fdsnws/event/1/query?",sep="")
+     url <- paste(obj@site,"/fdsnws/event/1/query?",sep="/")
   }
 
-  url <- paste(url,"starttime=",format(starttime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
-  url <- paste(url,"&endtime=",format(endtime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
+  url <- paste(url,"starttime=",format(starttime,"%Y-%m-%dT%H:%M:%OS0", tz="GMT"),sep="")
+  url <- paste(url,"&endtime=",format(endtime,"%Y-%m-%dT%H:%M:%OS0", tz="GMT"),sep="")
   url <- paste(url,"&format=text",sep="")
   
   # Add optional arguments if they are non-null
@@ -1403,31 +1239,40 @@ getEvent.IrisClient <- function(obj, starttime, endtime, minmag, maxmag, magtype
     
   # Conversion of URL into a data frame is a single line with read.table().
 
-  result <- try(gurlc <- RCurl::getURLContent(url,useragent=obj@useragent,header=TRUE),silent=TRUE) 
+  h <-  RCurl::basicTextGatherer()
+  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, timeout=300, connecttimeout=60)),silent=TRUE) 
+
   if (class(result) == "try-error") {
-    err_msg <- geterrmessage()
-    if (stringr::str_detect(err_msg, regex("service unavailable",ignore_case=TRUE))) {
-      Sys.sleep(2)
-      result <- try(gurlc <- RCurl::getURLContent(url,useragent=obj@useragent,header=TRUE),silent=TRUE)
-      if (class(result) == "try-error") {
-         stop(paste("getEvent.IrisClient:",err_msg, url))
-      }
-    } else if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
-      stop(paste("getEvent.IrisClient: Cannot open connection",url))
-    } else if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE))) {
-      stop(paste("getEvent.IrisClient: URL Not Found",url))
-    } else if (stringr::str_detect(err_msg, regex("couldn't connect to host",ignore_case=TRUE))) {
-      stop(paste("getEvent.IrisClient: Couldn't connect to host", url))
-    } else {
-      stop(paste("getEvent.IrisClient:",err_msg, url))
-    } 
+     err_msg <- geterrmessage()
+     stop(paste("getEvent.IrisClient:",err_msg, url))
   }
   
-  header <- gurlc$header
-  gurlc <- gurlc$body
-  
+  header <- RCurl::parseHTTPHeader(h$value())
+
+  if (header["status"] == "503" || header["status"] == "500") {
+     Sys.sleep(3)
+     h <-  RCurl::basicTextGatherer()
+     result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, timeout=300, connecttimeout=60)),silent=TRUE)
+     if (class(result) == "try-error") {
+         stop(paste("getEvent.IrisClient:",err_msg, url))
+     }
+     header <- RCurl::parseHTTPHeader(h$value())
+  }
+
   if (header["status"] != "200" && header["status"] != "204") {
-    stop(paste("getEvent.IrisClient: Unexpected http status code", header["status"],url))
+    err_msg <- gurlc
+    if (stringr::str_detect(err_msg, regex("service unavailable",ignore_case=TRUE)) || header["status"] == "503") {
+        stop(paste("getEvent.IrisClient: Service Unavailable", url))
+    } else if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
+        stop(paste("getEvent.IrisClient: Cannot open connection",url))
+    } else if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE)) || header["status"] == "404") {
+        stop(paste("getEvent.IrisClient: URL Not Found",url))
+    } else if (stringr::str_detect(err_msg, regex("couldn't connect to host",ignore_case=TRUE))) {
+        stop(paste("getEvent.IrisClient: Couldn't connect to host", url))
+    } else if (header["status"] != "200" && header["status"] != "204") {
+        stop(paste("getEvent.IrisClient: Unexpected http status code",header["status"],err_msg, url))
+    }
+
   }
   
   if(length(gurlc) == 0) { gurlc <- "" }
@@ -1525,25 +1370,27 @@ getTraveltime.IrisClient <- function(obj, latitude, longitude, depth, staLatitud
   
   # Conversion of URL into a data frame is a single line with read.table().
 
-  result <- try(gurlc <- RCurl::getURLContent(url,useragent=obj@useragent,header=TRUE),silent=TRUE)
+  h <-  RCurl::basicTextGatherer()
+  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, timeout=300, connecttimeout=60)),silent=TRUE)
+
   if (class(result) == "try-error" ) {
     err_msg <- geterrmessage()
-    if (stringr::str_detect(err_msg, regex("couldn't connect to host",ignore_case=TRUE))) {
-      stop(paste("getTraveltime.IrisClient: Couldn't connect to host", url))
-    } else if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE))) {
-      stop(paste("getTraveltime.IrisClient: URL Not Found",url))
-    } else if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
-      stop(paste("getTraveltime.IrisClient: Cannot open connection",url))
-    } else {
-      stop(paste("getTraveltime.IrisClient:",err_msg, url))
-    }
+    stop(paste("getTraveltime.IrisClient:",err_msg, url))
   }
-  
-  header <- gurlc$header
-  gurlc <- gurlc$body
-  
+
+  header <- RCurl::parseHTTPHeader(h$value())  
+
   if (header["status"] != "200" && header["status"] != "204") {
-    stop(paste("getTraveltime.IrisClient: Unexpected http status code", header["status"],url))
+    err_msg <- gurlc
+    if (stringr::str_detect(err_msg, regex("couldn't connect to host",ignore_case=TRUE))) {
+        stop(paste("getTraveltime.IrisClient: Couldn't connect to host", url))
+    } else if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE)) || header["status"] == "404") {
+        stop(paste("getTraveltime.IrisClient: URL Not Found",url))
+    } else if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
+        stop(paste("getTraveltime.IrisClient: Cannot open connection",url))
+    } else {
+        stop(paste("getTraveltime.IrisClient: Unexpected http status code",header["status"],strtrim(err_msg,500), url))
+    }
   }
   
   if(length(gurlc) == 0) { gurlc <- "" }
@@ -1605,9 +1452,9 @@ getDistaz.IrisClient <- function(obj, latitude, longitude, staLatitude, staLongi
   }
   
   # Get data from distaz web service
-  # NOTE:  RCurl::getURLContent returns a binary object based on the "resulting HTTP  header's Content-Type field."
-  # NOTE:  Use RCurl::getURL to return data as character.
-  result <- try( distazXml <- RCurl::getURL(url, useragent=obj@useragent),
+
+  h <-  RCurl::basicTextGatherer()
+  result <- try( distazXml <- RCurl::getURL(url, useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, timeout=300, connecttimeout=60)),
                  silent=TRUE)
   
   # Handle error response
@@ -1616,17 +1463,24 @@ getDistaz.IrisClient <- function(obj, latitude, longitude, staLatitude, staLongi
     stop(paste("getDistaz.IrisClient:", err_msg))
   }
 
-  if (stringr::str_detect(distazXml, regex("Not Found",ignore_case=TRUE))) {
-      stop(paste("getDistaz.IrisClient: URL Not Found:",url))
-  } else if (stringr::str_detect(distazXml, regex("connect to host",ignore_case=TRUE))) {
-      stop(paste("getDistaz.IrisClient: Could not connect to host", url))
-  } else if (stringr::str_detect(distazXml, regex("Error", ignore_case=TRUE))) {
-      err_msg <- stringr::str_extract(distazXml,"Error (.+)")
-      stop(paste("getDistaz.IrisClient: Error",err_msg, url))
-  } 
-    
-  
-  
+  header <- RCurl::parseHTTPHeader(h$value())
+
+  if (header["status"] != "200" && header["status"] != "204") {
+    err_msg <- distazXml
+    if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE)) || header["status"] == "404") {
+        stop(paste("getDistaz.IrisClient: URL Not Found:",url))
+    } else if (stringr::str_detect(err_msg, regex("connect to host",ignore_case=TRUE))) {
+        stop(paste("getDistaz.IrisClient: Could not connect to host", url))
+    } else if (stringr::str_detect(err_msg, regex("Error", ignore_case=TRUE))) {
+        err_msg <- stringr::str_extract(err_msg,"Error (.+)")
+        stop(paste("getDistaz.IrisClient: Error",err_msg, url))
+    } else if (nchar(distazXml)==0) {
+        stop(paste("getDistaz.IrisClient: returned empty string", url))
+    } else {
+        stop(paste("getDistaz.IrisClient: Unexpected http status code",header["status"], strtrim(err_msg,500) ,url))
+    }
+  }
+      
   # No errors so proceed
   
   # http://service.iris.edu/irisws/distaz/1/query?stalat=0.0&stalon=0.0&evtlat=15.0&evtlon=0.0
@@ -1665,7 +1519,11 @@ getDistaz.IrisClient <- function(obj, latitude, longitude, staLatitude, staLongi
   #  names(DF) <- names(namedValueStrings)
   
   # new code:
-  xmlList <- XML::xmlToList(distazXml) 
+  result <- try( xmlList <- XML::xmlToList(distazXml), silent=TRUE)
+  if (class(result) == "try-error" ) {
+    err_msg <- geterrmessage()
+    stop(paste("getDistaz.IrisClient:", err_msg))
+  } 
   xmlNames <- names(xmlList)
   xmlList <- c(xmlList["ellipsoid"],sapply(xmlList[xmlNames[! xmlNames %in% c("ellipsoid")]], as.numeric))
   DF <- as.data.frame(xmlList)

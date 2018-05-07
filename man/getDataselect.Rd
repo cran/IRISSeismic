@@ -1,21 +1,6 @@
 \name{getDataselect}
 \alias{getDataselect}
-\alias{getDataselect,IrisClient,character,character,character,character,POSIXct,POSIXct,character,character,logical,logical-method}
-\alias{getDataselect,IrisClient,character,character,character,character,POSIXct,POSIXct,missing,missing,missing,missing-method}
-\alias{getDataselect,IrisClient,character,character,character,character,POSIXct,POSIXct,character,character,logical,missing-method}
-\alias{getDataselect,IrisClient,character,character,character,character,POSIXct,POSIXct,character,character,missing,logical-method}
-\alias{getDataselect,IrisClient,character,character,character,character,POSIXct,POSIXct,character,missing,logical,logical-method}
-\alias{getDataselect,IrisClient,character,character,character,character,POSIXct,POSIXct,missing,character,logical,logical-method}
-\alias{getDataselect,IrisClient,character,character,character,character,POSIXct,POSIXct,character,character,missing,missing-method}
-\alias{getDataselect,IrisClient,character,character,character,character,POSIXct,POSIXct,character,missing,missing,logical-method}
-\alias{getDataselect,IrisClient,character,character,character,character,POSIXct,POSIXct,missing,missing,logical,logical-method}
-\alias{getDataselect,IrisClient,character,character,character,character,POSIXct,POSIXct,missing,character,logical,missing-method}
-\alias{getDataselect,IrisClient,character,character,character,character,POSIXct,POSIXct,missing,character,missing,logical-method}
-\alias{getDataselect,IrisClient,character,character,character,character,POSIXct,POSIXct,character,missing,logical,missing-method}
-\alias{getDataselect,IrisClient,character,character,character,character,POSIXct,POSIXct,character,missing,missing,missing-method}
-\alias{getDataselect,IrisClient,character,character,character,character,POSIXct,POSIXct,missing,missing,missing,logical-method}
-\alias{getDataselect,IrisClient,character,character,character,character,POSIXct,POSIXct,missing,missing,logical,missing-method}
-\alias{getDataselect,IrisClient,character,character,character,character,POSIXct,POSIXct,missing,character,missing,missing-method}
+\alias{getDataselect,IrisClient,character,character,character,character,POSIXct,POSIXct-method}
 
 
 \title{Retrieve seismic data from IRIS DMC}
@@ -28,7 +13,7 @@ have been sorted by start time.
 
 \usage{
 getDataselect(obj, network, station, location, channel, 
-              starttime, endtime, quality, repository, inclusiveEnd, ignoreEpoch)
+              starttime, endtime, ...)
 }
 
 \arguments{
@@ -39,11 +24,13 @@ getDataselect(obj, network, station, location, channel,
   \item{channel}{character string with the three letter channel code}
   \item{starttime}{POSIXct class specifying the starttime (GMT)}
   \item{endtime}{POSIXct class specifying the endtime (GMT)}
-  \item{quality}{optional character string identifying the quality. IRIS webservices defaults to quality="M".}
-  \item{repository}{optional character string identifying whether to exclusively search primary archive or realtime collection buffers.
-     Acceptable values are "primary" or "realtime". If not specified, IRIS webservices defaults to searching both repositories. }
-  \item{inclusiveEnd}{optional logical determining whether the endtime is inclusive (default = TRUE)}
-  \item{ignoreEpoch}{optional logical defining behavior when multiple epochs are encountered (default = FALSE)}
+  \item{\dots}{optional arguments
+     \code{quality} optional character string identifying the quality. IRIS webservices defaults to quality="M".
+     \code{repository} optional character string identifying whether to exclusively search primary archive or realtime collection buffers.
+           Acceptable values are "primary" or "realtime". If not specified, IRIS webservices defaults to both repositories.
+     \code{inclusiveEnd} optional logical determining whether the endtime is inclusive (default = TRUE)
+     \code{ignoreEpoch} optional logical defining behavior when multiple epochs are encountered (default = FALSE)
+   }
 }
 
 \details{
@@ -69,6 +56,10 @@ a 'Multiple epochs' error message to be generated.
 Handling all possible metadata differences so that the data may be merged is beyond the scope of this
 package. Instead, to avoid errors, users may specify \code{ignoreEpoch=TRUE} in which case
 the very first SNCL-epoch encountered will be used and all others will be discarded.
+
+For access to restricted data, getDataselect will look for system environmental variable "IrisClient_netrc"
+which should point to a .netrc authentication file.
+
 }
 
 \value{

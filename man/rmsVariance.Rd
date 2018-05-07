@@ -58,8 +58,8 @@ algorithm is applied.
 The \code{parallel~} version of this method is only available on \code{Stream} objects
 and returns a vector of values, one for each \code{Trace}.
 
-By default, the \code{parallel~} versions of these methods use \code{na.rm=FALSE} as there
-should be no missing datapoints in each \code{Trace}. The single-vector methods default to 
+By default, the \code{Stream} versions of these methods use \code{na.rm=FALSE} as there
+should be no missing datapoints in each \code{Trace}. The \code{Trace} methods default to 
 \code{na.rm=TRUE} to accommodate merged traces where gaps between traces have been
 filled with \code{NA}s.
 }

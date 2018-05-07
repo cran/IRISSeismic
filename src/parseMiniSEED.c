@@ -45,6 +45,11 @@ SEXP parseMiniSEED (SEXP buffer) {
   // Redirect libmseed logging messages to Matlab functions
   ms_loginit( (R_callback)&Rprintf, msgPrefix, (R_callback)&Rf_error, msgPrefix);
 
+  /* Read leap second list file if env. var. LIBMSEED_LEAPSECOND_FILE is set */
+  if (leapsecondlist == NULL) {
+    ms_readleapseconds ("LIBMSEED_LEAPSECOND_FILE"); 
+  }
+
   // Allocate space for the buffer
   PROTECT(buffer = AS_RAW(buffer));
   numPROTECT++;

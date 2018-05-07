@@ -592,7 +592,7 @@ msr_endtime (MSRecord *msr)
     while (lslist)
     {
       if (lslist->leapsecond > msr->starttime &&
-          lslist->leapsecond < (msr->starttime + span))
+          lslist->leapsecond <= (msr->starttime + span - HPTMODULUS))
       {
         span -= HPTMODULUS;
         break;

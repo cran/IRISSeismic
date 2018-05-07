@@ -428,7 +428,11 @@ if (!isGeneric("rmsVariance")) {
 } 
 rmsVariance.Trace <- function(x, na.rm) {
   mean <- mean(x, na.rm=na.rm)
-  n <- length(x)
+  if (na.rm) {
+    n <- length(x@data)-length(which(is.na(x@data)))
+  } else {
+    n <- length(x)
+  }
   return( sqrt( sum( (x@data-mean)^2, na.rm=na.rm ) / (n) ) )
 }
 setMethod("rmsVariance", signature(x="Trace", na.rm="logical"), function(x, na.rm) rmsVariance.Trace(x, na.rm=na.rm))
@@ -947,18 +951,18 @@ plot.Trace <- function(x, starttime=x@stats@starttime, endtime=x@stats@endtime,
     xlab <- paste(xlab, "\n"," ( ",length(x), " points, subsampling=", subsampling, " for this plot. )", sep="")
   }
 
-#   # Set up the time range to plot
-#   if (missing(starttime)) {
-#     starttime <- x@stats@starttime
-#   }
-#   if (missing(endtime)) {
-#     endtime <- x@stats@endtime
-#   }
-  
   # Plot
-  plot(x@data[indices] ~ times[indices], type='l', main="", #xaxt="n",
+  if (difftime(x@stats@endtime,x@stats@starttime,units="days") > "1 day" & difftime(x@stats@endtime,x@stats@starttime,units="days") < "7 days") {
+    plot(x@data[indices] ~ times[indices], type='l', main="", xaxt="n",  
        xlim=c(starttime, endtime),
        xlab=xlab, ylab=ylab, ...)
+    graphics::axis.POSIXct(1, at=seq(from=x@stats@starttime, to=x@stats@endtime, by="day"), format="%b %d")
+
+  } else {
+    plot(x@data[indices] ~ times[indices], type='l', main="", 
+       xlim=c(starttime, endtime),
+       xlab=xlab, ylab=ylab, ...)
+  }
   # x-axis
 #   graphics::axis(1, at=c(1,length(indices)), labels=c("",""))
 #   graphics::mtext(starttime, side=1, line=0.7, at=1, adj=0)

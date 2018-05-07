@@ -397,6 +397,7 @@ psdList <- function(st) {
   # Fill any gaps in the stream with zeroes (quick because it returns immediately if no gaps are found)
   st_merged <- mergeTraces(st,fillMethod="fillZero")
   tr_merged <- st_merged@traces[[1]]
+  tr_merged@data[is.na(tr_merged@data)] <- 0  # very occasionally a trace will contain NaN values from the original miniSEED?
   
   # Choose chunk size based on the chanel 'band code'(=sampling rate)
   # See:  http://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf , Appendix A
@@ -502,11 +503,15 @@ psdList2NoiseMatrix <- function(psdList, evalresp=NULL) {
   # Get instrument response from IRIS webservices if not provided by input evalresp
   if (is.null(evalresp)) {
       evalresp <- getEvalresp(iris,network,station,location,channel,time=starttime+1,
-                          minfreq=minfreq,maxfreq=maxfreq,nfreq=nfreq,units=units)
+                                minfreq=minfreq,maxfreq=maxfreq,nfreq=nfreq,units=units)
   }
 
   if (!("amp" %in% colnames(evalresp) & "freq" %in% colnames(evalresp))) {
       stop(paste("error evalresp dataframe does not have columns named 'amp' and 'freq'"))
+  }
+
+  if (nrow(evalresp)==0) {
+       stop(paste("getEvalresp returned no content"))
   }
   
   # NOTE:  Because we're operating in dB space we need to think in terms of logarithms.
@@ -598,13 +603,16 @@ psdDF2NoiseMatrix <- function(DF, evalresp=NULL) {
   
   if (is.null(evalresp)) {
       evalresp <- getEvalresp(iris,network,station,location,channel,time=starttime+1,
-                          minfreq=minfreq,maxfreq=maxfreq,nfreq=nfreq,units=units)
+                              minfreq=minfreq,maxfreq=maxfreq,nfreq=nfreq,units=units)
   }
 
   if (!("amp" %in% colnames(evalresp) & "freq"  %in% colnames(evalresp))) {
       stop(paste("error evalresp dataframe does not have columns named 'amp' and 'freq'"))
   }
- 
+
+  if (nrow(evalresp)==0) {
+       stop(paste("getEvalresp returned no content"))
+  }
   
   # NOTE:  Because we're operating in dB space we need to think in terms of logarithms.
   

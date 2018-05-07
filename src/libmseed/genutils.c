@@ -1245,7 +1245,7 @@ ms_readleapsecondfile (char *filename)
     fields = 0;
     leapsecond = scan_d64(readline,0,&endptr);
     if (endptr - readline > 0) fields++;
-    fields += scanf(endptr, " %d ", &TAIdelta);
+    fields += sscanf(endptr, " %d ", &TAIdelta);
 
     if (fields == 2)
     {

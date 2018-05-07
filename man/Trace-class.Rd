@@ -4,7 +4,6 @@
 \alias{Trace-class}
 \alias{Trace}
 \alias{as.vector,Trace-method}
-\alias{initialize}
 \alias{initialize,Trace-method}
 \alias{isDC}
 \alias{isDC,Trace-method}

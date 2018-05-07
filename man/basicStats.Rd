@@ -94,8 +94,8 @@ When \code{x} is a \code{Stream} object, methods \code{length}, \code{max}, \cod
 The \code{parallel~} versions of these methods are available only on \code{Stream} objects
 and return a vector of values, one for each \code{Trace}.
 
-By default, the \code{parallel~} versions of these methods use \code{na.rm=FALSE} as there
-should be no missing datapoints in each \code{Trace}. The single-vector methods default to 
+By default, the \code{Stream-method} versions of these methods use \code{na.rm=FALSE} as there
+should be no missing datapoints in each \code{Trace}. The \code{Trace} methods default to 
 \code{na.rm=TRUE} to accommodate merged traces where gaps have been filled with \code{NA}s.
 }
 
