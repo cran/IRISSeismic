@@ -1,3 +1,8 @@
+2018.240: 2.19.6
+	- Allow ms_readleapsecondfile() to be called multiple times, by @pn2200
+	- Fix compiler warning in mst_printsynclist().
+	- Fix memory leak (on error) in msr_duplicate() and other fixes by @pn2200.
+
 2017.283: 2.19.5
 	- msr_endtime(): calculate correct end time during a leap second.
 	- Fixed signedness comparison warning.
@@ -14,10 +19,16 @@
 	to Elliott Sales de Andrade.
 
 2017.061: 2.19.2
+	- Provide install target in Makefile thanks to by Pierre Duperray.
+	- Deprecate dynamic build target, the shared target will now build
+	shared or dynamic (Darwin) libraries depending on the system.
 	- Limit symbols exported in shared libraries to public interfaces
 	as defined in libmseed.map, thanks again to Pierre Duperray.
+	- Allow tests to work on Darwin with dynamic libraries.
 
 2017.060: 2.19.1
+	- Derive versioning of shared/dynamic library from canonical version
+	defined as LIBMSEED_VERSION in libmseed.h.
 	- Apply updates to more standardized use of NAME and typos in man pages,
 	submitted by Pierre Duperray.
 

@@ -28,6 +28,13 @@ IRIS DMC web services: \url{http://service.iris.edu/}
 
 \section{History}{
 
+  version 1.4.9
+  \itemize{
+    \item{ additional error handling }
+    \item{ minor updates to the plot.Trace and plot.Stream functions }
+    \item{ updated src/libmseed to version 2.19.6 }
+  }
+
   version 1.4.8
   \itemize{
     \item{ updated src/libmseed to version 2.19.5 }

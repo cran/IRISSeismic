@@ -39,7 +39,7 @@ This algorithm is adapted from code in the \pkg{seewave} package.
 }
 
 \examples{
-#\dontrun{
+\dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -56,7 +56,7 @@ trh <- hilbert(tr)
 # Plot signal data and hilbert data
 plot(tr@data, type='l', col='gray80')
 points(trh@data, type='l', col='blue')
-#}
+}
 }
 
 \keyword{methods}

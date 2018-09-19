@@ -863,9 +863,9 @@ plot.Stream <- function(x, ...) {
   
   plot(tr, ...)
   if (length(x@traces) == 1) {
-    graphics::mtext(paste(length(x@traces),"trace"), side=3, line=0.5, adj=0.05)          
+    graphics::mtext(paste(length(x@traces),"trace"), side=3, line=0.2, adj=0.95)          
   } else {
-    graphics::mtext(paste(length(x@traces),"traces"), side=3, line=0.5, adj=0.05)          
+    graphics::mtext(paste(length(x@traces),"traces"), side=3, line=0.2, adj=0.95)          
   }
   
 }

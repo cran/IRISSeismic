@@ -57,7 +57,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \examples{
-#\dontrun{
+\dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -103,7 +103,7 @@ pArrival <- start + traveltimes$travelTime[traveltimes$phaseName=="P"]
 sArrival <- start + traveltimes$travelTime[traveltimes$phaseName=="S"] 
 abline(v=pArrival, col='red')
 abline(v=sArrival, col='blue')
-#}
+}
 }
 
 \keyword{webservices}

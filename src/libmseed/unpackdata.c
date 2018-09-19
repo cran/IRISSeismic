@@ -3,7 +3,7 @@
  * STEIM2, GEOSCOPE (24bit and gain ranged), CDSN, SRO and DWWSSN
  * encoded data.
  *
- * modified: 2017.053
+ * modified: 2017.283
  ************************************************************************/
 
 #include <memory.h>

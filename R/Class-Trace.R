@@ -940,7 +940,7 @@ plot.Trace <- function(x, starttime=x@stats@starttime, endtime=x@stats@endtime,
   
   # remove ".M" or other quality factor designation as people don't expect it
   id <- stringr::str_sub(x@id, 1, stringr::str_length(x@id)-2)
-  main <- paste("Seismic Trace for ",id)
+  main <- paste("Seismic Trace for ",id,sep="")
   sensorText <- paste("(", x@Sensor, ")")
   # Create array of times
   times <- seq(from=x@stats@starttime, to=x@stats@endtime, length.out=length(x@data))
@@ -953,23 +953,14 @@ plot.Trace <- function(x, starttime=x@stats@starttime, endtime=x@stats@endtime,
 
   # Plot
   if (difftime(x@stats@endtime,x@stats@starttime,units="days") > "1 day" & difftime(x@stats@endtime,x@stats@starttime,units="days") < "7 days") {
-    plot(x@data[indices] ~ times[indices], type='l', main="", xaxt="n",  
-       xlim=c(starttime, endtime),
-       xlab=xlab, ylab=ylab, ...)
+    plot(x@data[indices] ~ times[indices], type='l',main=main, xaxt="n",  xlim=c(starttime, endtime), xlab=xlab,ylab=ylab,...)
     graphics::axis.POSIXct(1, at=seq(from=x@stats@starttime, to=x@stats@endtime, by="day"), format="%b %d")
 
   } else {
-    plot(x@data[indices] ~ times[indices], type='l', main="", 
-       xlim=c(starttime, endtime),
-       xlab=xlab, ylab=ylab, ...)
+    plot(x@data[indices] ~ times[indices], type='l', xlim=c(starttime, endtime),main=main,xlab=xlab,ylab=ylab,...)
   }
-  # x-axis
-#   graphics::axis(1, at=c(1,length(indices)), labels=c("",""))
-#   graphics::mtext(starttime, side=1, line=0.7, at=1, adj=0)
-#   graphics::mtext(endtime, side=1, line=0.7, at=length(indices), adj=1)
   # title
-  graphics::title(main)
-  graphics::mtext(sensorText, line=0.2)
+  graphics::mtext(sensorText, line=0.2, adj=0.05)
   
 }
 
