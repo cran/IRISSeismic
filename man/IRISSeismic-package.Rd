@@ -28,6 +28,16 @@ IRIS DMC web services: \url{http://service.iris.edu/}
 
 \section{History}{
 
+  version 1.5.0
+  \itemize{
+    \item{ added spacing as an option to getEvalresp }
+    \item{ modified getEvalresp to use IrisClient service_type }
+    \item{ new getDataAvailability() to return dataframe of
+           miniseed data extents in the IRIS archive using 
+           IRIS web service http://service.iris.edu/irisws/availability/1/ }
+    \item{minor tweak to src code to pass CRAN checks}
+  }
+
   version 1.4.9
   \itemize{
     \item{ additional error handling }

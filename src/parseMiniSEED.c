@@ -36,7 +36,6 @@ typedef void (* R_callback)(char *);
 SEXP parseMiniSEED (SEXP buffer) {
 
   int debug = 0;
-  int numPROTECT = 0;  // number of protected elements outside the loop
   int loopPROTECT = 0;  // the number of protected elements inside the loop
   int bufferLength = 0;
   char *bufferPtr;
@@ -52,7 +51,6 @@ SEXP parseMiniSEED (SEXP buffer) {
 
   // Allocate space for the buffer
   PROTECT(buffer = AS_RAW(buffer));
-  numPROTECT++;
   bufferPtr = (char *)RAW_POINTER(buffer);
   bufferLength = LENGTH(buffer);
 
@@ -168,7 +166,6 @@ SEXP parseMiniSEED (SEXP buffer) {
   // Create the return list, each element of which will contain a segmentList
   SEXP returnList;
   PROTECT(returnList = NEW_LIST(id->numsegments));
-  numPROTECT++;
 
   if (debug) {
     Rprintf("numsegments %d\n", id->numsegments);
@@ -179,7 +176,6 @@ SEXP parseMiniSEED (SEXP buffer) {
                      "starttime","endtime","data","act_flags","io_flags","dq_flags","timing_qual"};
   SEXP listNames;
   PROTECT(listNames = NEW_CHARACTER(14));
-  numPROTECT++;
   for (int i=0; i<14; i++) {
     SET_STRING_ELT(listNames, i, mkChar(names[i]));
   }
@@ -371,7 +367,7 @@ SEXP parseMiniSEED (SEXP buffer) {
   mstl_free (&mstl, 1);
 
   /* Unprotect and return */
-  UNPROTECT(numPROTECT);
+  UNPROTECT(3);
 
   return(returnList);
 }

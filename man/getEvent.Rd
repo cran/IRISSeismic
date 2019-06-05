@@ -3,11 +3,11 @@
 \alias{getEvent}
 \alias{getEvent,IrisClient,POSIXct,POSIXct-method}
 
-\title{Retrieve seismic event information from IRIS DMC}
+\title{Retrieve seismic event information from the USGS NEIC}
 
 \description{
 The \code{getEvent} method obtains seismic event data from
-the IRIS DMC \code{event} webservice.
+the USGS NEIC \code{event} webservice.
 }
 
 \usage{
@@ -30,7 +30,9 @@ getEvent(obj, starttime, endtime, minmag, maxmag, magtype,
 The \code{getEvent} method uses the event web service to obtain data for all events that meet the criteria defined by the arguments
 and returns that data in a dataframe. Each row of the dataframe represents a unique event.
 
-\code{getEvent} calls to the IRIS event webservice now go to https://earthquake.usgs.gov/fdsnws/event/1/.
+\code{getEvent} calls to the IRIS event webservice now go to https://earthquake.usgs.gov/fdsnws/event/1/. If \code{obj@site} is something
+other than "http://service.iris.edu", getEvent will point to \code{obj@site}/fdsnws/event/1/. The event service must be able to output
+format=text.
 }
 
 
@@ -50,9 +52,6 @@ used for internal consistency -- all other web services return columns named "la
 }
 
 \references{
-The IRIS DMC event webservice:
-
-  \url{http://service.iris.edu/fdsnws/event/1/}
 
 The USGS event webservice:
   \url{https://earthquake.usgs.gov/fdsnws/event/1/}
@@ -72,7 +71,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \examples{
-  \dontrun{
+#  \dontrun{
 # NOTE:  'maps' and 'mapdata' packages must be installed
 #require(maps)
 #require(mapdata)
@@ -93,7 +92,7 @@ print(paste(nrow(events),"earthquakes found with magnitude > 5.0"))
 #points(events$longitude, events$latitude, pch=16, cex=1.5, col='red')
 #labels <- paste(" ", as.character(round(events$magnitude,1)), sep="")
 #text(events$longitude, events$latitude, labels=labels, pos=4, cex=1.2, col='red3')
-  }
+#  }
 }
 
 \keyword{webservices}

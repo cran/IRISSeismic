@@ -91,9 +91,10 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \examples{ 
-\dontrun{
+#\dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
+options("nanotimeFormat"="\%Y-\%m-\%dT\%H-\%M-\%E9S")
 
 # Use getDataselect to request data for II.JTS.00.BHZ
 starttime <- as.POSIXct("2001-02-28",tz="GMT")
@@ -108,7 +109,7 @@ str(st)
 
 # Plot trace
 plot(st)
-}
+#}
 }
 
 \keyword{webservices}

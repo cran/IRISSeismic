@@ -12,7 +12,7 @@ the IRIS DMC \code{evalresp} webservice.
 
 \usage{
 getEvalresp(obj, network, station, location, channel,
-            time, minfreq, maxfreq, nfreq, units, output)
+            time, minfreq, maxfreq, nfreq, units, output, spacing)
 }
 
 \arguments{
@@ -27,6 +27,8 @@ getEvalresp(obj, network, station, location, channel,
   \item{nfreq}{ optional  number of frequencies at which response will be evaluated }
   \item{units}{ optional code specifying unit conversion }
   \item{output}{ optional code specifying output type (default="fap")}
+  \item{spacing}{ optional code specifying spacing, accepted values are "lin" or "linear",
+                  "log" or "logarithmic" (default="log")}
 }
 
 \details{

@@ -1092,6 +1092,158 @@ setMethod("getUnavailability", signature(obj="IrisClient",
 
 
 ################################################################################
+# getDataAvailability method returns a dataframe with information from the output
+# of the iris availability web service with "format=text&level=channel".
+#
+# http://service.iris.edu/irisws/availability/1/
+#
+################################################################################
+if (!isGeneric("getDataAvailability")) {
+  setGeneric("getDataAvailability", function(obj, network, station, location, channel, starttime, endtime, 
+                                              mergequality, mergesamplerate, mergeoverlap, mergetolerance, 
+                                              includerestricted, excludetoolarge){
+    standardGeneric("getDataAvailability")
+  })
+}
+
+getDataAvailability.IrisClient <- function(obj, network, station, location, channel, starttime, endtime, 
+                                            mergequality, mergesamplerate, mergeoverlap, mergetolerance, 
+                                            includerestricted, excludetoolarge) {
+
+  if (obj@service_type == "ph5ws") {
+    url <- paste(obj@site,"ph5ws/availability/1/query?",sep="/")
+  } else {
+    url <- paste(obj@site,"irisws/availability/1/query?",sep="/")
+  }
+  url <- paste(url,"net=",network,sep="")
+  url <- paste(url,"&sta=",station,sep="")
+  location <- ifelse(location=="","--",location)
+  url <- paste(url,"&loc=", stringr::str_replace(location,"  ","--"),sep="")
+  url <- paste(url,"&cha=",channel,sep="")
+  url <- paste(url,"&starttime=",format(starttime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
+  url <- paste(url,"&endtime=",format(endtime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
+  url <- paste(url,"&format=geocsv",sep="")
+  
+  # Add optional arguments if they are found
+  if (!missing(mergequality)) {
+    url <- paste(url,"&mergequality=",mergequality,sep="")
+  } else {
+    url <- paste(url,"&mergequality=TRUE",sep="")
+  }
+  
+  if (!missing(mergesamplerate)) {
+    url <- paste(url,"&mergesamplerate=",mergesamplerate,sep="")
+  } # default is FALSE
+  
+  if (!missing(mergeoverlap)) {
+    url <- paste(url,"&mergeoverlap=",mergeoverlap,sep="")
+  } else {
+    url <- paste(url,"&mergeoverlap=TRUE",sep="")
+  }
+  
+  if (!missing(mergetolerance) && mergeoverlap==TRUE) {
+    url <- paste(url,"&mergetolerance=",mergetolerance,sep="")
+  } # default is 1.5 sample rate
+  
+  if (!missing(includerestricted)) {
+    url <- paste(url,"&includerestricted=",includerestricted,sep="")
+  } else {
+    url <- paste(url,"&includerestricted=TRUE",sep="")
+  }
+  
+  if (!missing(excludetoolarge)) {
+    url <- paste(url,"&excludetoolarge=",excludetoolarge,sep="")
+  } # default is TRUE
+  
+  # Write debug output
+  if (obj@debug) {
+    write(paste("<debug>URL =",url), stdout())
+  }
+  
+  # Set up the colnames we wish to have in our dataframe
+  # Network | Station | Location | Channel | SampleRate | StartTime | EndTime
+  colNames <- c("network","station","location","channel","repository","samplerate","starttime","endtime")
+  colClasses <- c(rep("character",8))
+  
+  # Make webservice request
+  # NOTE:  Be sure to set na.strings="" as "NA" is a valid network name
+  
+  h <-  RCurl::basicTextGatherer()
+  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, timeout=300, connecttimeout=300)),silent=TRUE)
+  
+  if (class(result) == "try-error") {
+    err_msg <- geterrmessage()
+    stop(paste("getDataAvailability.IrisClient:", strtrim(err_msg,500), url))
+  }
+  
+  result <- try(header <- RCurl::parseHTTPHeader(h$value()))
+  if (class(result) == "try-error" ) {
+    err_msg <- geterrmessage()
+    stop(paste("getDataAvailability.IrisClient:",err_msg, url))
+  }
+  
+  if (header["status"] != "200" && header["status"] != "204") {
+    err_msg <- gurlc
+    if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE)) || header["status"] == "404") {
+      stop(paste("getDataAvailability.IrisClient: URL Not Found",url))
+    } else if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
+      stop(paste("getDataAvailability.IrisClient: Cannot open connection",url))
+    } else if (stringr::str_detect(err_msg, regex("Error 500: Internal Server Error"))) {
+      err_msg <- stringr::str_replace_all(err_msg, "[\r\n\t]","")
+      stop(paste("getDataAvailability.IrisClient: Internal Server Error:", stringr::str_match(err_msg,"Error 500: Internal Server Error(.+)Usage")[,2], url))
+    } else {
+      stop(paste("getDataAvailability.IrisClient: Unexpected http status code", header["status"], strtrim(err_msg,500),url))
+    }
+  }
+  
+  if(length(gurlc) == 0) { gurlc <- "" }
+  txtcon <- textConnection(gurlc)
+  on.exit(close(txtcon), add=TRUE)
+  result <- try( DF <- utils::read.delim(txtcon,sep="|",col.names=colNames,colClasses=colClasses,na.strings="",skip=4), silent=TRUE)
+  if (class(result) == "try-error" ) {
+    err_msg <- geterrmessage()
+    if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
+      stop(paste("getDataAvailability.IrisClient: Cannot open connection",url))
+    } else {
+      stop(paste("getDataAvailability.IrisClient:", err_msg, url))
+    }
+  }
+  
+  # No errors so proceed
+  # Filter out unwanted channels -- first to come to mind is LOG, but others get added by recommendation.
+  DF <- DF[!(DF$channel %in% c("LOG", "ACE", "OCF")),]
+  
+  # Convert "  " location codes back into the "" that is used in the miniSEED record
+  DF$location <- stringr::str_replace(DF$location,"  ","")
+  DF$location[is.na(DF$location)] <- ""
+  
+  # Convert time strings
+  DF$starttime <- as.POSIXct(DF$starttime, "%Y-%m-%dT%H:%M:%OS", tz="GMT")
+  DF$endtime <- as.POSIXct(DF$endtime, "%Y-%m-%dT%H:%M:%OS", tz="GMT")
+  
+  # Add a snclId column
+  DF$snclId <- paste(DF$network,DF$station,DF$location,DF$channel,sep=".")
+  
+  # Return dataframe with rows ordered by snclId
+  return(DF[order(DF$snclId),])
+}  
+ 
+
+# All required arguments specified
+setMethod("getDataAvailability", signature(obj="IrisClient",
+                                       network="character", station="character", location="character",
+                                       channel="character", starttime="POSIXct", endtime="POSIXct",
+                                       mergequality="ANY",mergesamplerate="ANY",mergeoverlap="ANY",
+                                       mergetolerance="ANY",
+                                       includerestricted="ANY",excludetoolarge="ANY"),
+          function(obj, network, station, location, channel, starttime, endtime,
+                   mergequality,mergesamplerate,mergeoverlap,mergetolerance,includerestricted,excludetoolarge)
+            getDataAvailability.IrisClient(obj, network, station, location, channel, starttime, endtime,
+                                       mergequality,mergesamplerate,mergeoverlap,mergetolerance,includerestricted,excludetoolarge))
+
+
+
+################################################################################
 # getEvalresp method returns instrument response data from the evalresp webservice:
 #
 #   http://service/irisws/evalresp/1/
@@ -1100,17 +1252,21 @@ setMethod("getUnavailability", signature(obj="IrisClient",
 
 if (!isGeneric("getEvalresp")) {
   setGeneric("getEvalresp", function(obj, network, station, location, channel, time,
-                                     minfreq, maxfreq, nfreq, units, output) {
-    standardGeneric("getEvalresp")
+                                     minfreq, maxfreq, nfreq, units, output, spacing) {
+     standardGeneric("getEvalresp")
   })
 }
 
 getEvalresp.IrisClient <- function(obj, network, station, location, channel, time, 
-                                   minfreq, maxfreq, nfreq, units, output) {
+                                   minfreq, maxfreq, nfreq, units, output, spacing) {
   
   # TODO:  getEvalresp should test for wildcards in network, station, location, channel
   # TODO:  and return an error if any are found.
-  url <- paste(obj@site,"/irisws/evalresp/1/query?",sep="")
+  if (obj@service_type == "ph5ws") {
+      url <- paste(obj@site,"ph5ws/evalresp/1/query?",sep="/")
+  } else {
+      url <- paste(obj@site,"irisws/evalresp/1/query?",sep="/")
+  }
   url <- paste(url,"net=",network,sep="")
   url <- paste(url,"&sta=",station,sep="")
   # NOTE:  Locations with blanks must be converted into "--" when creating the URL
@@ -1138,7 +1294,10 @@ getEvalresp.IrisClient <- function(obj, network, station, location, channel, tim
   if (!missing(units)) {
     url <- paste(url,"&units=",units,sep="")      
   }
-  
+  if (!missing(spacing)) {
+    url <- paste(url,"&spacing=",spacing,sep="")  
+  }
+ 
   # Write debug output
   if (obj@debug) {
     write(paste("<debug>URL =",url), stdout())
@@ -1208,11 +1367,11 @@ setMethod("getEvalresp", signature(obj="IrisClient",
                                    network="character", station="character", location="character",
                                    channel="character", time="POSIXct",
                                    minfreq="ANY", maxfreq="ANY", nfreq="ANY", units="ANY",
-                                   output="ANY"), 
+                                   output="ANY",spacing="ANY"), 
           function(obj, network, station, location, channel, time, 
-                   minfreq, maxfreq, nfreq, units, output) 
+                   minfreq, maxfreq, nfreq, units, output,spacing) 
             getEvalresp.IrisClient(obj, network, station, location, channel, time, 
-                                   minfreq, maxfreq, nfreq, units, output))
+                                   minfreq, maxfreq, nfreq, units, output,spacing))
 
 
 ################################################################################

@@ -49,6 +49,7 @@ exportMethods(
     "getRotation",
     "getStation",
     "getSNCL",
+    "getDataAvailability",
     "getTraveltime",
     "getUnavailability",
     "getUpDownTimes",
