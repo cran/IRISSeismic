@@ -34,7 +34,7 @@ This algorithm is adapted from code in the \pkg{seewave} package.
 }
 
 \examples{
-#\dontrun{
+\dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -66,7 +66,7 @@ ccf(tr@data,Im(hfft),lag.max=200,main="90 deg phase shift with Hilber transform"
 
 # Restore default layout
 layout(1)
-#}
+}
 }
 
 \keyword{methods}

@@ -91,7 +91,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \examples{ 
-#\dontrun{
+\dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 options("nanotimeFormat"="\%Y-\%m-\%dT\%H-\%M-\%E9S")
@@ -109,7 +109,7 @@ str(st)
 
 # Plot trace
 plot(st)
-#}
+}
 }
 
 \keyword{webservices}

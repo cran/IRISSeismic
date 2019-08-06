@@ -17,7 +17,7 @@ readMiniseedFile(file,sensor,scale,scalefreq,scaleunits,
 \arguments{
   \item{file}{character path of a miniSEED file}
   \item{sensor}{character description of the Sensor associated with this Station-Network-Channel-Location (SNCL) (see \link{Trace})}
-  \item{scale}{character description of the InstrumentSensitivity associated with this SNCL (see \link{Trace})}
+  \item{scale}{numeric description of the InstrumentSensitivity associated with this SNCL (see \link{Trace})}
   \item{scalefreq}{numeric description of frequency at which the InstrumentSensitivity is correct, the SensitivityFrequency (see \link{Trace})}
   \item{scaleunits}{character description of the InputUnits associated with this SNCL (see \link{Trace})}
   \item{latitude}{numeric latitude associated with this SNCL (see \link{Trace})}

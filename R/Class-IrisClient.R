@@ -153,12 +153,12 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
   location <- ifelse(location=="","--",location)
   url <- paste(url,"&loc=", stringr::str_replace(location,"  ","--"),sep="")
   url <- paste(url,"&cha=", channel,sep="")
-  url <- paste(url,"&start=", format(starttime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
+  url <- paste(url,"&start=", format(starttime,"%Y-%m-%dT%H:%M:%OS6", tz="GMT"),sep="")
   if (! inclusiveEnd) {
       endtime <- endtime-0.000001
       url <- paste(url,"&end=", format(endtime,"%Y-%m-%dT%H:%M:%OS6", tz="GMT"),sep="")
   } else {
-      url <- paste(url,"&end=", format(endtime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
+      url <- paste(url,"&end=", format(endtime,"%Y-%m-%dT%H:%M:%OS6", tz="GMT"),sep="")
   }
   if (!is.null(quality) && obj@service_type != "ph5ws" ){
     url <- paste(url,"&quality=",quality,sep="")
@@ -1120,8 +1120,8 @@ getDataAvailability.IrisClient <- function(obj, network, station, location, chan
   location <- ifelse(location=="","--",location)
   url <- paste(url,"&loc=", stringr::str_replace(location,"  ","--"),sep="")
   url <- paste(url,"&cha=",channel,sep="")
-  url <- paste(url,"&starttime=",format(starttime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
-  url <- paste(url,"&endtime=",format(endtime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
+  url <- paste(url,"&starttime=",format(starttime,"%Y-%m-%dT%H:%M:%OS6", tz="GMT"),sep="")
+  url <- paste(url,"&endtime=",format(endtime,"%Y-%m-%dT%H:%M:%OS6", tz="GMT"),sep="")
   url <- paste(url,"&format=geocsv",sep="")
   
   # Add optional arguments if they are found
@@ -1218,8 +1218,8 @@ getDataAvailability.IrisClient <- function(obj, network, station, location, chan
   DF$location[is.na(DF$location)] <- ""
   
   # Convert time strings
-  DF$starttime <- as.POSIXct(DF$starttime, "%Y-%m-%dT%H:%M:%OS", tz="GMT")
-  DF$endtime <- as.POSIXct(DF$endtime, "%Y-%m-%dT%H:%M:%OS", tz="GMT")
+  DF$starttime <- as.POSIXct(DF$starttime, "%Y-%m-%dT%H:%M:%OS6", tz="GMT")
+  DF$endtime <- as.POSIXct(DF$endtime, "%Y-%m-%dT%H:%M:%OS6", tz="GMT")
   
   # Add a snclId column
   DF$snclId <- paste(DF$network,DF$station,DF$location,DF$channel,sep=".")

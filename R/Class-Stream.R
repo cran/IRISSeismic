@@ -49,8 +49,8 @@ setClass("Stream",
                  traces = "list"),
   # default values for slots
   prototype(url = "",
-            requestedStarttime = as.POSIXct("1900-01-01T00:00:00",format="%Y-%m-%dT%H:%M:%OS", tz="GMT"),
-            requestedEndtime = as.POSIXct("1900-01-01T00:00:00",format="%Y-%m-%dT%H:%M:%OS", tz="GMT"),
+            requestedStarttime = as.POSIXct("1900-01-01T00:00:00",format="%Y-%m-%dT%H:%M:%OS6", tz="GMT"),
+            requestedEndtime = as.POSIXct("1900-01-01T00:00:00",format="%Y-%m-%dT%H:%M:%OS6", tz="GMT"),
             act_flags = rep(as.integer(0),8),
             io_flags = rep(as.integer(0),8),
             dq_flags = rep(as.integer(0),8),
@@ -602,8 +602,22 @@ mergeTraces.Stream <- function(x, fillMethod) {
   if ( ! all(stats::dist(unique(sampling_rates)) < 0.0002 )) { # slightly more forgiving criteria for acceptable sample rate jitter than round(sampling_rates,digits=4) 
     stop(paste("mergeTraces.Stream:",num_rates,"unique sampling rates encountered in Stream."))
   }
+
+  # some fdsnws/dataselect implementations cut on record instead of sample like IRIS. Trace starttime can be < requestedStarttime and
+  # trace endtime can be > requestedEndtime
+  if (gapInfo$nsamples[1] == 0) {
+     totalStart <- x@traces[[1]]@stats@starttime
+  } else {
+     totalStart <- x@requestedStarttime
+  }
   
-  totalSecs <- as.numeric(difftime(x@requestedEndtime, x@requestedStarttime, units="secs"))
+  if (gapInfo$nsamples[length(gapInfo$nsamples)] == 0) {
+     totalEnd <- x@traces[[length(x@traces)]]@stats@endtime
+  } else {
+     totalEnd <- x@requestedStarttime
+  }
+  
+  totalSecs <- as.numeric(difftime(totalEnd, totalStart, units="secs"))
   totalPoints <- as.integer(round(totalSecs) * x@traces[[1]]@stats@sampling_rate)  
 
   # NOTE:  Setting up a list of vectors that we will concatenate in one fell swoop at the end.

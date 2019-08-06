@@ -102,8 +102,8 @@ setClass("TraceHeader",
             station = "",
             channel = "",
             quality = "X",
-            starttime = as.POSIXct("1900-01-01T00:00:00",format="%Y-%m-%dT%H:%M:%OS", tz="GMT"),
-            endtime = as.POSIXct("1900-01-01T00:00:00",format="%Y-%m-%dT%H:%M:%OS", tz="GMT"),
+            starttime = as.POSIXct("1900-01-01T00:00:00",format="%Y-%m-%dT%H:%M:%OS6", tz="GMT"),
+            endtime = as.POSIXct("1900-01-01T00:00:00",format="%Y-%m-%dT%H:%M:%OS6", tz="GMT"),
             latitude = as.numeric(NA),     
             longitude = as.numeric(NA),    
             elevation = as.numeric(NA),    
@@ -144,7 +144,7 @@ setMethod("initialize", "TraceHeader",
       .Object@channel <- snclValues[4]
       .Object@npts <- as.integer(strsplit(headerValues[2]," ")[[1]][1])
       .Object@sampling_rate <- as.numeric(strsplit(headerValues[3]," ")[[1]][1])
-      .Object@starttime <- as.POSIXct(headerValues[4], format="%Y-%m-%dT%H:%M:%OS", tz="GMT") # header uses 'T' format
+      .Object@starttime <- as.POSIXct(headerValues[4], format="%Y-%m-%dT%H:%M:%OS6", tz="GMT") # header uses 'T' format
       .Object@latitude <- as.numeric(NA)
       .Object@longitude <- as.numeric(NA)
       .Object@elevation <- as.numeric(NA)
@@ -497,13 +497,13 @@ DDT.Trace <- function(x, demean, detrend, taper) {
   } else {
     data <- x@data
   }
-  
+
   # detrend
   if (detrend) {
     data <- as.numeric(pracma::detrend(x@data, tt='linear'))
     stats@processing <- append(stats@processing,"detrend")
   }
-  
+
   # cosine taper
   if (taper > 0) {
     data <- stats::spec.taper(data, p=taper)
@@ -768,7 +768,7 @@ STALTA.Trace <- function(x, staSecs, ltaSecs, algorithm, demean, detrend, taper,
     x <- DDT(x, demean, detrend, taper)   
   }
   len <- length(x)
-  
+
   # Stop if there is insufficient data
   if ( len < n_lta ) {
     stop(paste("STALTA.Trace: insufficient data."))
@@ -805,7 +805,7 @@ STALTA.Trace <- function(x, staSecs, ltaSecs, algorithm, demean, detrend, taper,
   } else {
     stop(paste("STALTA.Trace: algorithm=\"",algorithm,"\" not recognized.",sep=""))    
   }
-  
+
   return( picker )
 }
 
