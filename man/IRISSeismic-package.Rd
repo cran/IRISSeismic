@@ -28,6 +28,14 @@ IRIS DMC web services: \url{http://service.iris.edu/}
 
 \section{History}{
 
+  version 1.5.2
+  \itemize{
+    \item{ updated getDataAvailablity to use new fdsnws availability web service specification}
+    \item{ fixed bug in getDataAvailability when mergequality=FALSE }
+    \item{ fixed bug in getDataAvailability affecting start/end times, introduced in version 1.5.1 }
+    \item{fixed bug in mergeTraces when trace has gap at end, introduced in version 1.5.1}
+  }
+
   version 1.5.1
   \itemize{
     \item{ changed a subset of time format OS to OS6}

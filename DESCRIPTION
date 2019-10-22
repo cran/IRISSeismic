@@ -1,6 +1,6 @@
 Type: Package
 Package: IRISSeismic
-Version: 1.5.1
+Version: 1.5.2
 Title: Classes and Methods for Seismic Data Analysis
 Authors@R: c(
     person("Jonathan", "Callahan", email="jonathan@mazamascience.com", role=c("aut")),
@@ -24,11 +24,11 @@ Collate: Class-Trace.R Class-Stream.R Class-IrisClient.R
 License: GPL (>= 2)
 Repository: CRAN
 NeedsCompilation: yes
-Packaged: 2019-08-06 17:33:12 UTC; gillian
+Packaged: 2019-10-22 18:29:20 UTC; gillian
 Author: Jonathan Callahan [aut],
   Rob Casey [aut],
   Gillian Sharer [aut, cre],
   Mary Templeton [aut],
   Chad Trabant [ctb]
 Maintainer: Gillian Sharer <gillian@iris.washington.edu>
-Date/Publication: 2019-08-06 19:20:02 UTC
+Date/Publication: 2019-10-22 20:00:02 UTC

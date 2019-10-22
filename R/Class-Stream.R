@@ -614,7 +614,7 @@ mergeTraces.Stream <- function(x, fillMethod) {
   if (gapInfo$nsamples[length(gapInfo$nsamples)] == 0) {
      totalEnd <- x@traces[[length(x@traces)]]@stats@endtime
   } else {
-     totalEnd <- x@requestedStarttime
+     totalEnd <- x@requestedEndtime
   }
   
   totalSecs <- as.numeric(difftime(totalEnd, totalStart, units="secs"))

@@ -1110,11 +1110,7 @@ getDataAvailability.IrisClient <- function(obj, network, station, location, chan
                                             mergequality, mergesamplerate, mergeoverlap, mergetolerance, 
                                             includerestricted, excludetoolarge) {
 
-  if (obj@service_type == "ph5ws") {
-    url <- paste(obj@site,"ph5ws/availability/1/query?",sep="/")
-  } else {
-    url <- paste(obj@site,"irisws/availability/1/query?",sep="/")
-  }
+  url <- paste(obj@site,obj@service_type,"availability/1/query?",sep="/")
   url <- paste(url,"net=",network,sep="")
   url <- paste(url,"&sta=",station,sep="")
   location <- ifelse(location=="","--",location)
@@ -1125,35 +1121,47 @@ getDataAvailability.IrisClient <- function(obj, network, station, location, chan
   url <- paste(url,"&format=geocsv",sep="")
   
   # Add optional arguments if they are found
-  if (!missing(mergequality)) {
-    url <- paste(url,"&mergequality=",mergequality,sep="")
+  mergeflag <- 0
+  if (missing(mergequality) || mergequality == TRUE) {
+          url <- paste(url,"&merge=quality",sep="")
+          mergequality <- TRUE
+          mergeflag <- 1
+  } 
+  
+  if (!missing(mergesamplerate) && mergesamplerate == TRUE) {
+       if (mergeflag == 0) {
+              url <- paste(url,"&merge=samplerate",sep="")
+              mergeflag <- 1
+        } else {
+              url <- paste(url,",samplerate",sep="")
+        }
   } else {
-    url <- paste(url,"&mergequality=TRUE",sep="")
-  }
+       mergesamplerate <- FALSE
+  }  # default is FALSE
+
   
-  if (!missing(mergesamplerate)) {
-    url <- paste(url,"&mergesamplerate=",mergesamplerate,sep="")
-  } # default is FALSE
+  if (missing(mergeoverlap) || mergeoverlap == TRUE) {
+          if (mergeflag == 0) {
+                url <- paste(url,"&merge=overlap",sep="")
+                mergeflag <- 1
+          } else {
+                url <- paste(url,",overlap",sep="")
+          }
+  } # default is TRUE
   
-  if (!missing(mergeoverlap)) {
-    url <- paste(url,"&mergeoverlap=",mergeoverlap,sep="")
-  } else {
-    url <- paste(url,"&mergeoverlap=TRUE",sep="")
-  }
-  
-  if (!missing(mergetolerance) && mergeoverlap==TRUE) {
-    url <- paste(url,"&mergetolerance=",mergetolerance,sep="")
+  if (!missing(mergetolerance)) {
+         url <- paste(url,"&mergegaps=",mergetolerance,sep="")
   } # default is 1.5 sample rate
   
   if (!missing(includerestricted)) {
     url <- paste(url,"&includerestricted=",includerestricted,sep="")
   } else {
     url <- paste(url,"&includerestricted=TRUE",sep="")
-  }
-  
-  if (!missing(excludetoolarge)) {
-    url <- paste(url,"&excludetoolarge=",excludetoolarge,sep="")
   } # default is TRUE
+  
+  if (!missing(excludetoolarge) && excludetoolarge == TRUE) {
+    url <- paste(url,"&limit=500000",sep="")
+  } # default is FALSE
   
   # Write debug output
   if (obj@debug) {
@@ -1161,10 +1169,26 @@ getDataAvailability.IrisClient <- function(obj, network, station, location, chan
   }
   
   # Set up the colnames we wish to have in our dataframe
+  # Network | Station | Location | Channel | Quality | SampleRate | StartTime | EndTime
   # Network | Station | Location | Channel | SampleRate | StartTime | EndTime
-  colNames <- c("network","station","location","channel","repository","samplerate","starttime","endtime")
-  colClasses <- c(rep("character",8))
-  
+  if (mergequality == FALSE) {
+      if (mergesamplerate == TRUE) {
+         colNames <- c("network","station","location","channel","quality","starttime","endtime")
+         colClasses <- c(rep("character",7))
+      } else {
+         colNames <- c("network","station","location","channel","quality","samplerate","starttime","endtime")
+         colClasses <- c(rep("character",8))
+      }
+  } else {
+      if (mergesamplerate == TRUE) {
+         colNames <- c("network","station","location","channel","starttime","endtime")
+         colClasses <- c(rep("character",6))
+      } else {
+         colNames <- c("network","station","location","channel","samplerate","starttime","endtime")
+         colClasses <- c(rep("character",7))
+      }
+  }
+
   # Make webservice request
   # NOTE:  Be sure to set na.strings="" as "NA" is a valid network name
   
@@ -1218,8 +1242,8 @@ getDataAvailability.IrisClient <- function(obj, network, station, location, chan
   DF$location[is.na(DF$location)] <- ""
   
   # Convert time strings
-  DF$starttime <- as.POSIXct(DF$starttime, "%Y-%m-%dT%H:%M:%OS6", tz="GMT")
-  DF$endtime <- as.POSIXct(DF$endtime, "%Y-%m-%dT%H:%M:%OS6", tz="GMT")
+  DF$starttime <- as.POSIXct(DF$starttime, "%Y-%m-%dT%H:%M:%OS", tz="GMT")
+  DF$endtime <- as.POSIXct(DF$endtime, "%Y-%m-%dT%H:%M:%OS", tz="GMT")
   
   # Add a snclId column
   DF$snclId <- paste(DF$network,DF$station,DF$location,DF$channel,sep=".")

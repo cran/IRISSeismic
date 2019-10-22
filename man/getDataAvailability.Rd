@@ -25,23 +25,22 @@ getDataAvailability(obj, network, station, location, channel,starttime, endtime,
   \item{starttime}{ POSIXct class specifying the starttime (GMT) }
   \item{endtime}{ POSIXct class specifying the endtime (GMT) }
   \item{mergequality}{optional logical identifying if timespans with differing qualities are grouped together 
-                      (default=\code{FALSE})}
+                      (default=\code{TRUE})}
   \item{mergesamplerate}{optional logical identifying if timespans from data with differing sample rates are grouped 
                          together (default=\code{FALSE})}
-  \item{mergeoverlap}{optional logical identifying if overlapping timespans are merged together (default=\code{FALSE})}
-  \item{mergetolerance}{optional numeric. If \code{mergeoverlap=TRUE}, timespans which are separated by gaps smaller 
-                         than or equal to the mergetolerance value are merged together. To have an effect, the mergetolerance 
-                         value must be larger than 1.5 times the sample period. }
+  \item{mergeoverlap}{optional logical identifying if overlapping timespans are merged together (default=\code{TRUE})}
+  \item{mergetolerance}{optional numeric. Time spans separated by less than or equal to the mergetolerance value
+                         in seconds are merged together. To have an effect, the mergetolerance value must be larger 
+                         than 1.5 times the sample period. This implements the mergegaps option in the fdsnws availability 
+                         web service specification. } 
   \item{includerestricted}{ optional logical identifying whether to report on restricted data (default=\code{FALSE}) }
-  \item{excludetoolarge}{ optional logical identifying whether to ignore channels that are too fragmented for
-                         the availability service to process (default=\code{TRUE}). If FALSE, the service reports a 413 
-                         error (request too large) if any of these channels are selected. }
+  \item{excludetoolarge}{ optional logical, if TRUE sets the fdsnws availability web service option "limit=500000". default=\code{TRUE} }
 }
 
 
 \details{
-The \code{getDataAvailability} method uses the IRIS availability service to obtain start and endtimes for all continuous trace 
-segments in the IRIS archive for the requested network, station, location, channels and returns that data in a dataframe. 
+The \code{getDataAvailability} method uses the FDSNWS availability service to obtain start and endtimes for all continuous trace 
+segments in the IRIS (or other) archive for the requested network, station, location, channels and returns that data in a dataframe. 
 Each row of the dataframe represents a unique data trace extent. 
 
 Each of the arguments \code{network}, \code{station}, \code{location} or \code{channel} may contain
@@ -53,10 +52,27 @@ For more details see the \href{http://service.iris.edu/irisws/availability/1/}{w
 
 \value{
 A dataframe with the following columns:
-
+  
+  
+  mergequality=TRUE and mergesamplerate=FALSE (defaults):
   %% max preformatted length ---------------------------------------------------
   \preformatted{
-  network, station, location, channel, repository, samplerate, starttime, endtime, snclId 
+  network, station, location, channel, samplerate, starttime, endtime, snclId 
+  }
+
+  mergequality=TRUE and mergesamplerate=TRUE:
+  \preformatted{
+  network, station, location, channel, starttime, endtime, snclId
+  }
+
+  mergequality=FALSE and mergesamplerate=FALSE:
+  \preformatted{
+  network, station, location, channel, quality, samplerate, starttime, endtime, snclId            
+  }
+
+  mergequality=FALSE and mergesamplerate=TRUE:
+  \preformatted{
+  network, station, location, channel, quality, starttime, endtime, snclId
   }
 
   Rows are ordered by \code{snclId}.
@@ -70,7 +86,8 @@ A dataframe with the following columns:
 %% ~put references to the literature/web site here ~
 The IRIS DMC station web service:
 
-  \url{http://service.iris.edu/irisws/availability/1/}
+  \url{http://service.iris.edu/fdsnws/availability/1/}
+  \url{http://service.iris.edu/ph5ws/availability/1/}
 
 }
 

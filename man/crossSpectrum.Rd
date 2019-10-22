@@ -1,7 +1,7 @@
 \name{crossSpectrum}
 \alias{crossSpectrum}
 
-\title{Cross-Spectral Analaysis}
+\title{Cross-Spectral Analysis}
 
 \description{
 The crossSpectrum() function is based on \R's spec.pgram() function and attempts to provide
@@ -57,7 +57,6 @@ A dataframe with the following columns:
 }
 
 \references{
-\href{http://terascan.smast.umassd.edu/nasdata/archive/achaudhu.old/docs/TIMESERIES/notes_6.pdf}{Spectral Analysis -- Smoothed Periodogram Method}
 
 \href{https://sourceforge.net/p/octave/signal/ci/default/tree/inst/pwelch.m}{Octave pwelch() source code}
 
