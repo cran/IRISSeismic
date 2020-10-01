@@ -1,47 +1,47 @@
-## ----setup, include=FALSE------------------------------------------------
+## ----setup, include=FALSE-----------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
 
-## ---- out.width = "600px", echo=FALSE------------------------------------
+## ---- out.width = "600px", echo=FALSE-----------------------------------------
 knitr::include_graphics("rstudio-IRISSeismic.png")
 
-## ----first, results="hide"-----------------------------------------------
+## ----first, results="hide"----------------------------------------------------
 library(IRISSeismic)
 iris <- new("IrisClient")
 
-## ----second, fig.height=4, fig.width=5-----------------------------------
+## ----second, fig.height=4, fig.width=5----------------------------------------
 starttime <- as.POSIXct("2002-04-20", tz="GMT")
 endtime <- as.POSIXct("2002-04-21", tz="GMT")
 st <- getDataselect(iris,"US","OXF","","BHZ",starttime,endtime)
 length(st@traces)
 plotUpDownTimes(st, min_signal=1, min_gap=1)
 
-## ----third---------------------------------------------------------------
+## ----third--------------------------------------------------------------------
 getGaps(st)
 
-## ----fourth--------------------------------------------------------------
+## ----fourth-------------------------------------------------------------------
 parallelLength(st)
 parallelMax(st)
 parallelSd(st)
 
-## ----fifth---------------------------------------------------------------
+## ----fifth--------------------------------------------------------------------
 tr <- st@traces[[3]]
 tr@stats
 
-## ----sixth, fig.height=4, fig.width=6------------------------------------
+## ----sixth, fig.height=4, fig.width=6-----------------------------------------
 plot(tr)
 
-## ----seventh-------------------------------------------------------------
+## ----seventh------------------------------------------------------------------
 slotNames(st)
 
-## ----eighth--------------------------------------------------------------
+## ----eighth-------------------------------------------------------------------
 class(st@url)
 class(st@requestedStarttime)
 class(st@traces)
 
-## ----ninth---------------------------------------------------------------
+## ----ninth--------------------------------------------------------------------
 slotNames(st@traces[[1]])
 
-## ----tenth---------------------------------------------------------------
+## ----tenth--------------------------------------------------------------------
 as.POSIXct("2010-02-27", tz="GMT") # good
 as.POSIXct("2010-02-27 04:00:00", tz="GMT") # good
 as.POSIXct("2010-02-27T04:00:00", tz="GMT",
@@ -50,10 +50,10 @@ as.POSIXct("2010-02-27T04:00:00", tz="GMT",
 as.POSIXct("2010-02-27") # BAD -- no timezone
 as.POSIXct("2010-02-27T04:00:00", tz="GMT") # BAD -- no formatting
 
-## ----eleventh, results="hide"--------------------------------------------
+## ----eleventh, results="hide"-------------------------------------------------
 help("IRISSeismic",package="IRISSeismic")
 
-## ----twelfth,fig.height=8, fig.width=6-----------------------------------
+## ----twelfth,fig.height=8, fig.width=6----------------------------------------
 starttime <- as.POSIXct("2010-02-27", tz="GMT")
 endtime <- as.POSIXct("2010-02-28", tz="GMT")
 st <- getDataselect(iris,"IU","ANMO","00","BHZ",starttime,endtime)
@@ -69,7 +69,7 @@ plot(tr1)
 plot(tr2)
 layout(1)                     # restore original layout
 
-## ----thirteenth----------------------------------------------------------
+## ----thirteenth---------------------------------------------------------------
 starttime <- as.POSIXct("2002-04-20", tz="GMT")
 endtime <- as.POSIXct("2002-04-21", tz="GMT")
 st <- getDataselect(iris,"US","OXF","","BHZ",starttime,endtime)
@@ -78,7 +78,7 @@ picker <- STALTA(tr,3,30)
 threshold <- quantile(picker,0.99999,na.rm=TRUE)
 to <- triggerOnset(tr,picker,threshold)
 
-## ----fourteenth, fig.height=12, fig.width=6------------------------------
+## ----fourteenth, fig.height=12, fig.width=6-----------------------------------
 layout(matrix(seq(3)))        # layout a 3x1 matrix
 closeup1 <- eventWindow(tr,picker,threshold,3600)
 closeup2 <- eventWindow(tr,picker,threshold,600)
@@ -90,13 +90,13 @@ plot(closeup2)
 abline(v=to, col='red', lwd=2)
 layout(1)                     # restore original layout
 
-## ----fiftheenth----------------------------------------------------------
+## ----fiftheenth---------------------------------------------------------------
 starttime <- as.POSIXct("2010-02-27", tz="GMT")
 endtime <- as.POSIXct("2010-02-28", tz="GMT")
 availability <- getAvailability(iris,"IU","ANMO","*","B??",starttime,endtime)
 availability
 
-## ----sixteenth, fig.height=4, fig.width=6--------------------------------
+## ----sixteenth, fig.height=4, fig.width=6-------------------------------------
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 

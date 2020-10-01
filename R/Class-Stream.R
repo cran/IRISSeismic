@@ -582,10 +582,10 @@ if (!isGeneric("mergeTraces")) {
 
 mergeTraces.Stream <- function(x, fillMethod) {
   
-  # Return immediately if is only one trace with no initial or final gap
-  if (sum(getGaps(x)$nsamples) == 0) { return(x) }
-  
   num_traces <- length(x@traces)
+
+  # Return immediately if is only one trace with no initial or final gap
+  if (sum(getGaps(x)$nsamples) == 0 && num_traces == 1) { return(x) }
   
   gapInfo <- getGaps(x)
   num_gaps <- length(gapInfo$nsamples)

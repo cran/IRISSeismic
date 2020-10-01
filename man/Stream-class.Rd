@@ -108,7 +108,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 \note{
 The \code{Stream} object is inspired by the \code{Stream} class found in the
-python ObsPy package (\url{http://docs.obspy.org/packages/autogen/obspy.core.stream.Stream.html}).
+python ObsPy package (\url{https://docs.obspy.org/packages/autogen/obspy.core.stream.Stream.html}).
 
 The miniSEED flags and timing_qual values are described in the SEED manual
 (\url{http://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf}).  The "accumulators" contain

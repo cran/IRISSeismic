@@ -67,7 +67,7 @@ if (Sys.getenv("IrisClient_site") != "") {
 # e.g. irisNetrc <- "/home/mustang/mustang.netrc"
 # we will use no default here
 irisNetrc <- NULL
-if (Sys.getenv("IrisClient_netrc") != "") {
+if (Sys.getenv("IrisClient_netrc") != "") { 
 	irisNetrc <- Sys.getenv("IrisClient_netrc")
 }
 
@@ -137,6 +137,9 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
   # if we have a netrc definition, then use queryauth to access data
   # else, use standard query call
   url <- NULL
+  
+  #print(paste0("irisNetrc=",irisNetrc))
+
   if (! is.null(irisNetrc)) {
     	url <- paste(obj@site,obj@service_type,"dataselect/1/queryauth?",sep="/")
   } else {
@@ -343,6 +346,224 @@ getSNCL.IrisClient <- function(obj, sncl, starttime, endtime, quality=NULL, repo
 setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="POSIXct", endtime="POSIXct"),
           function(obj, sncl, starttime, endtime, ...)
             getSNCL.IrisClient(obj, sncl, starttime, endtime, ...))
+
+################################################################################
+# getTimeseries method returns a Stream object
+#
+# Data are obtained from the timeseries web service:
+# 
+#   http://service.iris.edu/irisws/timeseries/1/
+#
+# This method functions much like getDataselect() but allows for various types
+# of signal processing.
+#
+################################################################################
+
+if (!isGeneric("getTimeseries")) {
+  setGeneric("getTimeseries", function(obj, network, station, location, channel, starttime, endtime, ...) {
+    standardGeneric("getTimeseries")
+  })
+}
+
+getTimeseries.IrisClient <- function(obj, network, station, location, channel, starttime, endtime, processing=NULL, 
+                                                            repository=NULL,inclusiveEnd=TRUE, ignoreEpoch=FALSE) {
+  if (!is.logical(inclusiveEnd)) {
+     stop(paste("getTimeseries.IrisClient: option inclusiveEnd must be TRUE or FALSE"))
+  }
+  if (!is.logical(ignoreEpoch)) {
+     stop(paste("getTimeseries.IrisClient: option inclusiveEnd must be TRUE or FALSE"))
+  }
+
+  url <- NULL
+  if (! is.null(irisNetrc)) {
+        url <- paste(obj@site,"irisws/timeseries/1/queryauth?",sep="/")
+  } else {
+        url <- paste(obj@site,"irisws/timeseries/1/query?",sep="/")
+  }
+ 
+  url <- paste(url,"net=", network,sep="")
+
+  url <- paste(url,"&sta=", station,sep="")
+  # NOTE:  Locations with blanks must be converted into "--" when creating the URL
+  # NOTE:  For getTimeseries only, convert "" to "--"
+  location <- ifelse(location=="","--",location)
+  url <- paste(url,"&loc=", str_replace(location,"  ","--"),sep="")
+  url <- paste(url,"&cha=", channel,sep="")
+  url <- paste(url,"&start=", format(starttime,"%Y-%m-%dT%H:%M:%OS6", tz="GMT"),sep="")
+  if (! inclusiveEnd) {
+      endtime <- endtime-0.000001
+      url <- paste(url,"&end=", format(endtime,"%Y-%m-%dT%H:%M:%OS6", tz="GMT"),sep="")
+  } else {
+      url <- paste(url,"&end=", format(endtime,"%Y-%m-%dT%H:%M:%OS6", tz="GMT"),sep="")
+  }
+  if (!is.null(repository) && obj@service_type != "ph5ws"){
+    if (repository %in% c("realtime","primary","bud","primary,realtime","realtime,primary")){
+      url <- paste(url,"&repository=",repository,sep="")
+    } else {
+      err_msg <- c("Invalid repository, acceptable values are 'realtime' and 'primary'. To search both, do not specify a repository.")
+      stop(paste("getTimeseries.IrisClient:",err_msg))
+    }
+  }
+  
+  if (!is.null(processing)) {
+    url <- paste(url,processing,sep="")
+  }
+  
+  url <- paste(url,"&format=miniseed",sep="")
+  
+  if (obj@debug) {
+    write(paste("<debug>URL =",url), stdout())
+  }
+  
+  # Make webservice request
+   # Make authenticated request using a netrc file
+  if (! is.null(irisNetrc)) {
+        h <-  RCurl::basicTextGatherer()
+        result <- try( timeseriesResponse <- RCurl::getBinaryURL(url, useragent=obj@useragent,
+                                             netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update,followlocation = TRUE, timeout=300, connecttimeout=300)),
+                       silent=TRUE)
+
+        # Handle error response
+        if (class(result) == "try-error" ) {
+            err_msg <- geterrmessage()
+            stop(paste("getTimeseries.IrisClient:",err_msg, url))
+        }
+
+        result <- try(header <- RCurl::parseHTTPHeader(h$value()))
+        if (class(result) == "try-error" ) {
+            err_msg <- geterrmessage()
+            stop(paste("getTimeseries.IrisClient:",err_msg, url))
+        }
+        if (header["status"] == "401") {  # authentication error, try again
+            Sys.sleep(3)
+            h <-  RCurl::basicTextGatherer()
+            result <- try( timeseriesResponse <- RCurl::getBinaryURL(url, useragent=obj@useragent,
+                                                 netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update,followlocation = TRUE, timeout=300, connecttimeout=300)),
+                           silent=TRUE)
+            # Handle error response
+            if (class(result) == "try-error" ) {
+               err_msg <- geterrmessage()
+               stop(paste("getTimeseries.IrisClient:",err_msg, url))
+            }
+
+            result <- try(header <- RCurl::parseHTTPHeader(h$value()))
+            if (class(result) == "try-error" ) {
+              err_msg <- geterrmessage()
+              stop(paste("getTimeseries.IrisClient:",err_msg, url))
+            }
+        }
+        if (header["status"] == "500") {  # internal server error, try again
+            Sys.sleep(3)
+            h <-  RCurl::basicTextGatherer()
+            result <- try( timeseriesResponse <- RCurl::getBinaryURL(url, useragent=obj@useragent,
+                                                 netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update,followlocation = TRUE, timeout=300, connecttimeout=300)),
+                           silent=TRUE)
+            # Handle error response
+            if (class(result) == "try-error" ) {
+               err_msg <- geterrmessage()
+               stop(paste("getTimeseries.IrisClient:",err_msg, url))
+            }
+            result <- try(header <- RCurl::parseHTTPHeader(h$value()))
+            if (class(result) == "try-error" ) {
+              err_msg <- geterrmessage()
+              stop(paste("getTimeseries.IrisClient:",err_msg, url))
+            }
+        }
+
+  } else {
+        h <-  RCurl::basicTextGatherer()
+        result <- try( timeseriesResponse <- RCurl::getBinaryURL(url, useragent=obj@useragent, .opts = list(headerfunction = h$update,followlocation = TRUE, timeout=300, connecttimeout=300)),
+                       silent=TRUE)
+
+        # Handle error response
+        if (class(result) == "try-error" ) {
+            err_msg <- geterrmessage()
+            stop(paste("getTimeseries.IrisClient:",err_msg,url))
+        }
+
+        result <- try(header <- RCurl::parseHTTPHeader(h$value()))
+        if (class(result) == "try-error" ) {
+            err_msg <- geterrmessage()
+            stop(paste("getTimeseries.IrisClient:",err_msg, url))
+        }
+
+        if (header["status"] == "500") {  # internal server error, try again
+            Sys.sleep(3)
+            h <-  RCurl::basicTextGatherer()
+            result <- try( timeseriesResponse <- RCurl::getBinaryURL(url, useragent=obj@useragent,
+                                                 netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update,followlocation = TRUE, timeout=300, connecttimeout=300)),
+                           silent=TRUE)
+            # Handle error response
+            if (class(result) == "try-error" ) {
+               err_msg <- geterrmessage()
+               stop(paste("getTimeseries.IrisClient:",err_msg, url))
+            }
+            result <- try(header <- RCurl::parseHTTPHeader(h$value()))
+            if (class(result) == "try-error" ) {
+              err_msg <- geterrmessage()
+              stop(paste("getTimeseries.IrisClient:",err_msg, url))
+            }
+        }
+
+  }
+
+
+  if (header["status"] == "204") {  #irisws timeseries returned nothing
+      stop(paste("getTimeseries.IrisClient: No Data:",header["status"],url))
+  }
+
+  if (header["status"] != "200") {  #irisws timeseries returned something unexpected
+      if (header["status"] == "400") {
+           stop(paste("getTimeseries.IrisClient: Bad Request:",url))
+      } else if (header["status"] == "404") {
+           stop(paste("getTimeseries.IrisClient: URL Not Found:",url))
+      } else {
+           stop(paste("getTimeseriesIrisClient: Unexpected http status code",header["status"],header["statusMessage"],url))
+      }
+  }
+
+
+  # No errors so proceed
+
+  # Channel metadata is required to properly apply InstrumentSensitivity corrections
+  result <- try( channels <- getChannel(obj, network, station, location, channel, starttime, endtime),
+                 silent=TRUE)
+
+  # Handle error response
+  if (class(result) == "try-error" ) {
+    err_msg <- geterrmessage()
+    stop(paste("getTimeseries.IrisClient:",err_msg, url))
+  }
+  
+  # NOTE:  Sometimes, the station webservice will return multiple records for the same SNCL
+  # NOTE:  each with a different scale or starttime.  This still represents a single SNCL.
+  # NOTE:  What to do about multiple scales in the following getChannel request?
+  # Solution 1: if ignoreEpoch==TRUE, then just take the first epoch presented
+  # http://service.iris.edu/fdsnws/station/1/query?net=H2&sta=H2O&loc=00&cha=LHZ&starttime=2001-02-28T18:29:44&endtime=2001-02-28T19:29:44&includerestricted=false&format=text&level=channel
+
+  sncls <- paste(channels$network,channels$station,channels$location,channels$channel)
+  if (nrow(channels) > 1 && !ignoreEpoch) {
+    stop(paste("getTimeseries.IrisClient: Multiple epochs: getChannel returned",length(sncls),"records"))
+  } else {
+    channelInfo <- channels[1,]
+  }
+
+  # No errors so proceed
+
+  stream <- miniseed2Stream(timeseriesResponse,url,starttime,endtime,
+                            channelInfo$instrument,channelInfo$scale,channelInfo$scalefreq,channelInfo$scaleunits,channelInfo$latitude,
+                            channelInfo$longitude,channelInfo$elevation,channelInfo$depth,channelInfo$azimuth,channelInfo$dip)
+
+  return(stream)
+}
+
+# All arguments specified
+setMethod("getTimeseries", signature(obj="IrisClient", network="character", station="character", location="character",
+                                     channel="character", starttime="POSIXct", endtime="POSIXct"),
+          function(obj, network, station, location, channel, starttime, endtime, ...)
+            getTimeseries.IrisClient(obj, network, station, location, channel, starttime, endtime, ...))
+
+
 
 ################################################################################
 # getRotation method returns a list of three Stream objects
@@ -1095,7 +1316,7 @@ setMethod("getUnavailability", signature(obj="IrisClient",
 # getDataAvailability method returns a dataframe with information from the output
 # of the iris availability web service with "format=text&level=channel".
 #
-# http://service.iris.edu/irisws/availability/1/
+# http://service.iris.edu/fdsnws/availability/1/
 #
 ################################################################################
 if (!isGeneric("getDataAvailability")) {

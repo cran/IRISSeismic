@@ -43,7 +43,7 @@ documentation.
 ### RStudio
 
 Users of the `IRISSeismic` package are encouraged to first download and install
-the [RStudio](http://rstudio.org/) integrated development environment for 
+the [RStudio](https://rstudio.com/) integrated development environment for 
 **R**.  Newcomers to `R` will find **RStudio** a much friendlier 
 environment in which to work.
 
@@ -191,7 +191,7 @@ be careful to specify the timezone as R assumes the local timezone by default.
 
 Also, R assumes that datetime strings are formatted with a space
 separating date and time as opposed to the
-[ISO 8601](http://en.wikipedia.org/wiki/ISO_8601) 'T' separator.  If  an 
+[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) 'T' separator.  If  an 
 ISO 8601 character string is provided without specific formatting
 instructions, the time portion of the string will be lost *without any warning*!
 So it is very important to be careful and consistent if you write code that 
@@ -264,7 +264,7 @@ layout(1)                     # restore original layout
 Access to triggering algorithms for detecting events is provided by the
 `STALTA()` method of `Trace` objects.
 ( *cf* [A Comparison of Select Trigger Algorithms for Automated Global Seismic 
-Phase and Event Detection](https://pdfs.semanticscholar.org/4211/924fbde6f0a32536ad9730d201a80e4f272a.pdf)). The `STALTA()` method has the following
+Phase and Event Detection](https://www.semanticscholar.org/paper/A-comparison-of-select-trigger-algorithms-for-phase-Withers-Aster/4211924fbde6f0a32536ad9730d201a80e4f272a?p2df)). The `STALTA()` method has the following
 arguments and defaults:
 
   * `x` -- `Trace` being analyzed

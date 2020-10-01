@@ -50,6 +50,7 @@ exportMethods(
     "getStation",
     "getSNCL",
     "getDataAvailability",
+    "getTimeseries",
     "getTraveltime",
     "getUnavailability",
     "getUpDownTimes",
@@ -113,6 +114,7 @@ export("crossSpectrum",
        "psdList2NoiseMatrix",
        "psdPlot",
        "psdStatistics",
+       "transferFunctionSpectra",
        "unHistogram"
 )
 

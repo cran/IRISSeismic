@@ -1078,6 +1078,58 @@ unHistogram <- function(vec, startVal=1, incr=1) {
 	return(unlist(k))
 }
 
+##################
+# helper function to retrieve evalresp results to use for transfer function metric
+#
+
+transferFunctionSpectra <- function(st,sampling_rate) {
+      # This function returns an evalresp fap response for trace st using sampling_rate
+      # to determine frequency limits
+
+      # Min and Max frequencies for evalresp will be those used for the cross spectral binning
+      alignFreq <- 0.1
+
+      if (sampling_rate <= 1) {
+        loFreq <- 0.001
+      } else if (sampling_rate > 1 && sampling_rate < 10) {
+        loFreq <- 0.0025
+      } else {
+        loFreq <- 0.005
+      }
+
+      # No need to exceed the Nyquist frequency after decimation
+      hiFreq <- 0.5 * sampling_rate
+
+      if (alignFreq >= hiFreq) {
+        octaves <- seq(log2(alignFreq),log2(loFreq),-0.125)
+        octaves <- octaves[octaves <= log2(hiFreq)]
+      } else {
+        loOctaves <- seq(log2(alignFreq),log2(loFreq),-0.125)
+        hiOctaves <- seq(log2(alignFreq),log2(hiFreq),0.125)
+        octaves <- sort(unique(c(loOctaves,hiOctaves)))
+      }
+      binFreq <- sort(2^octaves)
+
+      # Argurments for evalresp
+      minfreq <- min(binFreq)
+      maxfreq <- max(binFreq)
+      nfreq <- length(binFreq)
+      units <- 'def'
+      output <- 'fap'
+
+      tr <- st@traces[[1]]
+
+      evalResp <- IRISSeismic::getEvalresp(methods::new("IrisClient"),
+                              tr@stats@network, tr@stats@station,
+                              tr@stats@location, tr@stats@channel,
+                              tr@stats@starttime,
+                              minfreq, maxfreq, nfreq, units, output)
+
+      evalResp
+} # END function transferFunctionSpectra
+
+
+
 ################################################################################
 # END
 ################################################################################

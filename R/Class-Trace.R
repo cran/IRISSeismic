@@ -281,8 +281,10 @@ setClass("Trace",
   prototype(id = "",
             stats = new("TraceHeader"),
             Sensor = "",
-            InstrumentSensitivity = 1.0,
-            SensitivityFrequency = 1.0,   
+            #InstrumentSensitivity = 1.0,
+            InstrumentSensitivity = as.numeric(NA),  #if no information is available, the default should not be 1.0
+            #SensitivityFrequency = 1.0,
+            SensitivityFrequency = as.numeric(NA),   #if no information is available, the default should not be 1.0
             InputUnits = "",
             data = c(0))
 )
@@ -293,8 +295,10 @@ setMethod("initialize", "Trace",
            id="",
            stats=new("TraceHeader"),
            Sensor = "",
-           InstrumentSensitivity = 1.0,
-           SensitivityFrequency = 1.0,    
+           #InstrumentSensitivity = 1.0,
+           InstrumentSensitivity = as.numeric(NA),
+           #SensitivityFrequency = 1.0,    
+           SensitivityFrequency = as.numeric(NA),
            InputUnits = "",
            data=c(0),
            ...) {

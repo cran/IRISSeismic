@@ -95,7 +95,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 
 \note{
 The \code{Trace} object is inspired by the \code{Trace} class found in the
-python ObsPy package (\url{http://docs.obspy.org/packages/autogen/obspy.core.trace.Trace.html}).
+python ObsPy package (\url{https://docs.obspy.org/packages/autogen/obspy.core.trace.Trace.html}).
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

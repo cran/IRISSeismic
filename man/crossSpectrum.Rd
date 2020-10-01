@@ -115,7 +115,7 @@ plot(1/DF$freq,transferPhase,type='l',log='x',
 
 # Restore default layout
 layout(1)
-#}
+}
 }
 
 \keyword{spectra}

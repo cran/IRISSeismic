@@ -1,6 +1,6 @@
 Type: Package
 Package: IRISSeismic
-Version: 1.5.2
+Version: 1.6.0
 Title: Classes and Methods for Seismic Data Analysis
 Authors@R: c(
     person("Jonathan", "Callahan", email="jonathan@mazamascience.com", role=c("aut")),
@@ -16,7 +16,7 @@ Suggests: knitr,rmarkdown
 VignetteBuilder: knitr
 Description: Provides classes and methods for seismic data analysis. The
              base classes and methods are inspired by the python code found in
-             the 'ObsPy' python toolbox <https://github.com/obsypy/obspy>. Additional classes and 
+             the 'ObsPy' python toolbox <https://github.com/obspy/obspy>. Additional classes and 
              methods support data returned by web services provided by the 'IRIS DMC'
              <http://service.iris.edu/>.
 Collate: Class-Trace.R Class-Stream.R Class-IrisClient.R
@@ -24,11 +24,11 @@ Collate: Class-Trace.R Class-Stream.R Class-IrisClient.R
 License: GPL (>= 2)
 Repository: CRAN
 NeedsCompilation: yes
-Packaged: 2019-10-22 18:29:20 UTC; gillian
+Packaged: 2020-10-01 17:39:38 UTC; gilliansharer
 Author: Jonathan Callahan [aut],
   Rob Casey [aut],
   Gillian Sharer [aut, cre],
   Mary Templeton [aut],
   Chad Trabant [ctb]
 Maintainer: Gillian Sharer <gillian@iris.washington.edu>
-Date/Publication: 2019-10-22 20:00:02 UTC
+Date/Publication: 2020-10-01 18:50:02 UTC

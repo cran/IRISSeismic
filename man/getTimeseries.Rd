@@ -1,52 +1,57 @@
-\name{getDataselect}
-\alias{getDataselect}
-\alias{getDataselect,IrisClient,character,character,character,character,POSIXct,POSIXct-method}
+\name{getTimeseries}
 
+\alias{getTimeseries}
+\alias{getTimeseries,IrisClient,character,character,character,character,POSIXct,POSIXct-method}
 
 \title{Retrieve seismic data from IRIS DMC}
 
 \description{
-The \code{getDataselect} method makes a request of the IRIS DMC \code{dataselect} 
+The \code{getTimeseries} method makes a request of the IRIS DMC \code{timeseries} 
 webservice and returns a \code{Stream} object in which individual \code{Traces}
 have been sorted by start time.
 }
 
 \usage{
-getDataselect(obj, network, station, location, channel, 
-              starttime, endtime, ...)
+getTimeseries(obj, network, station, location, channel, 
+              starttime, endtime,...)
 }
 
 \arguments{
-  \item{obj}{ \code{IrisClient} object}
-  \item{network}{character string with the two letter seismic network code}
-  \item{station}{character string with the station code}
-  \item{location}{character string with the location code}
-  \item{channel}{character string with the three letter channel code}
-  \item{starttime}{POSIXct class specifying the starttime (GMT)}
-  \item{endtime}{POSIXct class specifying the endtime (GMT)}
+  \item{obj}{\code{IrisClient} object }
+  \item{network}{character string with the two letter seismic network code }
+  \item{station}{character string with the station code }
+  \item{location}{character string with the location code }
+  \item{channel}{character string with the three letter channel code }
+  \item{starttime}{POSIXct class specifying the starttime (GMT) }
+  \item{endtime}{POSIXct class specifying the endtime (GMT) }
   \item{\dots}{optional arguments
-     \code{quality} optional character string identifying the quality. IRIS webservices defaults to quality="M".
      \code{repository} optional character string identifying whether to exclusively search primary archive or realtime collection buffers.
            Acceptable values are "primary" or "realtime". If not specified, IRIS webservices defaults to both repositories.
+     \code{processing}{optional character string with processing commands }
      \code{inclusiveEnd} optional logical determining whether the endtime is inclusive (default = TRUE)
      \code{ignoreEpoch} optional logical defining behavior when multiple epochs are encountered (default = FALSE)
    }
 }
 
 \details{
-This is the primary method for retrieving seismic data.  Data requests are made through
-the \code{dataselect} webservice and returned data are parsed using the internal miniseed2Stream() function.
+This is an alternative method for retreiving seismic data that accepts optional processing commands.
+Data requests are made through
+the \code{timeseries} webservice and returned data are parsed using
+the internal miniseed2Stream() function.
 
 If the location argument contains an empty string to specify a 'blank' location code, a location
 code of \code{"--"} will be used in the dataselect request URL.
-(See \href{http://service.iris.edu/fdsnws/dataselect/1/}{dataselect documentation}.)
 
+The \code{processing} parameter can be used to specify any type of processing supported by the
+\code{timeseries} webs service.  This string must begin with an ampersand and be ready to be appended to the request url, e.g.
+\code{processing="&demean=true&taper0.2,HANNING"}.  This gives the user complete control over the number
+and order of processing commands.
+(See \href{http://service.iris.edu/irisws/timeseries/1/}{timeseries documentation}.)
+  
 If \code{inclusiveEnd=FALSE}, then \code{getDataselect} will subtract 0.000001 seconds from the endtime before passing the 
 value to the \code{dataselect} webservice. An endtime of, e.g., \code{as.POSIXct("2016-01-03", tz="GMT")} will be passed 
 into \code{dataselect} as \code{end=2016-01-02T23:59:59.999999}. A data sample at time 2016-01-03T00:00:00 will not be returned
 unless \code{inclusiveEnd=TRUE}.
-
-Error returns from the webservice will stop evaluation and generate an error message.
 
 Sometimes the station webservice will return multiple records for the same SNCL,
 each with a different scale or starttime.  These represent different \emph{epochs} with
@@ -60,6 +65,7 @@ the very first SNCL-epoch encountered will be used and all others will be discar
 For access to restricted data, getDataselect will look for system environmental variable "IrisClient_netrc"
 which should point to a .netrc authentication file.
 
+Error returns from the webservice will stop evaluation and generate an error message.
 }
 
 \value{
@@ -68,17 +74,13 @@ A new \code{Stream} object is returned.
 
 \references{
 %% ~put references to the literature/web site here ~
-The IRIS DMC dataselect webservice:
+The IRIS DMC timeseries webservice:
 
-  \url{http://service.iris.edu/fdsnws/dataselect/1/}
-
-This implementation is similar in functionality to the obspy dataselect function:
-
-  \url{https://docs.obspy.org/_modules/obspy/clients/fdsn/client.html}
+  \url{http://service.iris.edu/irisws/timeseries/1/}
 }
 
 \author{
-Jonathan Callahan \email{jonathan@mazamascience.com}
+Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
 }
 
 %% \note{ }
@@ -86,30 +88,28 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
+\code{\link{getDataselect}}, 
 \code{\link{getSNCL}}, 
 \code{\link{IrisClient-class}}
 }
 
-\examples{ 
+\examples{
 \dontrun{
-# Open a connection to IRIS DMC webservices
-iris <- new("IrisClient")
-options("nanotimeFormat"="\%Y-\%m-\%dT\%H-\%M-\%E9S")
+# Open a connection to IRIS DMC webservices (use debug=TRUE so we can see the URLs generated)
+iris <- new("IrisClient",debug=TRUE)
 
-# Use getDataselect to request data for II.JTS.00.BHZ
-starttime <- as.POSIXct("2001-02-28",tz="GMT")
-endtime <- as.POSIXct("2001-03-01",tz="GMT")
+starttime <- as.POSIXct("2013-06-01",tz="GMT")
+endtime <- starttime + 24*3600
 
-st <- getDataselect(iris, "II","JTS","00","BHZ",starttime, endtime, 
-                    inclusiveEnd=FALSE,ignoreEpoch=TRUE)
+# Get raw data and processed data
+st1 <- getDataselect(iris,"IU","ANMO","00","LHZ",starttime,endtime)
+st2 <- getTimeseries(iris,"IU","ANMO","00","LHZ",starttime,endtime,"&demean=true&taper=0.2,HANNING")
 
-# Display structure of trace(s)
-
-str(st)
-
-# Plot trace
-plot(st)
+layout(matrix(seq(2)))
+plot(st1)
+plot(st2)
 }
 }
 
 \keyword{webservices}
+

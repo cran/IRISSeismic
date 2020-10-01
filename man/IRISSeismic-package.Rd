@@ -7,7 +7,7 @@
 
 \description{
 This package provides S4 classes for downloading and processing seismological 
-data available from the IRIS Data Management Center (DMC) (\url{http://www.iris.edu/dms/nodes/dmc/}).
+data available from the IRIS Data Management Center (DMC) (\url{http://ds.iris.edu/ds/nodes/dmc/}).
 Core classes \code{Trace}, \code{Stream} and \code{IrisClient} and their associated methods
 are inspired by the functionality available in the python ObsPy package (\url{http://obspy.org/}).
 }
@@ -27,6 +27,14 @@ IRIS DMC web services: \url{http://service.iris.edu/}
 }
 
 \section{History}{
+
+  version 1.6.0
+  \itemize{
+    \item{ irisNetrc definition moved inside getDataselect function}
+    \item{ restored getTimeseries function }
+    \item{ default values for class Trace InstrumentSensitivity and SensitivityFrequency changed to NA from 1.0 }
+    \item{ added transferFunctionSpectra function }
+  }
 
   version 1.5.2
   \itemize{

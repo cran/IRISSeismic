@@ -62,7 +62,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 
 \note{
 The \code{IrisClient} object is inspired by the \code{clients.fdsn.client.Client} class found in the
-python ObsPy package (\url{http://docs.obspy.org/packages/autogen/obspy.clients.fdsn.client.Client.html#obspy.clients.fdsn.client.Client}).
+python ObsPy package (\url{https://docs.obspy.org/packages/autogen/obspy.clients.fdsn.client.Client.html}).
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

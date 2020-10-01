@@ -68,7 +68,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 
 \note{
 The \code{TraceHeader} object is inspired by the \code{Stats} class found in the
-python ObsPy package (\url{http://docs.obspy.org/packages/autogen/obspy.core.trace.Stats.html}).
+python ObsPy package (\url{https://docs.obspy.org/packages/autogen/obspy.core.trace.Stats.html}).
 
 Retaining the ObsPy class name \code{Stats} would have generated a tremendous amount of 
 confusion in the context of R. Instead, the name

@@ -28,7 +28,7 @@ Distance in kilometers
 }
 
 \references{
-\url{http://en.wikipedia.org/wiki/Haversine_formula}
+\url{https://en.wikipedia.org/wiki/Haversine_formula}
 }
 
 \author{

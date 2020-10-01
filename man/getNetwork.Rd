@@ -63,7 +63,7 @@ The IRIS DMC station web service:
 
 This implementation was inspired by the functionality in the obspy get_stations() method.
  
-  \url{http://docs.obspy.org/packages/autogen/obspy.clients.fdsn.client.Client.get_stations.html}
+  \url{https://docs.obspy.org/packages/autogen/obspy.clients.fdsn.client.Client.get_stations.html}
 
 }
 
