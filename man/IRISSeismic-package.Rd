@@ -28,6 +28,12 @@ IRIS DMC web services: \url{http://service.iris.edu/}
 
 \section{History}{
 
+  version 1.6.2
+  \itemize{
+    \item{ getDataselect, modified default time out values }
+    \item{ fixed url in documentation }
+  }
+
   version 1.6.0
   \itemize{
     \item{ irisNetrc definition moved inside getDataselect function}
@@ -38,7 +44,8 @@ IRIS DMC web services: \url{http://service.iris.edu/}
 
   version 1.5.2
   \itemize{
-    \item{ updated getDataAvailablity to use new fdsnws availability web service specification}
+    \item{ updated getDataAvailablity to use new fdsnws availability web service specification
+           http://service.iris.edu/fdsnws/availability/1/ }
     \item{ fixed bug in getDataAvailability when mergequality=FALSE }
     \item{ fixed bug in getDataAvailability affecting start/end times, introduced in version 1.5.1 }
     \item{fixed bug in mergeTraces when trace has gap at end, introduced in version 1.5.1}

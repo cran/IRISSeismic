@@ -47,7 +47,7 @@ Each of the arguments \code{network}, \code{station}, \code{location} or \code{c
 a valid code or a wildcard expression, e.g. "BH?" or "*". Empty strings are converted to "*".
 Otherwise the ascii string that is used for these values is simply inserted into the web service request URL.
 
-For more details see the \href{http://service.iris.edu/irisws/availability/1/}{web service documentation}.
+For more details see the \href{http://service.iris.edu/fdsnws/availability/1/}{web service documentation}.
 }
 
 \value{
