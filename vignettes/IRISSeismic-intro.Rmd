@@ -36,14 +36,14 @@ the source code.
 
 ## Getting Started
 
-For those who are not used to working with `R`, the [Using R](http://mazamascience.com/WorkingWithData/?series=using-r) series of
+For those who are not used to working with `R`, the [Using R](https://web.archive.org/web/20120409050248/http://mazamascience.com/WorkingWithData/?series=using-r) series of
 blog posts offers tips on how to get started and includes links to other introductory
 documentation.
 
 ### RStudio
 
 Users of the `IRISSeismic` package are encouraged to first download and install
-the [RStudio](https://rstudio.com/) integrated development environment for 
+the [RStudio](https://www.rstudio.com/) integrated development environment for 
 **R**.  Newcomers to `R` will find **RStudio** a much friendlier 
 environment in which to work.
 

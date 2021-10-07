@@ -32,7 +32,7 @@ The multivariate timeseries passed in as the first argument should be a union of
 \preformatted{
   ts1 <- ts(data1,frequency=sampling_rate)
   ts2 <- ts(data2,frequency=sampling_rate)
-  x <- ts.untion(ts1,ts2)
+  x <- ts.union(ts1,ts2)
 }
 
 The crossSpectrum() function borrows most of its code from \R's spec.pgram() function. It omits any plotting

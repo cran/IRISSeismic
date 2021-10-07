@@ -138,7 +138,6 @@ SEXP parseMiniSEED (SEXP buffer) {
       total_dq_flags[6] += (int) bit(b,0x40);
       total_dq_flags[7] += (int) bit(b,0x80);
 
-      // TODO:  How to deal with avg. timing_qual when some are missing and some are not?
       if ( msr->Blkt1001 ) {
         totalBlkt1001++;
         totalTimingQuality += (int) msr->Blkt1001->timing_qual;
@@ -328,7 +327,7 @@ SEXP parseMiniSEED (SEXP buffer) {
     PROTECT(timing_qual = NEW_NUMERIC(1));
     loopPROTECT++;
     if (totalBlkt1001 > 0) {
-      REAL(timing_qual)[0] = (double) totalTimingQuality / (double) totalRecords;
+      REAL(timing_qual)[0] = (double) totalTimingQuality / (double) totalBlkt1001;
     } else {
       REAL(timing_qual)[0] = NA_REAL;
     }

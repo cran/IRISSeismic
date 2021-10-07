@@ -25,7 +25,7 @@
 
 # "Spectral Analysis -- Smoothed Periodogram Method"
 #
-#   http://www.ltrr.arizona.edu/~dmeko/notes_6.pdf
+#   https://web.archive.org/web/20030917133457/http://www.ltrr.arizona.edu/~dmeko/notes_6.pdf
 #
 #   Simple explanation of DFT and smoothed periodogram with an explanation of 
 #   Daniell smoothers:

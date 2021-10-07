@@ -1,6 +1,6 @@
 # Functions to wrap C code that uses libmseed.
 #
-# See http://mazamascience.com/WorkingWithData/?p=1099
+# See https://web.archive.org/web/20121117072251/http://mazamascience.com/WorkingWithData/?p=1099
 #
 
 # See seismic/src/parseMiniSEED.c for code comments

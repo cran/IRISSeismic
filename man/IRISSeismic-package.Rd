@@ -28,6 +28,11 @@ IRIS DMC web services: \url{http://service.iris.edu/}
 
 \section{History}{
 
+  version 1.6.3
+  \itemize{
+    \item{ Stream object @ timing_quality now averages the values of the miniSEED blockette 1001 timing quality values, instead of summing the blockette 1001 values and dividing by the number of records}
+  }
+
   version 1.6.2
   \itemize{
     \item{ getDataselect, modified default time out values }
