@@ -39,7 +39,7 @@ the \code{dataselect} webservice and returned data are parsed using the internal
 
 If the location argument contains an empty string to specify a 'blank' location code, a location
 code of \code{"--"} will be used in the dataselect request URL.
-(See \href{http://service.iris.edu/fdsnws/dataselect/1/}{dataselect documentation}.)
+(See \href{https://service.iris.edu/fdsnws/dataselect/1/}{dataselect documentation}.)
 
 If \code{inclusiveEnd=FALSE}, then \code{getDataselect} will subtract 0.000001 seconds from the endtime before passing the 
 value to the \code{dataselect} webservice. An endtime of, e.g., \code{as.POSIXct("2016-01-03", tz="GMT")} will be passed 
@@ -70,7 +70,7 @@ A new \code{Stream} object is returned.
 %% ~put references to the literature/web site here ~
 The IRIS DMC dataselect webservice:
 
-  \url{http://service.iris.edu/fdsnws/dataselect/1/}
+  \url{https://service.iris.edu/fdsnws/dataselect/1/}
 
 This implementation is similar in functionality to the obspy dataselect function:
 

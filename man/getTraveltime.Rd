@@ -43,7 +43,7 @@ Rows are ordered by \code{travelTime}.
 \references{
 The IRIS DMC traveltime web service:
 
-  \url{http://service.iris.edu/irisws/traveltime/1/}
+  \url{https://service.iris.edu/irisws/traveltime/1/}
 }
 
 \author{

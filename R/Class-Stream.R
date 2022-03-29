@@ -659,7 +659,11 @@ mergeTraces.Stream <- function(x, fillMethod) {
   
   # Guarantee that we return the correct number of points
   if (missing_points > 0) {
-    data <- c(data,rep(NA,missing_points))
+    if (fillMethod == "fillNA") {
+      data <- c(data,rep(NA,missing_points))
+    } else if (fillMethod == "fillZero") {
+      data <- c(data,rep(0,missing_points))
+    }
   }
   
   

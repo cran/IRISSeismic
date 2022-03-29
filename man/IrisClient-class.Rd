@@ -14,7 +14,7 @@ A class for making data and metadata requests from IRIS DMC web services.
 \section{Slots}{
   \describe{
     \item{\code{site}:}{Object of class \code{"character"}:
-    this is the first part of the url that the web service will be pointed to, defaults to \code{http://service.iris.edu} }
+    this is the first part of the url that the web service will be pointed to, defaults to \code{https://service.iris.edu} }
     \item{\code{service_type}:}{Object of class \code{"character"}:
     defaults to \code{fdsnws}; for data retrieval from the IRIS PH5 repository, set this to \code{ph5ws}; }
     \item{\code{debug}:}{Object of class \code{"logical"}:
@@ -39,7 +39,7 @@ A class for making data and metadata requests from IRIS DMC web services.
     makes a request of the instrument response web service and returns the information as a dataframe; see \code{\link{getEvalresp}} }
     \item{getEvent}{
     makes a request of the event web service and returns the information as a dataframe,
-    if \code{site}='http://service.iris.edu' then \code{getEvent} will direct to "https://earthquake.usgs.gov/fdsnws/event/1/query?"; 
+    if \code{site}='https://service.iris.edu' then \code{getEvent} will direct to "https://earthquake.usgs.gov/fdsnws/event/1/query?"; 
     see \code{\link{getEvent}} }
     \item{getNetwork}{
     makes a network request of the station web service and returns the result as a dataframe; see \code{\link{getNetwork}} }

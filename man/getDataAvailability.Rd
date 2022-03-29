@@ -47,7 +47,7 @@ Each of the arguments \code{network}, \code{station}, \code{location} or \code{c
 a valid code or a wildcard expression, e.g. "BH?" or "*". Empty strings are converted to "*".
 Otherwise the ascii string that is used for these values is simply inserted into the web service request URL.
 
-For more details see the \href{http://service.iris.edu/fdsnws/availability/1/}{web service documentation}.
+For more details see the \href{https://service.iris.edu/fdsnws/availability/1/}{web service documentation}.
 }
 
 \value{
@@ -86,8 +86,8 @@ A dataframe with the following columns:
 %% ~put references to the literature/web site here ~
 The IRIS DMC station web service:
 
-  \url{http://service.iris.edu/fdsnws/availability/1/}
-  \url{http://service.iris.edu/ph5ws/availability/1/}
+  \url{https://service.iris.edu/fdsnws/availability/1/}
+  \url{https://service.iris.edu/ph5ws/availability/1/}
 
 }
 

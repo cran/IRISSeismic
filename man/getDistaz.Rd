@@ -47,7 +47,7 @@ Only a single row is returned.
 \references{
 The IRIS DMC distaz webservice:
 
-  \url{http://service.iris.edu/irisws/distaz/1/}
+  \url{https://service.iris.edu/irisws/distaz/1/}
 }
 
 \author{

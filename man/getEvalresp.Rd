@@ -45,7 +45,7 @@ these values is simply passed through to \code{evalresp}.
 
 If the \code{location} argument contains an empty string to specify a 'blank' location code, a location
 code of \code{"--"} will be used in the dataselect request URL.
-(See \href{http://service.iris.edu/fdsnws/dataselect/1/}{dataselect documentation}.)
+(See \href{https://service.iris.edu/fdsnws/dataselect/1/}{dataselect documentation}.)
 
 The response from \code{evalresp} is converted into a dataframe with rows in order of increasing frequency.
 }
@@ -64,7 +64,7 @@ For \code{output="cs"}, a dataframe with columns named:
 \references{
 The IRIS DMC evalresp webservice:
 
-  \url{http://service.iris.edu/irisws/evalresp/1/}
+  \url{https://service.iris.edu/irisws/evalresp/1/}
 }
 
 \author{

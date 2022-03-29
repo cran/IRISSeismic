@@ -37,7 +37,7 @@ The \code{processing} parameter can be used to specify any type of processing su
 \code{rotation} webs service.  This string must begin with an ampersand and be ready to be appended to the request url, e.g.
 \code{processing="&components=ZRT&azimuth=23.1"}.  This gives the user complete control over the number
 and order of processing commands.
-(See \href{http://service.iris.edu/irisws/rotation/1/}{rotation documentation}.)
+(See \href{https://service.iris.edu/irisws/rotation/1/}{rotation documentation}.)
   
 Error returns from the web service will stop evaluation and generate an error message.
 }
@@ -50,7 +50,7 @@ A list of three \code{Stream} objects is returned.
 %% ~put references to the literature/web site here ~
 The IRIS DMC rotation web service:
 
-  \url{http://service.iris.edu/irisws/rotation/1/}
+  \url{https://service.iris.edu/irisws/rotation/1/}
 }
 
 \author{

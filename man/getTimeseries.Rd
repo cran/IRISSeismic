@@ -46,7 +46,7 @@ The \code{processing} parameter can be used to specify any type of processing su
 \code{timeseries} webs service.  This string must begin with an ampersand and be ready to be appended to the request url, e.g.
 \code{processing="&demean=true&taper0.2,HANNING"}.  This gives the user complete control over the number
 and order of processing commands.
-(See \href{http://service.iris.edu/irisws/timeseries/1/}{timeseries documentation}.)
+(See \href{https://service.iris.edu/irisws/timeseries/1/}{timeseries documentation}.)
   
 If \code{inclusiveEnd=FALSE}, then \code{getDataselect} will subtract 0.000001 seconds from the endtime before passing the 
 value to the \code{dataselect} webservice. An endtime of, e.g., \code{as.POSIXct("2016-01-03", tz="GMT")} will be passed 
@@ -76,7 +76,7 @@ A new \code{Stream} object is returned.
 %% ~put references to the literature/web site here ~
 The IRIS DMC timeseries webservice:
 
-  \url{http://service.iris.edu/irisws/timeseries/1/}
+  \url{https://service.iris.edu/irisws/timeseries/1/}
 }
 
 \author{

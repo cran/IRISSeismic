@@ -31,7 +31,7 @@ The \code{getEvent} method uses the event web service to obtain data for all eve
 and returns that data in a dataframe. Each row of the dataframe represents a unique event.
 
 \code{getEvent} calls to the IRIS event webservice now go to https://earthquake.usgs.gov/fdsnws/event/1/. If \code{obj@site} is something
-other than "http://service.iris.edu", getEvent will point to \code{obj@site}/fdsnws/event/1/. The event service must be able to output
+other than "https://service.iris.edu", getEvent will point to \code{obj@site}/fdsnws/event/1/. The event service must be able to output
 format=text.
 
 }

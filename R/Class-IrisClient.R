@@ -187,13 +187,13 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
                        silent=TRUE)
 
         # Handle error response
-        if (class(result) == "try-error" ) {
+        if (inherits(result,"try-error")) {
 	    err_msg <- geterrmessage()
             stop(paste("getDataselect.IrisClient:",err_msg, url))
 	}
 
         result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-        if (class(result) == "try-error" ) {
+        if (inherits(result,"try-error")) {
             err_msg <- geterrmessage()
             stop(paste("getDataselect.IrisClient:",err_msg, url))
         }
@@ -205,13 +205,13 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
                                                  netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update,followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)), 
                            silent=TRUE)
             # Handle error response
-            if (class(result) == "try-error" ) {
+            if (inherits(result,"try-error")) {
                err_msg <- geterrmessage()
                stop(paste("getDataselect.IrisClient:",err_msg, url))
             }
 
             result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-            if (class(result) == "try-error" ) {
+            if (inherits(result,"try-error")) {
               err_msg <- geterrmessage()
               stop(paste("getDataselect.IrisClient:",err_msg, url))
             }
@@ -223,12 +223,12 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
                                                  netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update,followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),
                            silent=TRUE)
             # Handle error response
-            if (class(result) == "try-error" ) {
+            if (inherits(result,"try-error")) {
                err_msg <- geterrmessage()
                stop(paste("getDataselect.IrisClient:",err_msg, url))
             }
             result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-            if (class(result) == "try-error" ) {
+            if (inherits(result,"try-error")) {
               err_msg <- geterrmessage()
               stop(paste("getDataselect.IrisClient:",err_msg, url))
             }
@@ -240,13 +240,13 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
                        silent=TRUE)
 
         # Handle error response
-        if (class(result) == "try-error" ) {
+        if (inherits(result,"try-error")) {
             err_msg <- geterrmessage()
             stop(paste("getDataselect.IrisClient:",err_msg,url))
         }
 
         result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-        if (class(result) == "try-error" ) {
+        if (inherits(result,"try-error")) {
             err_msg <- geterrmessage()
             stop(paste("getDataselect.IrisClient:",err_msg, url))
         }
@@ -258,12 +258,12 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
                                                  netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update,followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),
                            silent=TRUE)
             # Handle error response
-            if (class(result) == "try-error" ) {
+            if (inherits(result,"try-error")) {
                err_msg <- geterrmessage()
                stop(paste("getDataselect.IrisClient:",err_msg, url))
             }
             result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-            if (class(result) == "try-error" ) {
+            if (inherits(result,"try-error")) {
               err_msg <- geterrmessage()
               stop(paste("getDataselect.IrisClient:",err_msg, url))
             }
@@ -293,7 +293,7 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
                  silent=TRUE)
   
   # Handle error response
-  if (class(result) == "try-error" ) {
+  if (inherits(result,"try-error")) {
     err_msg <- geterrmessage()
     stop(paste("getDataselect.IrisClient:",err_msg, url))
   }  
@@ -424,13 +424,13 @@ getTimeseries.IrisClient <- function(obj, network, station, location, channel, s
                        silent=TRUE)
 
         # Handle error response
-        if (class(result) == "try-error" ) {
+        if (inherits(result,"try-error")) {
             err_msg <- geterrmessage()
             stop(paste("getTimeseries.IrisClient:",err_msg, url))
         }
 
         result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-        if (class(result) == "try-error" ) {
+        if (inherits(result,"try-error")) {
             err_msg <- geterrmessage()
             stop(paste("getTimeseries.IrisClient:",err_msg, url))
         }
@@ -441,13 +441,13 @@ getTimeseries.IrisClient <- function(obj, network, station, location, channel, s
                                                  netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update,followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),
                            silent=TRUE)
             # Handle error response
-            if (class(result) == "try-error" ) {
+            if (inherits(result,"try-error")) {
                err_msg <- geterrmessage()
                stop(paste("getTimeseries.IrisClient:",err_msg, url))
             }
 
             result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-            if (class(result) == "try-error" ) {
+            if (inherits(result,"try-error")) {
               err_msg <- geterrmessage()
               stop(paste("getTimeseries.IrisClient:",err_msg, url))
             }
@@ -459,12 +459,12 @@ getTimeseries.IrisClient <- function(obj, network, station, location, channel, s
                                                  netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update,followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),
                            silent=TRUE)
             # Handle error response
-            if (class(result) == "try-error" ) {
+            if (inherits(result,"try-error")) {
                err_msg <- geterrmessage()
                stop(paste("getTimeseries.IrisClient:",err_msg, url))
             }
             result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-            if (class(result) == "try-error" ) {
+            if (inherits(result,"try-error")) {
               err_msg <- geterrmessage()
               stop(paste("getTimeseries.IrisClient:",err_msg, url))
             }
@@ -476,13 +476,13 @@ getTimeseries.IrisClient <- function(obj, network, station, location, channel, s
                        silent=TRUE)
 
         # Handle error response
-        if (class(result) == "try-error" ) {
+        if (inherits(result,"try-error")) {
             err_msg <- geterrmessage()
             stop(paste("getTimeseries.IrisClient:",err_msg,url))
         }
 
         result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-        if (class(result) == "try-error" ) {
+        if (inherits(result,"try-error")) {
             err_msg <- geterrmessage()
             stop(paste("getTimeseries.IrisClient:",err_msg, url))
         }
@@ -494,12 +494,12 @@ getTimeseries.IrisClient <- function(obj, network, station, location, channel, s
                                                  netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update,followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),
                            silent=TRUE)
             # Handle error response
-            if (class(result) == "try-error" ) {
+            if (inherits(result,"try-error")) {
                err_msg <- geterrmessage()
                stop(paste("getTimeseries.IrisClient:",err_msg, url))
             }
             result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-            if (class(result) == "try-error" ) {
+            if (inherits(result,"try-error")) {
               err_msg <- geterrmessage()
               stop(paste("getTimeseries.IrisClient:",err_msg, url))
             }
@@ -530,7 +530,7 @@ getTimeseries.IrisClient <- function(obj, network, station, location, channel, s
                  silent=TRUE)
 
   # Handle error response
-  if (class(result) == "try-error" ) {
+  if (inherits(result,"try-error")) {
     err_msg <- geterrmessage()
     stop(paste("getTimeseries.IrisClient:",err_msg, url))
   }
@@ -719,13 +719,13 @@ getNetwork.IrisClient <- function(obj, network, station, location, channel,
   h <-  RCurl::basicTextGatherer()
   result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update,followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),silent=TRUE)
 
-  if (class(result) == "try-error" ) { 
+  if (inherits(result,"try-error")) { 
      err_msg <- geterrmessage()
      stop(paste("getNetwork.IrisClient:",err_msg,url))
   }
 
   result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-  if (class(result) == "try-error" ) {
+  if (inherits(result,"try-error")) {
      err_msg <- geterrmessage()
      stop(paste("getNetwork.IrisClient:",err_msg, url))
   }
@@ -749,7 +749,7 @@ getNetwork.IrisClient <- function(obj, network, station, location, channel,
   on.exit(close(txtcon),add=TRUE)
   result <- try( DF <- utils::read.delim(txtcon,sep="|",col.names=colNames,colClasses=colClasses,na.strings=""),silent=TRUE)
 
-  if (class(result) == "try-error" ) {    
+  if (inherits(result,"try-error")) {    
     err_msg <- geterrmessage()
     if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
       stop(paste("getNetwork.IrisClient: Cannot open connection",url))
@@ -863,13 +863,13 @@ getStation.IrisClient <- function(obj, network, station, location, channel,
   
   h <-  RCurl::basicTextGatherer()
   result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update,followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),silent=TRUE)
-  if (class(result) == "try-error" ) { 
+  if (inherits(result,"try-error")) { 
      err_msg <- geterrmessage()
      stop(paste("getStation.IrisClient:",err_msg, url))
   }
 
   result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-  if (class(result) == "try-error" ) {
+  if (inherits(result,"try-error")) {
      stop(paste("getStation.IrisClient:",err_msg, url))
   }
 
@@ -890,7 +890,7 @@ getStation.IrisClient <- function(obj, network, station, location, channel,
   txtcon <- textConnection(gurlc)
   on.exit(close(txtcon),add=TRUE)
   result <- try( DF <- utils::read.delim(txtcon,sep="|",col.names=colNames,colClasses=colClasses,na.strings=""),silent=TRUE)
-  if (class(result) == "try-error" ) {
+  if (inherits(result,"try-error")) {
     err_msg <- geterrmessage()
     if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
       stop(paste("getStation.IrisClient: Cannot open the connection:",url))
@@ -1011,13 +1011,13 @@ getChannel.IrisClient <- function(obj, network, station, location, channel,
   h <-  RCurl::basicTextGatherer()
   result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),silent=TRUE)
 
-  if (class(result) == "try-error" ) {
+  if (inherits(result,"try-error")) {
     err_msg <- geterrmessage()
     stop(paste("getChannel.IrisClient:",err_msg, url))
   }
 
   result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-  if (class(result) == "try-error" ) {
+  if (inherits(result,"try-error")) {
     err_msg <- geterrmessage()
     stop(paste("getChannel.IrisClient:",err_msg, url))
   }
@@ -1038,7 +1038,7 @@ getChannel.IrisClient <- function(obj, network, station, location, channel,
   on.exit(close(txtcon),add=TRUE)
   result <- try( DF <- utils::read.delim(txtcon,sep="|",col.names=colNames,colClasses=colClasses,na.strings=""), silent=TRUE)
 
-  if (class(result) == "try-error" ) {
+  if (inherits(result,"try-error")) {
      err_msg <- geterrmessage()
      if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
         stop(paste("getChannel.IrisClient: Cannot open connection",url))
@@ -1171,13 +1171,13 @@ getAvailability.IrisClient <- function(obj, network, station, location, channel,
   h <-  RCurl::basicTextGatherer()
   result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),silent=TRUE)
 
-  if (class(result) == "try-error" ) {   
+  if (inherits(result,"try-error")) {   
      err_msg <- geterrmessage()
      stop(paste("getAvailability.IrisClient:",err_msg, url))
   }
 
   result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-  if (class(result) == "try-error" ) {
+  if (inherits(result,"try-error")) {
      err_msg <- geterrmessage()
      stop(paste("getAvailability.IrisClient:",err_msg, url))
   }
@@ -1200,7 +1200,7 @@ getAvailability.IrisClient <- function(obj, network, station, location, channel,
   on.exit(close(txtcon), add=TRUE)
   result <- try( DF <- utils::read.delim(txtcon,sep="|",col.names=colNames,colClasses=colClasses,na.strings=""), silent=TRUE)
 
-  if (class(result) == "try-error" ) {
+  if (inherits(result,"try-error")) {
      err_msg <- geterrmessage()
      if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
         stop(paste("getAvailability.IrisClient: Cannot open connection",url))
@@ -1416,13 +1416,13 @@ getDataAvailability.IrisClient <- function(obj, network, station, location, chan
   h <-  RCurl::basicTextGatherer()
   result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),silent=TRUE)
   
-  if (class(result) == "try-error") {
+  if (inherits(result,"try-error")) {
     err_msg <- geterrmessage()
     stop(paste("getDataAvailability.IrisClient:", strtrim(err_msg,500), url))
   }
   
   result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-  if (class(result) == "try-error" ) {
+  if (inherits(result,"try-error")) {
     err_msg <- geterrmessage()
     stop(paste("getDataAvailability.IrisClient:",err_msg, url))
   }
@@ -1445,7 +1445,7 @@ getDataAvailability.IrisClient <- function(obj, network, station, location, chan
   txtcon <- textConnection(gurlc)
   on.exit(close(txtcon), add=TRUE)
   result <- try( DF <- utils::read.delim(txtcon,sep="|",col.names=colNames,colClasses=colClasses,na.strings="",skip=4), silent=TRUE)
-  if (class(result) == "try-error" ) {
+  if (inherits(result,"try-error")) {
     err_msg <- geterrmessage()
     if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
       stop(paste("getDataAvailability.IrisClient: Cannot open connection",url))
@@ -1562,13 +1562,13 @@ getEvalresp.IrisClient <- function(obj, network, station, location, channel, tim
   h <-  RCurl::basicTextGatherer()
   result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),silent=TRUE)
 
-  if (class(result) == "try-error") {  
+  if (inherits(result,"try-error")) {  
      err_msg <- geterrmessage()
      stop(paste("getEvalresp.IrisClient:", strtrim(err_msg,500), url))
   }
 
   result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-  if (class(result) == "try-error" ) {
+  if (inherits(result,"try-error")) {
      err_msg <- geterrmessage()
      stop(paste("getEvalresp.IrisClient:",err_msg, url))
   }
@@ -1591,7 +1591,7 @@ getEvalresp.IrisClient <- function(obj, network, station, location, channel, tim
   txtcon <- textConnection(gurlc)
   on.exit(close(txtcon), add=TRUE)
   result <- try ( DF <- utils::read.table(txtcon, col.names=colNames), silent=TRUE )
-  if (class(result) == "try-error" ) {
+  if (inherits(result,"try-error")) {
     err_msg <- geterrmessage()
     if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
       stop(paste("getEvalresp.IrisClient: Cannot open connection",url))
@@ -1686,13 +1686,13 @@ getEvent.IrisClient <- function(obj, starttime, endtime, minmag, maxmag, magtype
   h <-  RCurl::basicTextGatherer()
   result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),silent=TRUE) 
 
-  if (class(result) == "try-error") {
+  if (inherits(result,"try-error")) {
      err_msg <- geterrmessage()
      stop(paste("getEvent.IrisClient:",err_msg, url))
   }
   
   result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-  if (class(result) == "try-error") {
+  if (inherits(result,"try-error")) {
      err_msg <- geterrmessage()
      stop(paste("getEvent.IrisClient:",err_msg, url))
   }
@@ -1701,11 +1701,11 @@ getEvent.IrisClient <- function(obj, starttime, endtime, minmag, maxmag, magtype
      Sys.sleep(3)
      h <-  RCurl::basicTextGatherer()
      result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),silent=TRUE)
-     if (class(result) == "try-error") {
+     if (inherits(result,"try-error")) {
          stop(paste("getEvent.IrisClient:",err_msg, url))
      }
      result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-     if (class(result) == "try-error") {
+     if (inherits(result,"try-error")) {
          err_msg <- geterrmessage()
          stop(paste("getEvent.IrisClient:",err_msg, url))
      }
@@ -1731,7 +1731,7 @@ getEvent.IrisClient <- function(obj, starttime, endtime, minmag, maxmag, magtype
   txtcon <- textConnection(gurlc)
   on.exit(close(txtcon), add=TRUE)
   result <- try ( DF <- utils::read.table(txtcon, sep="|", quote="", col.names=colNames, colClasses=colClasses),silent=TRUE )
-  if (class(result) == "try-error" ) {
+  if (inherits(result,"try-error")) {
     err_msg <- geterrmessage()
     if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
       stop(paste("getEvent.IrisClient: Cannot open connection",url))
@@ -1825,13 +1825,13 @@ getTraveltime.IrisClient <- function(obj, latitude, longitude, depth, staLatitud
   h <-  RCurl::basicTextGatherer()
   result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),silent=TRUE)
 
-  if (class(result) == "try-error" ) {
+  if (inherits(result,"try-error")) {
     err_msg <- geterrmessage()
     stop(paste("getTraveltime.IrisClient:",err_msg, url))
   }
 
   result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-  if (class(result) == "try-error" ) {
+  if (inherits(result,"try-error")) {
     err_msg <- geterrmessage()
     stop(paste("getTraveltime.IrisClient:",err_msg, url))
   }
@@ -1853,7 +1853,7 @@ getTraveltime.IrisClient <- function(obj, latitude, longitude, depth, staLatitud
   txtcon <- textConnection(gurlc)
   on.exit(close(txtcon), add=TRUE)
   result <- try ( returnValue <- utils::read.table(txtcon, skip=4, col.names=colNames, colClasses=colClasses),silent=TRUE )
-  if (class(result) == "try-error" ) {
+  if (inherits(result,"try-error")) {
     err_msg <- geterrmessage()
     if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
       stop(paste("getTraveltime.IrisClient: Cannot open connection",url))
@@ -1914,13 +1914,13 @@ getDistaz.IrisClient <- function(obj, latitude, longitude, staLatitude, staLongi
                  silent=TRUE)
   
   # Handle error response
-  if (class(result) == "try-error" ) { 
+  if (inherits(result,"try-error")) { 
     err_msg <- geterrmessage()
     stop(paste("getDistaz.IrisClient:", err_msg))
   }
 
   result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-  if (class(result) == "try-error" ) {
+  if (inherits(result,"try-error")) {
     err_msg <- geterrmessage()
     stop(paste("getDistaz.IrisClient:", err_msg))
   }
@@ -1980,7 +1980,7 @@ getDistaz.IrisClient <- function(obj, latitude, longitude, staLatitude, staLongi
   
   # new code:
   result <- try( xmlList <- XML::xmlToList(distazXml), silent=TRUE)
-  if (class(result) == "try-error" ) {
+  if (inherits(result,"try-error")) {
     err_msg <- geterrmessage()
     stop(paste("getDistaz.IrisClient:", err_msg))
   } 

@@ -42,7 +42,7 @@ a valid code or a wildcard expression, e.g. "BH?" or "*". Empty strings are conv
 Otherwise, the ascii string that is used for
 these values is simply inserted into the web service request URL.
 
-For more details see the \href{http://service.iris.edu/fdsnws/station/1/}{web service documentation}.
+For more details see the \href{https://service.iris.edu/fdsnws/station/1/}{web service documentation}.
 }
 
 \value{
@@ -60,7 +60,7 @@ Rows are ordered by \code{network-station}.
 %% ~put references to the literature/web site here ~
 The IRIS DMC station web service:
 
-  \url{http://service.iris.edu/fdsnws/station/1/}
+  \url{https://service.iris.edu/fdsnws/station/1/}
 
 This implementation was inspired by the functionality in the obspy get_stations() method.
  

@@ -43,7 +43,7 @@ A new \code{Stream} object is returned.
 %% ~put references to the literature/web site here ~
 The IRIS DMC dataselect web service:
 
-  \url{http://service.iris.edu/fdsnws/dataselect/1/}
+  \url{https://service.iris.edu/fdsnws/dataselect/1/}
 }
 
 \author{

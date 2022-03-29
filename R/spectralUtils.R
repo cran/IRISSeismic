@@ -473,7 +473,7 @@ psdList2NoiseMatrix <- function(psdList, evalresp=NULL) {
   
   # Need to ensure that the IrisClient object exists as R has a default
   # "iris" dataset.  See help(iris, package="datasets")
-  if (class(iris) == "data.frame") {
+  if (inherits(iris,"data.frame")) {
     iris <- new("IrisClient")
   }
   
@@ -569,7 +569,7 @@ psdDF2NoiseMatrix <- function(DF, evalresp=NULL) {
   
   # Need to ensure that the IrisClient object exists as R has a default
   # "iris" dataset.  See help(iris, package="datasets")
-  if (class(iris) == "data.frame") {
+  if (inherits(iris,"data.frame")) {
     iris <- new("IrisClient")
   }
   
@@ -767,12 +767,12 @@ psdStatistics <- function(PSDs, evalresp=NULL) {
   
   # Get list of frequencies and a noiseMatrix
   
-  if (class(PSDs) == "list") {   
+  if (inherits(PSDs,"list")) {
     
     freq <- PSDs[[1]]$freq
     noiseMatrix <- psdList2NoiseMatrix(PSDs, evalresp) 
     
-  } else if (class(PSDs) == "data.frame") {  
+  } else if (inherits(PSDs,"data.frame")) {  
     
     freq <- sort(unique(PSDs$freq))
     noiseMatrix <- psdDF2NoiseMatrix(PSDs, evalresp)  
@@ -857,11 +857,12 @@ psdStatistics <- function(PSDs, evalresp=NULL) {
 # psdPlot --------------------------------------------------------------
 
 # Plot instrument corrected noise values of PSDs in list or dataframe
+# PSDs <- psdList(st) 
 
 psdPlot <- function(PSDs, style='psd', evalresp=NULL, ylo=-200,yhi=-50, showNoiseModel=TRUE, 
                     showMaxMin=TRUE, showMode=TRUE, showMean=FALSE, showMedian=FALSE, ...) {
   
-  if (class(PSDs) == "list") {
+  if (inherits(PSDs,"list")) {
     
     psdCount <- length(PSDs)
     
@@ -878,7 +879,7 @@ psdPlot <- function(PSDs, style='psd', evalresp=NULL, ylo=-200,yhi=-50, showNois
     endtime <- PSDs[[psdCount]]$endtime
     freq <- PSDs[[1]]$freq
         
-  } else if (class(PSDs) == "data.frame") {
+  } else if (inherits(PSDs,"data.frame")) {
     
     psdCount <- length(unique(PSDs$starttime))
 

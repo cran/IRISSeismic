@@ -59,6 +59,7 @@ signal.
 }
 
 \examples{
+\dontrun{
 # Open a connection to IRIS DMC webservices
 iris <- new("IrisClient")
 
@@ -75,6 +76,7 @@ to <- triggerOnset(tr,picker)
 
 plot(tr)
 abline(v=to, col='red', lwd=2)
+}
 }
 
 \keyword{methods}

@@ -4,9 +4,6 @@
  * Routines to handle TraceList and related structures.
  *
  * Written by Chad Trabant, IRIS Data Management Center
- *
- * modified: 2015.108
- * modified: 2016/04/28 - Robert Casey, IRIS DMC - (REC)
  ***************************************************************************/
 
 #include <stdio.h>
@@ -751,7 +748,7 @@ mstl_addmsrtoseg (MSTraceSeg *seg, MSRecord *msr, hptime_t endtime, flag whence)
    * the first initial sample rate it encountered ( see mstl_msr2seg() )
    */
   seg->samprate_list = add_segsamprate(seg->samprate_list,msr->samprate);
-  
+
   return seg;
 } /* End of mstl_addmsrtoseg() */
 
@@ -1015,8 +1012,8 @@ mstl_printtracelist (MSTraceList *mstl, flag timeformat,
       /* Create formatted time strings */
       if (timeformat == 2)
       {
-        snprintf (stime, sizeof (stime), "%.6f", (double)MS_HPTIME2EPOCH (seg->starttime));
-        snprintf (etime, sizeof (etime), "%.6f", (double)MS_HPTIME2EPOCH (seg->endtime));
+        snprintf (stime, sizeof (stime), "%.6f", MS_HPTIME2EPOCH ((double)seg->starttime));
+        snprintf (etime, sizeof (etime), "%.6f", MS_HPTIME2EPOCH ((double)seg->endtime));
       }
       else if (timeformat == 1)
       {
@@ -1259,8 +1256,8 @@ mstl_printgaplist (MSTraceList *mstl, flag timeformat,
         /* Create formatted time strings */
         if (timeformat == 2)
         {
-          snprintf (time1, sizeof (time1), "%.6f", (double)MS_HPTIME2EPOCH (seg->endtime));
-          snprintf (time2, sizeof (time2), "%.6f", (double)MS_HPTIME2EPOCH (seg->next->starttime));
+          snprintf (time1, sizeof (time1), "%.6f", MS_HPTIME2EPOCH ((double)seg->endtime));
+          snprintf (time2, sizeof (time2), "%.6f", MS_HPTIME2EPOCH ((double)seg->next->starttime));
         }
         else if (timeformat == 1)
         {
@@ -1295,7 +1292,6 @@ mstl_printgaplist (MSTraceList *mstl, flag timeformat,
 
   return;
 } /* End of mstl_printgaplist() */
-
 
 /* REC - non-standard function addition.  To the indicated pointer to an associative linked list
  * add a sample rate value, which will result in either a new node with a count of 1, or an incremented
@@ -1352,4 +1348,3 @@ double get_segsamprate_mode(MSSampRateList *srl) {
         if (max == NULL) return (double) 0.0;
         else return (double) max->samprate;
 } /* End of get_segsamprate_mode */
-

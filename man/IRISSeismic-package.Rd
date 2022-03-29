@@ -23,10 +23,15 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 \references{
 ObsPy: \url{http://obspy.org/}
 
-IRIS DMC web services: \url{http://service.iris.edu/}
+IRIS DMC web services: \url{https://service.iris.edu/}
 }
 
 \section{History}{
+ 
+  version 1.6.4
+  \itemize{
+    \item{ updated to (modified version of) libmseed-2.19.8 }
+  }
 
   version 1.6.3
   \itemize{

@@ -44,8 +44,7 @@ miniseed2Stream <- function(miniseed,
                  silent=TRUE  )
  
   # Handle error response
-  if (class(result) == "try-error" ) {
-    
+  if (inherits(result,"try-error")) {
     err_msg <- geterrmessage()
     if (stringr::str_detect(err_msg,"libmseed__zero traces in miniSEED record")) {
       stop(paste("miniseed2Stream: No data found.", url))

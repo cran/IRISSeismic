@@ -49,9 +49,9 @@ st1 is assumed to be N and st2 is assumed to be E. Orthogonality is also assumed
 
 \references{
 %% ~put references to the literature/web site here ~
-IRIS DMC rotation web service documentation:
+IRIS DMC rotation web service:
 
-  \url{http://service.iris.edu/irisws/rotation/docs/1/help/}
+  \url{https://service.iris.edu/irisws/rotation/1/}
 }
 
 \author{

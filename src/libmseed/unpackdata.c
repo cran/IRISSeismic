@@ -50,7 +50,7 @@ msr_decode_int16 (int16_t *input, int samplecount, int32_t *output,
     sample = input[idx];
 
     if (swapflag)
-      ms_gswap2a (&sample);
+      ms_gswap2 (&sample);
 
     output[idx] = (int32_t)sample;
 
@@ -86,7 +86,7 @@ msr_decode_int32 (int32_t *input, int samplecount, int32_t *output,
     sample = input[idx];
 
     if (swapflag)
-      ms_gswap4a (&sample);
+      ms_gswap4 (&sample);
 
     output[idx] = sample;
 
@@ -122,7 +122,7 @@ msr_decode_float32 (float *input, int samplecount, float *output,
     memcpy (&sample, &input[idx], sizeof (float));
 
     if (swapflag)
-      ms_gswap4a (&sample);
+      ms_gswap4 (&sample);
 
     output[idx] = sample;
 
@@ -158,7 +158,7 @@ msr_decode_float64 (double *input, int samplecount, double *output,
     memcpy (&sample, &input[idx], sizeof (double));
 
     if (swapflag)
-      ms_gswap8a (&sample);
+      ms_gswap8 (&sample);
 
     output[idx] = sample;
 
@@ -220,8 +220,8 @@ msr_decode_steim1 (int32_t *input, int inputlength, int samplecount,
     {
       if (swapflag)
       {
-        ms_gswap4a (&frame[1]);
-        ms_gswap4a (&frame[2]);
+        ms_gswap4 (&frame[1]);
+        ms_gswap4 (&frame[2]);
       }
 
       X0 = frame[1];
@@ -242,7 +242,7 @@ msr_decode_steim1 (int32_t *input, int inputlength, int samplecount,
 
     /* Swap 32-bit word containing the nibbles */
     if (swapflag)
-      ms_gswap4a (&frame[0]);
+      ms_gswap4 (&frame[0]);
 
     /* Decode each 32-bit word according to nibble */
     for (widx = startnibble; widx < 16 && samplecount > 0; widx++)
@@ -273,8 +273,8 @@ msr_decode_steim1 (int32_t *input, int inputlength, int samplecount,
 
         if (swapflag)
         {
-          ms_gswap2a (&word->d16[0]);
-          ms_gswap2a (&word->d16[1]);
+          ms_gswap2 (&word->d16[0]);
+          ms_gswap2 (&word->d16[1]);
         }
 
         if (decodedebug)
@@ -284,7 +284,7 @@ msr_decode_steim1 (int32_t *input, int inputlength, int samplecount,
       case 3: /* 11: One 4-byte difference */
         diffcount = 1;
         if (swapflag)
-          ms_gswap4a (&word->d32);
+          ms_gswap4 (&word->d32);
 
         if (decodedebug)
           ms_log (1, "  W%02d: 11=1x32b  %d\n", widx, word->d32);
@@ -377,8 +377,8 @@ msr_decode_steim2 (int32_t *input, int inputlength, int samplecount,
     {
       if (swapflag)
       {
-        ms_gswap4a (&frame[1]);
-        ms_gswap4a (&frame[2]);
+        ms_gswap4 (&frame[1]);
+        ms_gswap4 (&frame[2]);
       }
 
       X0 = frame[1];
@@ -399,7 +399,7 @@ msr_decode_steim2 (int32_t *input, int inputlength, int samplecount,
 
     /* Swap 32-bit word containing the nibbles */
     if (swapflag)
-      ms_gswap4a (&frame[0]);
+      ms_gswap4 (&frame[0]);
 
     /* Decode each 32-bit word according to nibble */
     for (widx = startnibble; widx < 16 && samplecount > 0; widx++)
@@ -430,7 +430,7 @@ msr_decode_steim2 (int32_t *input, int inputlength, int samplecount,
 
       case 2: /* nibble=10: Must consult dnib, the high order two bits */
         if (swapflag)
-          ms_gswap4a (&frame[widx]);
+          ms_gswap4 (&frame[widx]);
         dnib = EXTRACTBITRANGE (frame[widx], 30, 2);
 
         switch (dnib)
@@ -482,7 +482,7 @@ msr_decode_steim2 (int32_t *input, int inputlength, int samplecount,
 
       case 3: /* nibble=11: Must consult dnib, the high order two bits */
         if (swapflag)
-          ms_gswap4a (&frame[widx]);
+          ms_gswap4 (&frame[widx]);
         dnib = EXTRACTBITRANGE (frame[widx], 30, 2);
 
         switch (dnib)
@@ -642,7 +642,7 @@ msr_decode_geoscope (char *input, int samplecount, float *output,
     case DE_GEOSCOPE163:
       memcpy (&sint, input, sizeof (int16_t));
       if (swapflag)
-        ms_gswap2a (&sint);
+        ms_gswap2 (&sint);
 
       /* Recover mantissa and gain range factor */
       mantissa  = (sint & GEOSCOPE_MANTISSA_MASK);
@@ -659,7 +659,7 @@ msr_decode_geoscope (char *input, int samplecount, float *output,
     case DE_GEOSCOPE164:
       memcpy (&sint, input, sizeof (int16_t));
       if (swapflag)
-        ms_gswap2a (&sint);
+        ms_gswap2 (&sint);
 
       /* Recover mantissa and gain range factor */
       mantissa  = (sint & GEOSCOPE_MANTISSA_MASK);
@@ -755,7 +755,7 @@ msr_decode_cdsn (int16_t *input, int samplecount, int32_t *output,
   {
     memcpy (&sint, &input[idx], sizeof (int16_t));
     if (swapflag)
-      ms_gswap2a (&sint);
+      ms_gswap2 (&sint);
 
     /* Recover mantissa and gain range factor */
     mantissa  = (sint & CDSN_MANTISSA_MASK);
@@ -848,7 +848,7 @@ msr_decode_sro (int16_t *input, int samplecount, int32_t *output,
   {
     memcpy (&sint, &input[idx], sizeof (int16_t));
     if (swapflag)
-      ms_gswap2a (&sint);
+      ms_gswap2 (&sint);
 
     /* Recover mantissa and gain range factor */
     mantissa  = (sint & SRO_MANTISSA_MASK);
@@ -902,7 +902,7 @@ msr_decode_dwwssn (int16_t *input, int samplecount, int32_t *output,
   {
     memcpy (&sint, &input[idx], sizeof (uint16_t));
     if (swapflag)
-      ms_gswap2a (&sint);
+      ms_gswap2 (&sint);
     sample = (int32_t)sint;
 
     /* Take 2's complement for sample */
