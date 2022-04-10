@@ -111,8 +111,12 @@ network <- "TA"
 station <- "M22K"
 channel <- "BHZ"
 
-traceList <- getDataAvailability(iris,network,station,"*",channel,starttime,endtime)
-traceList
+result <- try(traceList <- getDataAvailability(iris,network,station,"*",channel,starttime,endtime))
+if (inherits(result,"try-error")) {
+  message(geterrmessage())
+} else {
+  traceList
+}
 }
 
 \keyword{webservices}

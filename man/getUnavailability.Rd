@@ -89,18 +89,26 @@ starttime <- as.POSIXct("2001-02-28",tz="GMT")
 endtime <- starttime + 2*24*3600
 
 # Use the getEvent web service to determine what events happened in this time period
-events <- getEvent(iris,starttime,endtime,6.0)
-events
+result <- try(events <- getEvent(iris,starttime,endtime,6.0))
+if (inherits(result,"try-error")) {
+  message(geterrmessage())
+} else {
+  events
 
 # biggest event is Nisqually
-eIndex <- which(events$magnitude == max(events$magnitude))
-e <- events[eIndex[1],]
+  eIndex <- which(events$magnitude == max(events$magnitude))
+  e <- events[eIndex[1],]
 
 # Find all BHZ channels that were NOT collecting data at the time of the quake 
 # and within 5 degrees of the quake epicenter (or are otherwise unavailable from IRIS).
-channels <- getUnavailability(iris,"*","*","*","BHZ",starttime,endtime,
-                              lat=e$latitude,long=e$longitude,maxradius=5)
-channels
+  result <- try(channels <- getUnavailability(iris,"*","*","*","BHZ",starttime,endtime,
+                            lat=e$latitude,long=e$longitude,maxradius=5))
+  if (inherits(result,"try-error")) {
+    message(geterrmessage())
+  } else {
+    channels
+  }
+}
 }
 
 \keyword{webservices}

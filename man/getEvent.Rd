@@ -83,17 +83,20 @@ iris <- new("IrisClient")
 # Get events > mag 5.0 over a week in June of 2012
 starttime <- as.POSIXct("2012-06-21", tz="GMT")
 endtime <- starttime + 3600 * 24 * 7
-events <- getEvent(iris, starttime, endtime, minmag=5.0)
+result <- try(events <- getEvent(iris, starttime, endtime, minmag=5.0))
+if (inherits(result,"try-error")) {
+  message(geterrmessage())
+} else {
 
 # Look at all events
-print(paste(nrow(events),"earthquakes found with magnitude > 5.0"))
+  print(paste(nrow(events),"earthquakes found with magnitude > 5.0"))
   
 # Plot events on a map
-#map('world')
-#points(events$longitude, events$latitude, pch=16, cex=1.5, col='red')
-#labels <- paste(" ", as.character(round(events$magnitude,1)), sep="")
-#text(events$longitude, events$latitude, labels=labels, pos=4, cex=1.2, col='red3')
+  #map('world')
+  #points(events$longitude, events$latitude, pch=16, cex=1.5, col='red')
+  #labels <- paste(" ", as.character(round(events$magnitude,1)), sep="")
+  #text(events$longitude, events$latitude, labels=labels, pos=4, cex=1.2, col='red3')
   }
 }
-
+}
 \keyword{webservices}

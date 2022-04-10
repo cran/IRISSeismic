@@ -89,17 +89,25 @@ starttime <- as.POSIXct("2001-02-28",tz="GMT")
 endtime <- starttime + 2*24*3600
 
 # Use the getEvent web service to determine what events happened in this time period
-events <- getEvent(iris,starttime,endtime,6.0)
-events
+result <- try(events <- getEvent(iris,starttime,endtime,6.0))
+if (inherits(result,"try-error")) {
+  message(geterrmessage())
+} else {
+  events
 
 # biggest event is Nisqually
-eIndex <- which(events$magnitude == max(events$magnitude))
-e <- events[eIndex[1],]
+  eIndex <- which(events$magnitude == max(events$magnitude))
+  e <- events[eIndex[1],]
 
 # Which stations in the US network are within 5 degrees of the quake epicenter?
-stations <- getStation(iris,"US","*","*","BHZ",starttime,endtime,
-                       lat=e$latitude,long=e$longitude,maxradius=5)
-stations
+  result <- try(stations <- getStation(iris,"US","*","*","BHZ",starttime,endtime,
+                            lat=e$latitude,long=e$longitude,maxradius=5))
+  if (inherits(result,"try-error")) {
+    message(geterrmessage())
+  } else {
+    stations
+  }
+}
 }
 
 \keyword{webservices}

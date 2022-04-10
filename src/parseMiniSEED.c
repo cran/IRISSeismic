@@ -79,7 +79,7 @@ SEXP parseMiniSEED (SEXP buffer) {
 
   // Set up variables to store information accumulated per MSRecord
   int64_t totalRecords = 0;
-  int64_t totalSamples = 0;
+  //int64_t totalSamples = 0;
 
   // Set up quality variables
   uint8_t b = 0;
@@ -102,7 +102,7 @@ SEXP parseMiniSEED (SEXP buffer) {
       boffset += 256;
     } else {
       totalRecords++;
-      totalSamples += msr->samplecnt;
+      //totalSamples += msr->samplecnt;
 	  
       // TODO:  How to attach quality information to individual TraceSegments?
       // TODO:  Right now we're calculating quality for the entire Trace and attaching
