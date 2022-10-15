@@ -163,6 +163,7 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
   } else {
       url <- paste(url,"&end=", format(endtime,"%Y-%m-%dT%H:%M:%OS6", tz="GMT"),sep="")
   }
+  url <- paste(url,"&nodata=204",sep="")
   if (!is.null(quality) && obj@service_type != "ph5ws" ){
     url <- paste(url,"&quality=",quality,sep="")
   }
@@ -681,6 +682,7 @@ getNetwork.IrisClient <- function(obj, network, station, location, channel,
   url <- paste(url,"&cha=",ifelse(channel=="","*",channel),sep="")
   url <- paste(url,"&starttime=",format(starttime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
   url <- paste(url,"&endtime=",format(endtime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
+  url <- paste(url,"&nodata=204",sep="")
   if (obj@service_type != "ph5ws") {
     url <- paste(url,"&includerestricted=",ifelse(includerestricted,"true","false"),sep="")
   }
@@ -826,6 +828,7 @@ getStation.IrisClient <- function(obj, network, station, location, channel,
   url <- paste(url,"&cha=",ifelse(channel=="","*",channel),sep="")
   url <- paste(url,"&starttime=",format(starttime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
   url <- paste(url,"&endtime=",format(endtime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
+  url <- paste(url,"&nodata=204",sep="")
   if(!is.null(includerestricted) && obj@service_type != "ph5ws") {
     url <- paste(url,"&includerestricted=",includerestricted,sep="")
   }
@@ -969,6 +972,7 @@ getChannel.IrisClient <- function(obj, network, station, location, channel,
   url <- paste(url,"&cha=",ifelse(channel=="","*",channel),sep="")
   url <- paste(url,"&starttime=",format(starttime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
   url <- paste(url,"&endtime=",format(endtime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
+  url <- paste(url,"&nodata=204",sep="")
   if (obj@service_type == "fdsnws") {
     if (!is.null(includerestricted)) {
        url <- paste(url,"&includerestricted=",tolower(includerestricted),sep="")
@@ -1095,7 +1099,7 @@ setMethod("getChannel", signature(obj="IrisClient",
 # With additional parameters, this webservice returns information on all
 # matching SNCLs that have available data.
 #
-# The fdsnws/station/availability web service will return space characters for location
+# The fdsnws/station web service will return space characters for location
 # codes that are SPACE SPACE.
 #
 #   http://service.iris.edu/fdsnws/station/1/
@@ -1127,6 +1131,7 @@ getAvailability.IrisClient <- function(obj, network, station, location, channel,
   url <- paste(url,"&cha=",ifelse(channel=="","*",channel),sep="")
   url <- paste(url,"&starttime=",format(starttime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
   url <- paste(url,"&endtime=",format(endtime,"%Y-%m-%dT%H:%M:%OS", tz="GMT"),sep="")
+  url <- paste(url,"&nodata=204",sep="")
   if (obj@service_type != "ph5ws") {
     url <- paste(url,"&includerestricted=",ifelse(includerestricted,"true","false"),sep="")
   }
@@ -1340,6 +1345,7 @@ getDataAvailability.IrisClient <- function(obj, network, station, location, chan
   url <- paste(url,"&starttime=",format(starttime,"%Y-%m-%dT%H:%M:%OS6", tz="GMT"),sep="")
   url <- paste(url,"&endtime=",format(endtime,"%Y-%m-%dT%H:%M:%OS6", tz="GMT"),sep="")
   url <- paste(url,"&format=geocsv",sep="")
+  url <- paste(url,"&nodata=204",sep="")
   
   # Add optional arguments if they are found
   mergeflag <- 0

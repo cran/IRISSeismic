@@ -28,6 +28,12 @@ IRIS DMC web services: \url{https://service.iris.edu/}
 
 \section{History}{
 
+  version 1.6.6
+  \itemize{
+    \item{ for web service calls that support the nodata=<204|404> option, use nodata=204 }
+    \item{ corrected the crossSpectrum documentation, Pxy is the cross-periodogram for ts1 and ts2 }
+  }
+
   version 1.6.5
   \itemize{
     \item{ examples and vignette updated for better error handling when accessing internet resources}

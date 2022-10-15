@@ -52,8 +52,8 @@ A dataframe with the following columns:
 \item{\code{coh}}{magnitude squared coherence between ts1 and ts2}
 \item{\code{phase}}{cross-spectral phase between ts1 and ts2}
 \item{\code{Pxx}}{periodogram for ts1}
-\item{\code{Pyy}}{cross-periodogram for ts1 and ts2}
-\item{\code{Pxy}}{periodogram for ts2}
+\item{\code{Pyy}}{periodogram for ts2}
+\item{\code{Pxy}}{cross-periodogram for ts1 and ts2}
 }
 
 \references{

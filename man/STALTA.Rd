@@ -101,7 +101,7 @@ A vector of values is returned of the same length as the data in the \code{Trace
 
 \href{http://www.fcaglp.unlp.edu.ar/~velis/papers/PickingGeop10.pdf}{Automatic first-breaks picking: New strategies and algorithms} (Sabbione and Velis 2010)
 
-\href{https://cseg.ca/assets/files/resources/abstracts/2012/279_GC2012_Adaptive_Microseismic_Event_Detection.pdf}{Adaptive microseismic event detection and automatic time picking} (Akram and Eaton 2012)
+\href{https://geoconvention.com/wp-content/uploads/abstracts/2012/279_GC2012_Adaptive_Microseismic_Event_Detection.pdf}{Adaptive microseismic event detection and automatic time picking} (Akram and Eaton 2012)
 
 "Characterization of Global Seismograms Using an Automatic-Picking Algorithm"
 Bulletin of the Seismological Society of America, Vol. 84, No. 2, pp. 366-376, April 1994 (Earle and Shearer)
