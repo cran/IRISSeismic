@@ -23,19 +23,19 @@ psdStatistics(PSDs, evalresp=NULL)
 A list of elements:
 
 \itemize{
-\item{\code{noiseMatrix}}{ -- matrix of corrected power levels; rows=PSDs, columns=frequencies}
-\item{\code{pdfMatrix}}{ -- matrix of probability density values; rows=dB level, columns=frequencies}
-\item{\code{freq}}{ -- vector of frequencies associated statistics vectors and with matrix columns}
-\item{\code{pdfBins}}{ -- vector of power values (dB) associated with \code{pdfMatrix}} rows
-\item{\code{max}}{ -- maximum power level at each frequency}
-\item{\code{min}}{ -- minimum power level at each frequency}
-\item{\code{mean}}{ -- mean power level at each frequency}
-\item{\code{median}}{ -- median power level at each frequency}
-\item{\code{mode}}{ -- mode of power level at each frequency (obtained from \code{pdfMatrix})}
-\item{\code{nlnm}}{ -- low noise model power level at each frequency}
-\item{\code{nhnm}}{ -- high noise model power level at each frequency}
-\item{\code{pct_above}}{ -- percent of PSDs above the high noise model at each frequency}
-\item{\code{pct_below}}{ -- percent of PSDS below the low noise model at each frequency}
+\item{\code{noiseMatrix} -- matrix of corrected power levels; rows=PSDs, columns=frequencies}
+\item{\code{pdfMatrix} -- matrix of probability density values; rows=dB level, columns=frequencies}
+\item{\code{freq} -- vector of frequencies associated statistics vectors and with matrix columns}
+\item{\code{pdfBins} -- vector of power values (dB) associated with \code{pdfMatrix} rows}
+\item{\code{max} -- maximum power level at each frequency}
+\item{\code{min} -- minimum power level at each frequency}
+\item{\code{mean} -- mean power level at each frequency}
+\item{\code{median} -- median power level at each frequency}
+\item{\code{mode} -- mode of power level at each frequency (obtained from \code{pdfMatrix})}
+\item{\code{nlnm} -- low noise model power level at each frequency}
+\item{\code{nhnm} -- high noise model power level at each frequency}
+\item{\code{pct_above} -- percent of PSDs above the high noise model at each frequency}
+\item{\code{pct_below} -- percent of PSDS below the low noise model at each frequency}
 }
 
 A variety of plots can be generated form the information in this list.
@@ -43,7 +43,7 @@ A variety of plots can be generated form the information in this list.
 } %% end of value
 
 \references{
-\href{http://pubs.usgs.gov/of/2005/1438/pdf/OFR-1438.pdf}{Seismic Noise Analysis System Using Power Spectral Density Probability Density Functions} (McNamara and Boaz 2005)
+\href{https://pubs.usgs.gov/of/2005/1438/pdf/OFR-1438.pdf}{Seismic Noise Analysis System Using Power Spectral Density Probability Density Functions} (McNamara and Boaz 2005)
 }
 
 \author{

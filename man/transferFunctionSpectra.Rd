@@ -6,7 +6,7 @@
 \title{function to retrieve response values to use for input to the IRISMustangMetrics::transferFunctionMetric}
 
 \description{
-The \code{transferFunctionSpectra} function returns a frequency-amplitude-phase response from the service.iris.edu/iris/ws/evalresp web service for a seismic \code{Stream} object
+The \code{transferFunctionSpectra} function returns a frequency-amplitude-phase response from the service.earthscope.org/iris/ws/evalresp web service for a seismic \code{Stream} object
 using sampling_rate to determine frequency limits. The IRISMustangMetrics::transferFunctionMetric expects this output as evalresp input.
 }
 
@@ -24,7 +24,7 @@ transferFunctionSpectra(st,sampling_rate)
   \code{getEvalresp} function based on input sample rate. Other getEvalresp inputs are units='def' (default)
    and output='fap' (frequency-amplitude-phase).  
 
-  \code{transferFunctionSpectra} will always call \code{getEvalresp} using the service.iris.edu/irisws/evalresp 
+  \code{transferFunctionSpectra} will always call \code{getEvalresp} using the service.earthscope.org/irisws/evalresp 
    web service. The IRISMustangMetrics::transferFunctionMetric expects this output as evalresp input.
 
 }
@@ -36,7 +36,7 @@ Output is a dataframe with columns named:
 }
 
 \author{
-Mary Templeton \email{met@iris.washington.edu}
+Mary Templeton \email{mary.templeton@earthscope.org}
 }
 
 \seealso{

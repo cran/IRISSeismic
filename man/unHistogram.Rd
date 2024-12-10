@@ -29,7 +29,7 @@ A vector of bin values with appropriate counts of each.
 %% \references{ }
 
 \author{
-Rob Casey \email{rob@iris.washington.edu}
+Rob Casey \email{rob.casey@earthscope.org}
 }
 
 %% \note{ }

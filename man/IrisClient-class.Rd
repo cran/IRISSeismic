@@ -8,15 +8,15 @@
 \title{ Class \code{"IrisClient"} }
 
 \description{
-A class for making data and metadata requests from IRIS DMC web services.
+A class for making data and metadata requests from EarthScope web services.
 }
 
 \section{Slots}{
   \describe{
     \item{\code{site}:}{Object of class \code{"character"}:
-    this is the first part of the url that the web service will be pointed to, defaults to \code{https://service.iris.edu} }
+    this is the first part of the url that the web service will be pointed to, defaults to \code{https://service.earthscope.org} }
     \item{\code{service_type}:}{Object of class \code{"character"}:
-    defaults to \code{fdsnws}; for data retrieval from the IRIS PH5 repository, set this to \code{ph5ws}; }
+    defaults to \code{fdsnws}; for data retrieval from the EarthScope PH5 repository, set this to \code{ph5ws}; }
     \item{\code{debug}:}{Object of class \code{"logical"}:
     when set to TRUE will cause any web service requestURL to be printed }
     \item{\code{useragent}:}{Object of class \code{"character"}:
@@ -39,7 +39,7 @@ A class for making data and metadata requests from IRIS DMC web services.
     makes a request of the instrument response web service and returns the information as a dataframe; see \code{\link{getEvalresp}} }
     \item{getEvent}{
     makes a request of the event web service and returns the information as a dataframe,
-    if \code{site}='https://service.iris.edu' then \code{getEvent} will direct to "https://earthquake.usgs.gov/fdsnws/event/1/query?"; 
+    if \code{site}='https://service.iris.edu' or \code{site}='https://service.earthscope.org' then \code{getEvent} will direct to "https://earthquake.usgs.gov/fdsnws/event/1/query?"; 
     see \code{\link{getEvent}} }
     \item{getNetwork}{
     makes a network request of the station web service and returns the result as a dataframe; see \code{\link{getNetwork}} }
@@ -71,7 +71,7 @@ python ObsPy package (\url{https://docs.obspy.org/packages/autogen/obspy.clients
 
 \examples{
 \dontrun{
-# Open a connection to IRIS DMC webservices
+# Open a connection to EarthScope webservices
 iris <- new("IrisClient", debug=TRUE)
 
 starttime <- as.POSIXct("2012-01-24", tz="GMT")

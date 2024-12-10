@@ -24,7 +24,7 @@
 #
 # This is a port of some of the functionality found in obspy.core.stream.py 
 # 
-#   http://docs.obspy.org/packages/autogen/obspy.core.stream.Stream.html
+#   https://docs.obspy.org/packages/autogen/obspy.core.stream.Stream.html
 #
 ################################################################################
 
@@ -519,7 +519,7 @@ setMethod("getUpDownTimes", signature(x="Stream", min_signal="missing", min_gap=
 #
 # Slicing is rounded to the nearest second.
 #
-# http://docs.obspy.org/packages/autogen/obspy.core.stream.Stream.slice.html#obspy.core.stream.Stream.slice
+# https://docs.obspy.org/packages/autogen/obspy.core.stream.Stream.slice.html#obspy.core.stream.Stream.slice
 ################################################################################
 
 if (!isGeneric("slice")) {
@@ -603,7 +603,7 @@ mergeTraces.Stream <- function(x, fillMethod) {
     stop(paste("mergeTraces.Stream:",num_rates,"unique sampling rates encountered in Stream."))
   }
 
-  # some fdsnws/dataselect implementations cut on record instead of sample like IRIS. Trace starttime can be < requestedStarttime and
+  # some fdsnws/dataselect implementations cut on record instead of sample like EarthScope. Trace starttime can be < requestedStarttime and
   # trace endtime can be > requestedEndtime
   if (gapInfo$nsamples[1] == 0) {
      totalStart <- x@traces[[1]]@stats@starttime
@@ -623,7 +623,7 @@ mergeTraces.Stream <- function(x, fillMethod) {
   # NOTE:  Setting up a list of vectors that we will concatenate in one fell swoop at the end.
   # NOTE:  This avoids the incremental growth and copying that is incredibly slow.
   # NOTE:  See R Inferno Chapter 2 -- Growing Objects
-  # NOTE:    http://www.burns-stat.com/pages/Tutor/R_inferno.pdf
+  # NOTE:    https://www.burns-stat.com/pages/Tutor/R_inferno.pdf
   
   num_vectors <- num_gaps + num_traces
   dataList <- vector('list',num_vectors)

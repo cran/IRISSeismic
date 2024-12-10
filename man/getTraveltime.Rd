@@ -3,11 +3,11 @@
 \alias{getTraveltime}
 \alias{getTraveltime,IrisClient,numeric,numeric,numeric,numeric,numeric-method}
 
-\title{Retrieve seismic traveltime information from IRIS DMC}
+\title{Retrieve seismic traveltime information from EarthScope}
 
 \description{
 The \code{getTraveltime} method obtains seismic traveltime data from
-the IRIS DMC \code{traveltime} web service and returns it in a dataframe.
+the EarthScope \code{traveltime} web service and returns it in a dataframe.
 }
 
 \usage{
@@ -41,9 +41,9 @@ Rows are ordered by \code{travelTime}.
 }
 
 \references{
-The IRIS DMC traveltime web service:
+The EarthScope traveltime web service:
 
-  \url{https://service.iris.edu/irisws/traveltime/1/}
+  \url{https://service.earthscope.org/irisws/traveltime/1/}
 }
 
 \author{
@@ -58,7 +58,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 
 \examples{
 \dontrun{
-# Open a connection to IRIS DMC webservices
+# Open a connection to EarthScope webservices
 iris <- new("IrisClient")
 
 # Two days around the "Nisqually Quake"

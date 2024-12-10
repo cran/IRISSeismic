@@ -53,7 +53,7 @@ signal::butter, signal::filter
 
 \examples{
 \dontrun{
-# Open a connection to IRIS DMC webservices
+# Open a connection to EarthScope webservices
 iris <- new("IrisClient")
 
 # Compare to the results in figure 2a of
@@ -61,7 +61,7 @@ iris <- new("IrisClient")
 # "Determination of New Zealand Ocean Bottom Seismometer Orientation
 #  via Rayleigh-Wave Polarization", Stachnik et al. 
 #
-# http://srl.geoscienceworld.org/content/83/4/704
+# https://srl.geoscienceworld.org/content/83/4/704
 #
 # (note: since publication, ZU.NZ19..BH1 has been renamed BH2 and ZU.NZ19..BH2 has been renamed BH1)
 

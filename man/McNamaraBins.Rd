@@ -6,7 +6,7 @@
 \description{
 The McNamaraBins() function implements the binning algorithm specified in
 the "Data Preparation and Processing" section of
-\href{http://pubs.usgs.gov/of/2005/1438/pdf/OFR-1438.pdf}{Seismic Noise Analysis System Using Power Spectral Density Probability Density Functions}.
+\href{https://pubs.usgs.gov/of/2005/1438/pdf/OFR-1438.pdf}{Seismic Noise Analysis System Using Power Spectral Density Probability Density Functions}.
 }
 
 \usage{
@@ -37,7 +37,7 @@ A dataframe containing binned values is returned with the same column names as t
 }
 
 \references{
-\href{http://pubs.usgs.gov/of/2005/1438/pdf/OFR-1438.pdf}{Seismic Noise Analysis System Using Power Spectral Density Probability Density Functions} (McNamara and Boaz 2005)
+\href{https://pubs.usgs.gov/of/2005/1438/pdf/OFR-1438.pdf}{Seismic Noise Analysis System Using Power Spectral Density Probability Density Functions} (McNamara and Boaz 2005)
 }
 
 \author{

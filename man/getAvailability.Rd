@@ -4,10 +4,10 @@
 \alias{getAvailability,IrisClient,character,character,character,character,POSIXct,POSIXct,logical-method}
 \alias{getAvailability,IrisClient,character,character,character,character,POSIXct,POSIXct,missing-method}
 
-\title{Retrieve Channel metadata from IRIS DMC}
+\title{Retrieve Channel metadata from EarthScope}
 
 \description{
-The \code{getAvailability} method obtains channel metadata for available channels from the IRIS DMC
+The \code{getAvailability} method obtains channel metadata for available channels from the EarthScope
 \code{station} web service and returns it in a dataframe.
 }
 
@@ -48,7 +48,7 @@ Otherwise the ascii string that is used for
 these values is simply inserted into the web service request URL.
 (For non-available channels use \code{\link{getUnavailability}}.)
 
-For more details see the \href{https://service.iris.edu/fdsnws/station/1/}{web service documentation}.
+For more details see the \href{https://service.earthscope.org/fdsnws/station/1/}{web service documentation}.
 }
 
 \value{
@@ -73,9 +73,9 @@ will share the same \code{snclId}.
 
 \references{
 %% ~put references to the literature/web site here ~
-The IRIS DMC station web service:
+The EarthScope station web service:
 
-  \url{https://service.iris.edu/fdsnws/station/1/}
+  \url{https://service.earthscope.org/fdsnws/station/1/}
 
 This implementation was inspired by the functionality in the obspy get_stations() method.
  
@@ -97,7 +97,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 
 %% max preformatted length ---------------------------------------------------
 \examples{
-# Open a connection to IRIS DMC webservices
+# Open a connection to EarthScope webservices
 iris <- new("IrisClient")
 
 # Date of Nisqually quake

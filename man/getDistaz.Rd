@@ -3,11 +3,11 @@
 \alias{getDistaz}
 \alias{getDistaz,IrisClient,numeric,numeric,numeric,numeric-method}
 
-\title{Retrieve great circle distance information from IRIS DMC}
+\title{Retrieve great circle distance information from EarthScope}
 
 \description{
 The \code{getDistaz} method obtains great circle distance data from
-the IRIS DMC \code{distaz} web service.
+the EarthScope \code{distaz} web service.
 }
 
 \usage{
@@ -45,9 +45,9 @@ Only a single row is returned.
 }
 
 \references{
-The IRIS DMC distaz webservice:
+The EarthScope distaz webservice:
 
-  \url{https://service.iris.edu/irisws/distaz/1/}
+  \url{https://service.earthscope.org/irisws/distaz/1/}
 }
 
 \author{

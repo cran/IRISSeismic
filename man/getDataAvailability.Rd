@@ -3,10 +3,10 @@
 \alias{getDataAvailability}
 \alias{getDataAvailability,IrisClient,character,character,character,character,POSIXct,POSIXct-method}
 
-\title{Retrieve miniseed trace extents from IRIS DMC}
+\title{Retrieve miniseed trace extents from EarthScope}
 
 \description{
-The \code{getDataAvailability} method obtains miniseed time extents from the IRIS DMC 
+The \code{getDataAvailability} method obtains miniseed time extents from the EarthScope 
 \code{availability} web service and returns it in a dataframe.
 }
 
@@ -40,14 +40,14 @@ getDataAvailability(obj, network, station, location, channel,starttime, endtime,
 
 \details{
 The \code{getDataAvailability} method uses the FDSNWS availability service to obtain start and endtimes for all continuous trace 
-segments in the IRIS (or other) archive for the requested network, station, location, channels and returns that data in a dataframe. 
+segments in the EarthScope (or other) archive for the requested network, station, location, channels and returns that data in a dataframe. 
 Each row of the dataframe represents a unique data trace extent. 
 
 Each of the arguments \code{network}, \code{station}, \code{location} or \code{channel} may contain
 a valid code or a wildcard expression, e.g. "BH?" or "*". Empty strings are converted to "*".
 Otherwise the ascii string that is used for these values is simply inserted into the web service request URL.
 
-For more details see the \href{https://service.iris.edu/fdsnws/availability/1/}{web service documentation}.
+For more details see the \href{https://service.earthscope.org/fdsnws/availability/1/}{web service documentation}.
 }
 
 \value{
@@ -84,15 +84,15 @@ A dataframe with the following columns:
 
 \references{
 %% ~put references to the literature/web site here ~
-The IRIS DMC station web service:
+The EarthScope station web service:
 
-  \url{https://service.iris.edu/fdsnws/availability/1/}
-  \url{https://service.iris.edu/ph5ws/availability/1/}
+  \url{https://service.earthscope.org/fdsnws/availability/1/}
+  \url{https://service.earthscope.org/ph5ws/availability/1/}
 
 }
 
 \author{
-Gillian Sharer \email{gillian@iris.washington.edu}
+Gillian Sharer \email{gillian.sharer@earthscope.org}
 }
 
 
@@ -102,7 +102,7 @@ Gillian Sharer \email{gillian@iris.washington.edu}
 
 %% max preformatted length ---------------------------------------------------
 \examples{
-# Open a connection to IRIS DMC webservices
+# Open a connection to EarthScope webservices
 iris <- new("IrisClient")
 
 starttime <- as.POSIXct("2018-01-01",tz="GMT")

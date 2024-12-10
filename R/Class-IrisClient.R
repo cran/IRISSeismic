@@ -1,5 +1,5 @@
 ##
-##    S4 classes for communicating with IRIS DMC web services.
+##    S4 classes for communicating with EarthScope web services.
 ##
 ##    Copyright (C) 2012  Mazama Science, Inc.
 ##    by Jonathan Callahan, jonathan@mazamascience.com
@@ -23,12 +23,12 @@
 #
 # Inspiration for the functionality in this code comes from obspy.iris.client.Client 
 # 
-#   http://docs.obspy.org/packages/autogen/obspy.iris.client.Client.html
+#   https://docs.obspy.org/packages/autogen/obspy.iris.client.Client.html
 #
 #
 # Documentation for FDSN Web Services is available here:
 #
-#   http://www.fdsn.org/webservices/
+#   https://www.fdsn.org/webservices/
 #
 ################################################################################
 
@@ -41,7 +41,7 @@
 #
 #    :type site: str, optional
 #    :param site: Base URL of the IRIS Web service (default
-#        is ``'http://service.iris.edu/'``).
+#        is ``'https://service.earthscope.org/'``).
 #    :type service_type: str, optional
 #    :param service_type: second element of URL, usually fdsnws
 #    :type debug: bool, optional
@@ -58,7 +58,7 @@
 
 # check for a user R profile for the IRIS Client site URL
 # otherwise, use the default URL
-irisSite <- "http://service.iris.edu"
+irisSite <- "https://service.earthscope.org"
 if (Sys.getenv("IrisClient_site") != "") {
 	irisSite <- Sys.getenv("IrisClient_site")
 }
@@ -114,7 +114,7 @@ setMethod("initialize","IrisClient",
 # This implementation matches some of the functionality in the obspy dataselect
 # function.
 # 
-#   http://docs.obspy.org/_modules/obspy/iris/client.html#Client.dataselect
+#   https://docs.obspy.org/_modules/obspy/iris/client.html#Client.dataselect
 #
 ################################################################################
 
@@ -303,7 +303,7 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
   # NOTE:  each with a different scale or starttime.  This still represents a single SNCL.
   # NOTE:  What to do about multiple scales in the following getChannel request?
   # Solution 1: if ignoreEpoch==TRUE, then just take the first epoch presented
-  # http://service.iris.edu/fdsnws/station/1/query?net=H2&sta=H2O&loc=00&cha=LHZ&starttime=2001-02-28T18:29:44&endtime=2001-02-28T19:29:44&includerestricted=false&format=text&level=channel
+  # https://service.earthscope.prg/fdsnws/station/1/query?net=H2&sta=H2O&loc=00&cha=LHZ&starttime=2001-02-28T18:29:44&endtime=2001-02-28T19:29:44&includerestricted=false&format=text&level=channel
 
   sncls <- paste(channels$network,channels$station,channels$location,channels$channel)
   if (nrow(channels) > 1 && !ignoreEpoch) {
@@ -353,7 +353,7 @@ setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="PO
 #
 # Data are obtained from the timeseries web service:
 # 
-#   http://service.iris.edu/irisws/timeseries/1/
+#   https://service.earthscope.org/irisws/timeseries/1/
 #
 # This method functions much like getDataselect() but allows for various types
 # of signal processing.
@@ -540,7 +540,7 @@ getTimeseries.IrisClient <- function(obj, network, station, location, channel, s
   # NOTE:  each with a different scale or starttime.  This still represents a single SNCL.
   # NOTE:  What to do about multiple scales in the following getChannel request?
   # Solution 1: if ignoreEpoch==TRUE, then just take the first epoch presented
-  # http://service.iris.edu/fdsnws/station/1/query?net=H2&sta=H2O&loc=00&cha=LHZ&starttime=2001-02-28T18:29:44&endtime=2001-02-28T19:29:44&includerestricted=false&format=text&level=channel
+  # https://service.earthscope.prg/fdsnws/station/1/query?net=H2&sta=H2O&loc=00&cha=LHZ&starttime=2001-02-28T18:29:44&endtime=2001-02-28T19:29:44&includerestricted=false&format=text&level=channel
 
   sncls <- paste(channels$network,channels$station,channels$location,channels$channel)
   if (nrow(channels) > 1 && !ignoreEpoch) {
@@ -571,7 +571,7 @@ setMethod("getTimeseries", signature(obj="IrisClient", network="character", stat
 #
 # Data are obtained from the rotation web service:
 # 
-#   http://service.iris.edu/irisws/rotation/1/
+#   https://service.earthscope.org/irisws/rotation/1/
 #
 ################################################################################
 
@@ -651,7 +651,7 @@ setMethod("getRotation", signature(obj="IrisClient",
 # getNetwork method returns a dataframe with information from the output
 # of the fdsn station web service with "format=text&level=network".
 #
-#   http://service.iris.edu/fdsnws/station/1/
+#   https://service.earthscope.prg/fdsnws/station/1/
 #
 # Example output:
 #
@@ -797,7 +797,7 @@ setMethod("getNetwork", signature(obj="IrisClient",
 # getStation method returns a dataframe with information from the output
 # of the fdsn station web service with "format=text&level=station".
 #
-#   http://service.iris.edu/fdsnws/station/1/
+#   https://service.earthscope.prg/fdsnws/station/1/
 #
 # Example output:
 #
@@ -941,7 +941,7 @@ setMethod("getStation", signature(obj="IrisClient",
 # getChannel method returns a dataframe with information from the output
 # of the fdsn station web service with "format=text&level=channel".
 #
-#   http://service.iris.edu/fdsnws/station/1/
+#   https://service.earthscope.prg/fdsnws/station/1/
 #
 # Example output:
 #
@@ -1102,7 +1102,7 @@ setMethod("getChannel", signature(obj="IrisClient",
 # The fdsnws/station web service will return space characters for location
 # codes that are SPACE SPACE.
 #
-#   http://service.iris.edu/fdsnws/station/1/
+#   https://service.earthscope.prg/fdsnws/station/1/
 #
 # #Network | Station | Location | Channel | Latitude | Longitude | Elevation | Depth | Azimuth | Dip | Instrument | Scale | ScaleFreq | ScaleUnits | SampleRate | StartTime | EndTime
 # CU|ANWB|00|LHZ|17.66853|-61.78557|39.0|0.0|0.0|-90.0|Streckeisen STS-2 Standard-gain|2.43609E9|0.05|M/S|1.0|2010-02-10T18:35:00|2599-12-31T23:59:59
@@ -1321,7 +1321,7 @@ setMethod("getUnavailability", signature(obj="IrisClient",
 # getDataAvailability method returns a dataframe with information from the output
 # of the iris availability web service with "format=text&level=channel".
 #
-# http://service.iris.edu/fdsnws/availability/1/
+# https://service.earthscope.prg/fdsnws/availability/1/
 #
 ################################################################################
 if (!isGeneric("getDataAvailability")) {
@@ -1497,7 +1497,7 @@ setMethod("getDataAvailability", signature(obj="IrisClient",
 ################################################################################
 # getEvalresp method returns instrument response data from the evalresp webservice:
 #
-#   http://service/irisws/evalresp/1/
+#   https://service.earthscope.org/irisws/evalresp/1/
 #
 ################################################################################
 
@@ -1644,7 +1644,7 @@ if (!isGeneric("getEvent")) {
 getEvent.IrisClient <- function(obj, starttime, endtime, minmag, maxmag, magtype,
                                 mindepth, maxdepth) {
   
-  if(stringr::str_detect(obj@site,regex("service.*.iris.edu"))) {
+  if(stringr::str_detect(obj@site,regex("service.*.iris.edu|service.*.earthscope.org"))) {
      url <- "https://earthquake.usgs.gov/fdsnws/event/1/query?"
   } else {
      url <- paste(obj@site,"/fdsnws/event/1/query?",sep="/")
@@ -1774,7 +1774,7 @@ setMethod("getEvent", signature(obj="IrisClient",
 # getTraveltime method returns a dataframe with information from the traveltime
 # webservice:
 #
-#   http://service.iris.edu/irisws/traveltime/1/
+#   https://service.earthscope.org/irisws/traveltime/1/
 #
 ################################################################################
 
@@ -1801,7 +1801,7 @@ getTraveltime.IrisClient <- function(obj, latitude, longitude, depth, staLatitud
     write(paste("<debug>URL =",url), stdout())
   }
   
-  # http://service.iris.edu/irisws/traveltime/1/query?evloc=[-11.12,165.378]&evdepth=10.0&staloc=[-30.4183,151.6293]
+  # https://service.earthscope.org/irisws/traveltime/1/query?evloc=[-11.12,165.378]&evdepth=10.0&staloc=[-30.4183,151.6293]
   #
   #   Model: iasp91
   #   Distance   Depth   Phase   Travel    Ray Param  Takeoff  Incident  Purist    Purist
@@ -1889,7 +1889,7 @@ setMethod("getTraveltime", signature(obj="IrisClient",
 # getDistaz method returns a dataframe with information from the distaz
 # webservice:
 #
-#   http://service.iris.edu/irisws/distaz/1/
+#   https://service.earthscope.org/irisws/distaz/1/
 #
 ################################################################################
 
@@ -1949,7 +1949,7 @@ getDistaz.IrisClient <- function(obj, latitude, longitude, staLatitude, staLongi
       
   # No errors so proceed
   
-  # http://service.iris.edu/irisws/distaz/1/query?stalat=0.0&stalon=0.0&evtlat=15.0&evtlon=0.0
+  # https://service.earthscope.org/irisws/distaz/1/query?stalat=0.0&stalon=0.0&evtlat=15.0&evtlon=0.0
   #
   # <DistanceAzimuth>
   #   <azimuth>180.0</azimuth>
@@ -1959,10 +1959,10 @@ getDistaz.IrisClient <- function(obj, latitude, longitude, staLatitude, staLongi
 
   # See this example for magic with the XML package:
   #
-  #  http://www.omegahat.net/RSXML/gettingStarted.html
+  #  https://www.omegahat.net/RSXML/gettingStarted.html
   
   #  IRISWS distaz xml output became more compicated on 2016/08/17. Simple leaf node parsing no longer works.
-  #  new output for http://service.iris.edu/irisws/distaz/1/query?stalat=0.0&stalon=0.0&evtlat=15.0&evtlon=0.0 looks like:
+  #  new output for https://service.earthscope.org/irisws/distaz/1/query?stalat=0.0&stalon=0.0&evtlat=15.0&evtlon=0.0 looks like:
   #
   # <DistanceAzimuth>
   #   <ellipsoid name="WGS84">

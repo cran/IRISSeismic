@@ -4,10 +4,10 @@
 \alias{getStation,IrisClient,character,character,character,character,POSIXct,POSIXct,logical-method}
 \alias{getStation,IrisClient,character,character,character,character,POSIXct,POSIXct,missing-method}
 
-\title{Retrieve Station metadata from IRIS DMC}
+\title{Retrieve Station metadata from EarthScope}
 
 \description{
-The \code{getStation} method obtains station metadata from the IRIS DMC station web service
+The \code{getStation} method obtains station metadata from the EarthScope station web service
 and returns it in a dataframe.
 }
 
@@ -42,7 +42,7 @@ a valid code or a wildcard expression, e.g. "BH?" or "*". Empty strings are conv
 Otherwise, the ascii string that is used for
 these values is simply inserted into the web service request URL.
 
-For more details see the \href{https://service.iris.edu/fdsnws/station/1/}{web service documentation}.
+For more details see the \href{https://service.earthscope.org/fdsnws/station/1/}{web service documentation}.
 }
 
 \value{
@@ -58,9 +58,9 @@ Rows are ordered by \code{network-station}.
 
 \references{
 %% ~put references to the literature/web site here ~
-The IRIS DMC station web service:
+The EarthScope station web service:
 
-  \url{https://service.iris.edu/fdsnws/station/1/}
+  \url{https://service.earthscope.org/fdsnws/station/1/}
 
 This implementation was inspired by the functionality in the obspy get_stations() method.
  
@@ -81,7 +81,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \examples{
-# Open a connection to IRIS DMC webservices
+# Open a connection to EarthScope webservices
 iris <- new("IrisClient")
 
 # Date of Nisqually quake

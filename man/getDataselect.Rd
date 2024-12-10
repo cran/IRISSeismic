@@ -3,10 +3,10 @@
 \alias{getDataselect,IrisClient,character,character,character,character,POSIXct,POSIXct-method}
 
 
-\title{Retrieve seismic data from IRIS DMC}
+\title{Retrieve seismic data from EarthScope}
 
 \description{
-The \code{getDataselect} method makes a request of the IRIS DMC \code{dataselect} 
+The \code{getDataselect} method makes a request of the EarthScope \code{dataselect} 
 webservice and returns a \code{Stream} object in which individual \code{Traces}
 have been sorted by start time.
 }
@@ -25,7 +25,7 @@ getDataselect(obj, network, station, location, channel,
   \item{starttime}{POSIXct class specifying the starttime (GMT)}
   \item{endtime}{POSIXct class specifying the endtime (GMT)}
   \item{\dots}{optional arguments
-     \code{quality} optional character string identifying the quality. IRIS webservices defaults to quality="M".
+     \code{quality} optional character string identifying the quality. EarthScope webservices defaults to quality="M".
      \code{repository} optional character string identifying whether to exclusively search primary archive or realtime collection buffers.
            Acceptable values are "primary" or "realtime". If not specified, IRIS webservices defaults to both repositories.
      \code{inclusiveEnd} optional logical determining whether the endtime is inclusive (default = TRUE)
@@ -39,7 +39,7 @@ the \code{dataselect} webservice and returned data are parsed using the internal
 
 If the location argument contains an empty string to specify a 'blank' location code, a location
 code of \code{"--"} will be used in the dataselect request URL.
-(See \href{https://service.iris.edu/fdsnws/dataselect/1/}{dataselect documentation}.)
+(See \href{https://service.earthscope.org/fdsnws/dataselect/1/}{dataselect documentation}.)
 
 If \code{inclusiveEnd=FALSE}, then \code{getDataselect} will subtract 0.000001 seconds from the endtime before passing the 
 value to the \code{dataselect} webservice. An endtime of, e.g., \code{as.POSIXct("2016-01-03", tz="GMT")} will be passed 
@@ -68,9 +68,9 @@ A new \code{Stream} object is returned.
 
 \references{
 %% ~put references to the literature/web site here ~
-The IRIS DMC dataselect webservice:
+The EarthScope dataselect webservice:
 
-  \url{https://service.iris.edu/fdsnws/dataselect/1/}
+  \url{https://service.earthscope.org/fdsnws/dataselect/1/}
 
 This implementation is similar in functionality to the obspy dataselect function:
 
@@ -92,7 +92,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 
 \examples{ 
 \dontrun{
-# Open a connection to IRIS DMC webservices
+# Open a connection to EarthScope webservices
 iris <- new("IrisClient")
 options("nanotimeFormat"="\%Y-\%m-\%dT\%H-\%M-\%E9S")
 

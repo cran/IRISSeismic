@@ -104,7 +104,7 @@ python ObsPy package (\url{https://docs.obspy.org/packages/autogen/obspy.core.tr
 
 \examples{
 \dontrun{
-# Open a connection to IRIS DMC webservices
+# Open a connection to EarthScope webservices
 iris <- new("IrisClient")
 
 # Set the starttime and endtime

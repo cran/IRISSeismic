@@ -60,7 +60,7 @@ signal.
 
 \examples{
 \dontrun{
-# Open a connection to IRIS DMC webservices
+# Open a connection to EarthScope webservices
 iris <- new("IrisClient")
 
 starttime <- as.POSIXct("2010-02-27 06:00:00",tz="GMT")

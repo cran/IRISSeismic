@@ -7,13 +7,18 @@
 
 \description{
 This package provides S4 classes for downloading and processing seismological 
-data available from the IRIS Data Management Center (DMC) (\url{http://ds.iris.edu/ds/nodes/dmc/}).
+data available from Earthscope Consortium (\url{https://www.earthscope.org}) (formerly IRIS) or 
+other data centers offering FDSN web services.
 Core classes \code{Trace}, \code{Stream} and \code{IrisClient} and their associated methods
-are inspired by the functionality available in the python ObsPy package (\url{http://obspy.org/}).
+are inspired by the functionality available in the python ObsPy package (\url{https://obspy.org/}).
 }
 
 \section{Introduction}{
-  The "IRISSeismic-intro" vignette gives introductory examples on using the package.
+The "IRISSeismic-intro" vignette gives introductory examples on using the package.
+
+In 2023, IRIS (Incorporated Research Institutions for Seismology) and UNAVCO merged
+to form EarthScope Consortium. IRIS (now EarthScope) webservices are unchanged but 
+can now be accessed at \url{https://service.earthscope.org} as well as \url{https://service.iris.edu}.  
 }
 
 \author{
@@ -21,12 +26,18 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
 \references{
-ObsPy: \url{http://obspy.org/}
+ObsPy: \url{https://obspy.org/}
 
-IRIS DMC web services: \url{https://service.iris.edu/}
+EarthScope web services: \url{https://service.earthscope.org/}
 }
 
 \section{History}{
+
+  version 1.6.7
+  \itemize{
+      \item{ update maintainer contact information }
+      \item{ update IRIS references to EarthScope } 
+  }
 
   version 1.6.6
   \itemize{
@@ -66,7 +77,7 @@ IRIS DMC web services: \url{https://service.iris.edu/}
   version 1.5.2
   \itemize{
     \item{ updated getDataAvailablity to use new fdsnws availability web service specification
-           http://service.iris.edu/fdsnws/availability/1/ }
+           https://service.iris.edu/fdsnws/availability/1/ }
     \item{ fixed bug in getDataAvailability when mergequality=FALSE }
     \item{ fixed bug in getDataAvailability affecting start/end times, introduced in version 1.5.1 }
     \item{fixed bug in mergeTraces when trace has gap at end, introduced in version 1.5.1}
@@ -85,7 +96,7 @@ IRIS DMC web services: \url{https://service.iris.edu/}
     \item{ modified getEvalresp to use IrisClient service_type }
     \item{ new getDataAvailability() to return dataframe of
            miniseed data extents in the IRIS archive using 
-           IRIS web service http://service.iris.edu/irisws/availability/1/ }
+           IRIS web service https://service.iris.edu/irisws/availability/1/ }
     \item{ minor change to src code to pass CRAN checks } 
   }
 
@@ -135,7 +146,7 @@ IRIS DMC web services: \url{https://service.iris.edu/}
   }
   version 1.4.3
   \itemize{
-    \item{changed getEvent default url from http://earthquake.usgs.gov/fdsnws/event/1/ to https://earthquake.usgs.gov/fdsnws/event/1/}
+    \item{changed getEvent default url from https://earthquake.usgs.gov/fdsnws/event/1/ to https://earthquake.usgs.gov/fdsnws/event/1/}
   }
   version 1.4.2
   \itemize{
@@ -176,7 +187,7 @@ IRIS DMC web services: \url{https://service.iris.edu/}
 
   version 1.3.4 -- webservices and plotting
   \itemize{
-    \item{\code{getEvent} forwards http://service.iris.edu/fdsnws/event/1/ calls to http://earthquake.usgs.gov/fdsnws/event/1/}
+    \item{\code{getEvent} forwards https://service.iris.edu/fdsnws/event/1/ calls to https://earthquake.usgs.gov/fdsnws/event/1/}
     \item{\code{getDistaz} changes output dataframe column name ellipsoid..attrs to ellipsoid.name}
     \item{\code{plot.Trace} allows for user supplied ylab and xlab input}
   }
@@ -199,12 +210,12 @@ IRIS DMC web services: \url{https://service.iris.edu/}
 
   version 1.3.0 -- compatibility with IRIS webservices
   \itemize{
-    \item{getDistaz() returns new variables from output of http://services.iris.edu/irisws/distaz/1/}
+    \item{getDistaz() returns new variables from output of https://services.iris.edu/irisws/distaz/1/}
   }
 
   version 1.2.2 -- PDF bug fix
   \itemize{
-    \item{psdList2NoiseMatrix() adds 1 second to start time in getEvalresp call to work around a quirk in http://services.iris.edu/irisws/evalresp/1/ 
+    \item{psdList2NoiseMatrix() adds 1 second to start time in getEvalresp call to work around a quirk in https://services.iris.edu/irisws/evalresp/1/ 
           webservice that will not return a response if the start time is exactly on a metadata epoch boundary.}
   }
   
@@ -216,7 +227,7 @@ IRIS DMC web services: \url{https://service.iris.edu/}
   version 1.2.0 -- PDF
   \itemize{
     \item{psdStatistics() changes method of setting PDF bins from fixed values to bins based on the high and low PSD values 
-          and shifts bin centers by 0.5 dB. The result now matches output from http://services.iris.edu/mustang/noise-pdf.}
+          and shifts bin centers by 0.5 dB. The result now matches output from https://services.iris.edu/mustang/noise-pdf.}
   }
 
   verison 1.1.7 -- improved error handling
@@ -377,7 +388,7 @@ IRIS DMC web services: \url{https://service.iris.edu/}
     \code{quality=M}.)}
     \item{Improved \code{STALTA.Trace()} method removes experimental algorithms and now uses C++ code from package 
     \code{rollSeismic} to calculate rolling means.}
-    \item{Updated \code{IrisClient} now uses web services from \url{http://service.iris.edu} for the following methods:
+    \item{Updated \code{IrisClient} now uses web services from \url{https://service.iris.edu} for the following methods:
     \code{getDataselect}, \code{getEvalresp}, \code{getEvent}}
   }
   
@@ -424,7 +435,7 @@ IRIS DMC web services: \url{https://service.iris.edu/}
 }
 
 \examples{
-# Open a connection to IRIS DMC webservices
+# Open a connection to EarthScope webservices
 iris <- new("IrisClient", debug=TRUE)
 
 starttime <- as.POSIXct("2010-02-27 06:45:00", tz="GMT")

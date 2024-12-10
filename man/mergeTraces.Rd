@@ -24,8 +24,8 @@ mergeTraces(x, fillMethod)
 \details{
 Available values for \code{fillMethod} include:
   \itemize{
-    \item{\code{fillNA}}{ -- gaps are filled with \code{NA} (\R's missing value flag)}
-    \item{\code{fillZero}}{ -- gaps are filled with \code{0.0}}
+    \item{\code{fillNA} -- gaps are filled with \code{NA} (\R's missing value flag)}
+    \item{\code{fillZero} -- gaps are filled with \code{0.0}}
   }
 }
 
@@ -45,7 +45,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 
 \examples{
 \dontrun{
-# Open a connection to IRIS DMC webservices
+# Open a connection to EarthScope webservices
 iris <- new("IrisClient")
 
 starttime <- as.POSIXct("2002-04-20", tz="GMT")

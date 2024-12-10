@@ -99,7 +99,7 @@ A vector of values is returned of the same length as the data in the \code{Trace
 
 \href{https://www.crewes.org/Documents/ResearchReports/2014/CRR201476.pdf}{Automatic time-picking of first arrivals on large seismic datasets}
 
-\href{http://www.fcaglp.unlp.edu.ar/~velis/papers/PickingGeop10.pdf}{Automatic first-breaks picking: New strategies and algorithms} (Sabbione and Velis 2010)
+\href{https://web.archive.org/web/20170809102808/https://www.fcaglp.unlp.edu.ar/~velis/papers/PickingGeop10.pdf}{Automatic first-breaks picking: New strategies and algorithms} (Sabbione and Velis 2010)
 
 \href{https://geoconvention.com/wp-content/uploads/abstracts/2012/279_GC2012_Adaptive_Microseismic_Event_Detection.pdf}{Adaptive microseismic event detection and automatic time picking} (Akram and Eaton 2012)
 
@@ -126,7 +126,7 @@ For higher resolution channels, picking an increment of \code{2/sampling_rate} c
 
 \examples{
 \dontrun{
-# Open a connection to IRIS DMC webservices
+# Open a connection to EarthScope webservices
 iris <- new("IrisClient")
 
 starttime <- as.POSIXct("2010-02-27",tz="GMT")

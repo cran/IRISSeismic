@@ -1,7 +1,7 @@
 ## ----setup, include=FALSE-----------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
 
-## ---- out.width = "600px", echo=FALSE-----------------------------------------
+## ----out.width = "600px", echo=FALSE------------------------------------------
 knitr::include_graphics("rstudio-IRISSeismic.png")
 
 ## ----first, results="hide"----------------------------------------------------
@@ -141,7 +141,7 @@ if (inherits(result,"try-error")) {
 }
 
 ## ----sixteenth, fig.height=4, fig.width=6-------------------------------------
-# Open a connection to IRIS DMC webservices
+# Open a connection to EarthScope webservices
 iris <- new("IrisClient")
 
 # Two days around the "Nisqually Quake"

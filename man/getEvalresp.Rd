@@ -3,11 +3,11 @@
 \alias{getEvalresp}
 \alias{getEvalresp,IrisClient,character,character,character,character,POSIXct-method}
 
-\title{Retrieve instrument response information from IRIS DMC}
+\title{Retrieve instrument response information from EarthScope}
 
 \description{
 The \code{getEvalresp} method obtains instrument response data from
-the IRIS DMC \code{evalresp} webservice.
+the EarthScope \code{evalresp} webservice.
 }
 
 \usage{
@@ -45,7 +45,7 @@ these values is simply passed through to \code{evalresp}.
 
 If the \code{location} argument contains an empty string to specify a 'blank' location code, a location
 code of \code{"--"} will be used in the dataselect request URL.
-(See \href{https://service.iris.edu/fdsnws/dataselect/1/}{dataselect documentation}.)
+(See \href{https://service.earthscope.org/fdsnws/dataselect/1/}{dataselect documentation}.)
 
 The response from \code{evalresp} is converted into a dataframe with rows in order of increasing frequency.
 }
@@ -62,9 +62,9 @@ For \code{output="cs"}, a dataframe with columns named:
 }
 
 \references{
-The IRIS DMC evalresp webservice:
+The EarthScope evalresp webservice:
 
-  \url{https://service.iris.edu/irisws/evalresp/1/}
+  \url{https://service.earthscope.org/irisws/evalresp/1/}
 }
 
 \author{

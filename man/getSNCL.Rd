@@ -3,7 +3,7 @@
 \alias{getSNCL}
 \alias{getSNCL,IrisClient,character,POSIXct,POSIXct-method}
 
-\title{Retrieve seismic data from IRIS DMC}
+\title{Retrieve seismic data from EarthScope}
 
 \description{
 The getSNCL() method is a convenience wrapper for the getSNCL() method
@@ -21,7 +21,7 @@ getSNCL(obj, sncl, starttime, endtime, ...)
   \item{starttime}{ POSIXct class specifying the starttime (GMT) }
   \item{endtime}{ POSIXct class specifying the endtime (GMT) }
   \item{\dots}{optional arguments   
-     \code{quality} optional character string identifying the quality. IRIS webservices defaults to quality="M".
+     \code{quality} optional character string identifying the quality. EarthScope webservices defaults to quality="M".
      \code{repository} optional character string identifying whether to exclusively search primary archive or realtime collection buffers.
            Acceptable values are "primary" or "realtime". If not specified, IRIS webservices defaults to both repositories.
      \code{inclusiveEnd} optional logical determining whether the endtime is inclusive (default = TRUE)
@@ -41,9 +41,9 @@ A new \code{Stream} object is returned.
 
 \references{
 %% ~put references to the literature/web site here ~
-The IRIS DMC dataselect web service:
+The EarthScope dataselect web service:
 
-  \url{https://service.iris.edu/fdsnws/dataselect/1/}
+  \url{https://service.earthscope.org/fdsnws/dataselect/1/}
 }
 
 \author{
@@ -61,7 +61,7 @@ Jonathan Callahan \email{jonathan@mazamascience.com}
 
 \examples{ 
 \dontrun{
-# Open a connection to IRIS DMC webservices
+# Open a connection to EarthScope webservices
 iris <- new("IrisClient")
 
 # Use getSNCL to request data for II.JTS.00.BHZ

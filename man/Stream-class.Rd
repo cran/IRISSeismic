@@ -111,9 +111,9 @@ The \code{Stream} object is inspired by the \code{Stream} class found in the
 python ObsPy package (\url{https://docs.obspy.org/packages/autogen/obspy.core.stream.Stream.html}).
 
 The miniSEED flags and timing_qual values are described in the SEED manual
-(\url{http://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf}).  The "accumulators" contain
+(\url{https://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf}).  The "accumulators" contain
 counts of the number of times each bit flag was set during the parsing of a miniSEED file.
-These attributes are retained primarily for assessing data quality issues within the IRIS DMC.
+These attributes are retained primarily for assessing data quality issues within the EarthScope.
 
 The following code documentation describes how each of the flags is used within miniSEED files:
 \preformatted{
@@ -155,7 +155,7 @@ The following code documentation describes how each of the flags is used within 
 
 \examples{
 \dontrun{
-# Open a connection to IRIS DMC webservices
+# Open a connection to EarthScope webservices
 iris <- new("IrisClient")
 
 starttime <- as.POSIXct("2012-01-24", tz="GMT")

@@ -60,7 +60,7 @@ See \code{\link{getUpDownTimes}}.
 
 \examples{
 \dontrun{
-# Open a connection to IRIS DMC webservices
+# Open a connection to EarthScope webservices
 iris <- new("IrisClient")
 
 # Three Streams, each with different upDownTimes

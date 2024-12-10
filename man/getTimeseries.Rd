@@ -3,10 +3,10 @@
 \alias{getTimeseries}
 \alias{getTimeseries,IrisClient,character,character,character,character,POSIXct,POSIXct-method}
 
-\title{Retrieve seismic data from IRIS DMC}
+\title{Retrieve seismic data from EarthScope}
 
 \description{
-The \code{getTimeseries} method makes a request of the IRIS DMC \code{timeseries} 
+The \code{getTimeseries} method makes a request of the EarthScope \code{timeseries} 
 webservice and returns a \code{Stream} object in which individual \code{Traces}
 have been sorted by start time.
 }
@@ -27,10 +27,11 @@ getTimeseries(obj, network, station, location, channel,
   \item{\dots}{optional arguments
      \code{repository} optional character string identifying whether to exclusively search primary archive or realtime collection buffers.
            Acceptable values are "primary" or "realtime". If not specified, IRIS webservices defaults to both repositories.
-     \code{processing}{optional character string with processing commands }
+     \code{processing} optional character string with processing commands
      \code{inclusiveEnd} optional logical determining whether the endtime is inclusive (default = TRUE)
      \code{ignoreEpoch} optional logical defining behavior when multiple epochs are encountered (default = FALSE)
    }
+
 }
 
 \details{
@@ -46,7 +47,7 @@ The \code{processing} parameter can be used to specify any type of processing su
 \code{timeseries} webs service.  This string must begin with an ampersand and be ready to be appended to the request url, e.g.
 \code{processing="&demean=true&taper0.2,HANNING"}.  This gives the user complete control over the number
 and order of processing commands.
-(See \href{https://service.iris.edu/irisws/timeseries/1/}{timeseries documentation}.)
+(See \href{https://service.earthscope.org/irisws/timeseries/1/}{timeseries documentation}.)
   
 If \code{inclusiveEnd=FALSE}, then \code{getDataselect} will subtract 0.000001 seconds from the endtime before passing the 
 value to the \code{dataselect} webservice. An endtime of, e.g., \code{as.POSIXct("2016-01-03", tz="GMT")} will be passed 
@@ -74,9 +75,9 @@ A new \code{Stream} object is returned.
 
 \references{
 %% ~put references to the literature/web site here ~
-The IRIS DMC timeseries webservice:
+The EarthScope timeseries webservice:
 
-  \url{https://service.iris.edu/irisws/timeseries/1/}
+  \url{https://service.earthscope.org/irisws/timeseries/1/}
 }
 
 \author{
@@ -95,7 +96,7 @@ Jonathan Callahan \email{jonathan.s.callahan@gmail.com}
 
 \examples{
 \dontrun{
-# Open a connection to IRIS DMC webservices (use debug=TRUE so we can see the URLs generated)
+# Open a connection to EarthScope webservices (use debug=TRUE so we can see the URLs generated)
 iris <- new("IrisClient",debug=TRUE)
 
 starttime <- as.POSIXct("2013-06-01",tz="GMT")

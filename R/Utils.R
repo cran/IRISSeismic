@@ -167,8 +167,8 @@ readMiniseedFile <- function(file,
 # Functions similarly to the rotation service with "&azimuth=angle&components=ZRT"
 # expects orthogonal traces
 #
-#   http://service.iris.edu/irisws/rotation/1/
-#   http://service.iris.edu/irisws/rotation/docs/1/help/
+#   https://service.earthscope.org/irisws/rotation/1/
+#   https://service.earthscope.org/irisws/rotation/docs/1/help/
 
 rotate2D <- function(st1,st2,angle) {
   
@@ -290,7 +290,7 @@ rotate2D <- function(st1,st2,angle) {
 #
 # Calculates the geodesic distance between two points using the Haversine formula.
 #
-# from http://www.r-bloggers.com/great-circle-distance-calculations-in-r/
+# from https://www.r-bloggers.com/great-circle-distance-calculations-in-r/
 #
 surfaceDistance <- function(lat1_deg, lon1_deg, lat2_deg, lon2_deg) {
   

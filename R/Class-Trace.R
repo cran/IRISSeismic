@@ -24,7 +24,7 @@
 #
 # This is a port of some of the functionality found in obspy.core.trace.py 
 # 
-#   http://docs.obspy.org/packages/autogen/obspy.core.trace.Trace.html
+#   https://docs.obspy.org/packages/autogen/obspy.core.trace.Trace.html
 ################################################################################
 
 ################################################################################
@@ -114,7 +114,7 @@ setClass("TraceHeader",
 
 ################################################################################
 #
-# A TraceHeader can be initialized with a headerLine as returned by the IRIS DMC timeseries webservice:
+# A TraceHeader can be initialized with a headerLine as returned by the EarthScope timeseries webservice:
 #
 # TIMESERIES LD_POTS__HHZ_M, 351 samples, 100.503 sps, 2012-01-29T00:00:00.006000, SLIST, INTEGER, COUNTS
 #
@@ -683,7 +683,7 @@ if (!isGeneric("hilbert")) {
 } 
 
 # Code copied from seewave package hilbert() method
-#   http://cran.r-project.org/web/packages/seewave/index.html
+#   https://cran.r-project.org/web/packages/seewave/index.html
 hilbert.Trace <- function(x) {
   
   # Always detrend, demean, cosine taper the data
@@ -710,7 +710,7 @@ if (!isGeneric("envelope")) {
 } 
 
 # Code copied from seewave package env() and hilbert() methods
-#   http://cran.r-project.org/web/packages/seewave/index.html
+#   https://cran.r-project.org/web/packages/seewave/index.html
 envelope.Trace <- function(x) {
   
   # Always detrend, demean, cosine taper the data
@@ -733,21 +733,21 @@ setMethod("envelope", signature(x="Trace"),
 
 # Multi-purpose SLA/TLA trigger algorithm --------------------------------------
 
-# NOTE:  http://en.wikipedia.org/wiki/First_break_picking
+# NOTE:  https://en.wikipedia.org/wiki/First_break_picking
 # NOTE:  
 # NOTE:  "A Comparison of Select Trigger Algorithms for Automated Global Seismic Phase and Event Detection"
-# NOTE:  http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.116.245&rep=rep1&type=pdf
+# NOTE:  https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.116.245&rep=rep1&type=pdf
 # NOTE:
 # NOTE:  Wong:
 # NOTE:  "Automatic time-picking of first arrivals on noisy microseismic data"
-# NOTE:  http://www.crewes.org/ForOurSponsors/ConferenceAbstracts/2009/CSEG/Wong_CSEG_2009.pdf
+# NOTE:  https://www.crewes.org/ForOurSponsors/ConferenceAbstracts/2009/CSEG/Wong_CSEG_2009.pdf
 # NOTE:
 # NOTE:  GEOPHYSICS, VOL. 75, NO. 4 (JULY-AUGUST 2010); P. V67-V76
 # NOTE:  Automatic first-breaks picking: New strategies and algorithms"
-# NOTE:  http://www.fcaglp.unlp.edu.ar/~velis/papers/PickingGeop10.pdf
+# NOTE:  https://www.fcaglp.unlp.edu.ar/~velis/papers/PickingGeop10.pdf
 # NOTE:
 # NOTE:  "Adaptive microseismic event detection and automatic time picking"
-# NOTE:  http://www.cspg.org/documents/Conventions/Archives/Annual/2012/279_GC2012_Adaptive_Microseismic_Event_Detection.pdf
+# NOTE:  https://www.cspg.org/documents/Conventions/Archives/Annual/2012/279_GC2012_Adaptive_Microseismic_Event_Detection.pdf
 # NOTE:
 # NOTE:  Earle and Shearer:
 # NOTE:  "Characterization of Global Seismograms Using an Automatic-Picking Algorithm"
@@ -842,7 +842,7 @@ setMethod("STALTA", signature(x="Trace", staSecs="missing", ltaSecs="missing",
 # NOTE:  This method only returns the first timepoint or NA.  It DOES NOT implement
 # NOTE:  the full functionality found in the ObsPy method of the same name.
 #
-# NOTE:  http://docs.obspy.org/packages/autogen/obspy.signal.trigger.triggerOnset.html
+# NOTE:  https://docs.obspy.org/packages/autogen/obspy.signal.trigger.triggerOnset.html
 
 if (!isGeneric("triggerOnset")) {
   setGeneric("triggerOnset", function(x, picker, threshold, index) {
