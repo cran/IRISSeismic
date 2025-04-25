@@ -30,8 +30,8 @@ getEvent(obj, starttime, endtime, minmag, maxmag, magtype,
 The \code{getEvent} method uses the event web service to obtain data for all events that meet the criteria defined by the arguments
 and returns that data in a dataframe. Each row of the dataframe represents a unique event.
 
-\code{getEvent} calls to the EarthScope event webservice now go to https://earthquake.usgs.gov/fdsnws/event/1/. If \code{obj@site} is something
-other than "https://service.iris.edu" or "https://service.earthscope.org", getEvent will point to \code{obj@site}/fdsnws/event/1/. The event service must be able to output
+\code{getEvent} calls to the IRIS event webservice now go to https://earthquake.usgs.gov/fdsnws/event/1/. If \code{obj@site} is something
+other than "https://service.earthscope.org", getEvent will point to \code{obj@site}/fdsnws/event/1/. The event service must be able to output
 format=text.
 
 }

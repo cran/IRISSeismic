@@ -61,7 +61,7 @@ iris <- new("IrisClient")
 # "Determination of New Zealand Ocean Bottom Seismometer Orientation
 #  via Rayleigh-Wave Polarization", Stachnik et al. 
 #
-# https://srl.geoscienceworld.org/content/83/4/704
+# http://srl.geoscienceworld.org/content/83/4/704
 #
 # (note: since publication, ZU.NZ19..BH1 has been renamed BH2 and ZU.NZ19..BH2 has been renamed BH1)
 

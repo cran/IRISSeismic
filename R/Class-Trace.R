@@ -114,7 +114,7 @@ setClass("TraceHeader",
 
 ################################################################################
 #
-# A TraceHeader can be initialized with a headerLine as returned by the EarthScope timeseries webservice:
+# A TraceHeader can be initialized with a headerLine as returned by the IRIS DMC timeseries webservice:
 #
 # TIMESERIES LD_POTS__HHZ_M, 351 samples, 100.503 sps, 2012-01-29T00:00:00.006000, SLIST, INTEGER, COUNTS
 #

@@ -111,7 +111,7 @@ The \code{Stream} object is inspired by the \code{Stream} class found in the
 python ObsPy package (\url{https://docs.obspy.org/packages/autogen/obspy.core.stream.Stream.html}).
 
 The miniSEED flags and timing_qual values are described in the SEED manual
-(\url{https://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf}).  The "accumulators" contain
+(\url{http://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf}).  The "accumulators" contain
 counts of the number of times each bit flag was set during the parsing of a miniSEED file.
 These attributes are retained primarily for assessing data quality issues within the EarthScope.
 

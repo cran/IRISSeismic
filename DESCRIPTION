@@ -1,6 +1,6 @@
 Type: Package
 Package: IRISSeismic
-Version: 1.6.7
+Version: 1.7.0
 Title: Classes and Methods for Seismic Data Analysis
 Authors@R: c(
     person("Jonathan", "Callahan", email="jonathan@mazamascience.com", role=c("aut")),
@@ -17,18 +17,18 @@ VignetteBuilder: knitr
 Description: Provides classes and methods for seismic data analysis. The
              base classes and methods are inspired by the python code found in
              the 'ObsPy' python toolbox <https://github.com/obspy/obspy>. Additional classes and 
-             methods support data returned by web services provided by EarthScope.
-             <https://service.earthscope.org/>.
+             methods support data returned by web services provided by the 'IRIS DMC'
+             <http://service.iris.edu/>.
 Collate: Class-Trace.R Class-Stream.R Class-IrisClient.R
-        mseedWrappers.R Utils.R spectralUtils.R
+        mseedWrappers.R Utils.R spectralUtils.R zzz.R
 License: GPL (>= 2)
 Repository: CRAN
 NeedsCompilation: yes
-Packaged: 2024-12-10 01:29:54 UTC; gilliansharer
 Author: Jonathan Callahan [aut],
   Rob Casey [aut],
   Gillian Sharer [aut, cre],
   Mary Templeton [aut],
   Chad Trabant [ctb]
 Maintainer: Gillian Sharer <gillian.sharer@earthscope.org>
-Date/Publication: 2024-12-10 08:30:12 UTC
+Packaged: 2025-04-23 23:41:17 UTC; gilliansharer
+Date/Publication: 2025-04-25 09:00:06 UTC

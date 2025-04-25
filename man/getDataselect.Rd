@@ -25,7 +25,7 @@ getDataselect(obj, network, station, location, channel,
   \item{starttime}{POSIXct class specifying the starttime (GMT)}
   \item{endtime}{POSIXct class specifying the endtime (GMT)}
   \item{\dots}{optional arguments
-     \code{quality} optional character string identifying the quality. EarthScope webservices defaults to quality="M".
+     \code{quality} optional character string identifying the quality. IRIS webservices defaults to quality="M".
      \code{repository} optional character string identifying whether to exclusively search primary archive or realtime collection buffers.
            Acceptable values are "primary" or "realtime". If not specified, IRIS webservices defaults to both repositories.
      \code{inclusiveEnd} optional logical determining whether the endtime is inclusive (default = TRUE)
@@ -57,8 +57,9 @@ Handling all possible metadata differences so that the data may be merged is bey
 package. Instead, to avoid errors, users may specify \code{ignoreEpoch=TRUE} in which case
 the very first SNCL-epoch encountered will be used and all others will be discarded.
 
-For access to restricted data, getDataselect will look for system environmental variable "IrisClient_netrc"
-which should point to a .netrc authentication file.
+For access to restricted data, getDataselect will look for a system environmental variable "IrisClient_passw" which should be a 
+string in the form "login:password". Alternatively, getDataselect will look for system environmental variable 
+"IrisClient_netrc" which should point to a .netrc authentication file.
 
 }
 

@@ -227,7 +227,6 @@ ms_readmsr_main (MSFileParam **ppmsfp, MSRecord **ppmsr, const char *msfile,
   int readsize  = 0;
   int readcount = 0;
   int retcode   = MS_NOERROR;
-  char *endptr;
 
   if (!ppmsr)
     return MS_GENERROR;
@@ -470,9 +469,7 @@ ms_readmsr_main (MSFileParam **ppmsfp, MSRecord **ppmsr, const char *msfile,
       memcpy (hdrstr, MSFPREADPTR (msfp) + (packtypes[msfp->packtype][0] + packskipsize - packtypes[msfp->packtype][1]),
               packtypes[msfp->packtype][1]);
 
-      /*(replacing) sscanf (hdrstr, " %" SCNd64, &datasize);*/
-      datasize = scan_d64(hdrstr,0,&endptr);
-
+      sscanf (hdrstr, " %" SCNd64, &datasize);
       packdatasize = (off_t)datasize;
 
       /* Next pack header = File position + skipsize + header size + data size
@@ -495,7 +492,7 @@ ms_readmsr_main (MSFileParam **ppmsfp, MSRecord **ppmsr, const char *msfile,
     {
       char srcname[100];
 
-      ms_recsrcname (MSFPREADPTR (msfp), srcname, 1);
+      ms_recsrcname (MSFPREADPTR (msfp), srcname, sizeof(srcname), 1);
 
       if (!ms_matchselect (selections, srcname, HPTERROR, HPTERROR, NULL))
       {
@@ -983,6 +980,11 @@ ms_fread (char *buf, int size, int num, FILE *stream)
   return read;
 } /* End of ms_fread() */
 
+/* (GKS, 04-22-2025) msr_writemseed, mst_writemseed, mst_writemseedgroup, and
+ * ms_record_handler_int are commented out because CRAN standards require 
+ * compiled code to not write to stdout. The IRISSeismic R-package does not 
+ * call on these functions. 
+ */
 /***************************************************************************
  * ms_record_handler_int:
  *
@@ -990,14 +992,15 @@ ms_fread (char *buf, int size, int num, FILE *stream)
  * an open file descriptor to which records will be written.
  *
  ***************************************************************************/
-static void
+/* static void
 ms_record_handler_int (char *record, int reclen, void *ofp)
 {
   if (fwrite (record, reclen, 1, (FILE *)ofp) != 1)
   {
     ms_log (2, "Error writing to output file\n");
   }
-} /* End of ms_record_handler_int() */
+} // End of ms_record_handler_int() 
+*/
 
 /***************************************************************************
  * msr_writemseed:
@@ -1007,7 +1010,7 @@ ms_record_handler_int (char *record, int reclen, void *ofp)
  *
  * Returns the number of records written on success and -1 on error.
  ***************************************************************************/
-int
+/* int
 msr_writemseed (MSRecord *msr, const char *msfile, flag overwrite,
                 int reclen, flag encoding, flag byteorder, flag verbose)
 {
@@ -1019,7 +1022,7 @@ msr_writemseed (MSRecord *msr, const char *msfile, flag overwrite,
   if (!msr || !msfile)
     return -1;
 
-  /* Open output file or use stdout */
+  // Open output file or use stdout
   if (strcmp (msfile, "-") == 0)
   {
     ofp = stdout;
@@ -1031,7 +1034,7 @@ msr_writemseed (MSRecord *msr, const char *msfile, flag overwrite,
     return -1;
   }
 
-  /* Pack the MSRecord */
+  // Pack the MSRecord
   if (msr->numsamples > 0)
   {
     msr->encoding  = encoding;
@@ -1047,11 +1050,12 @@ msr_writemseed (MSRecord *msr, const char *msfile, flag overwrite,
     }
   }
 
-  /* Close file and return record count */
+  // Close file and return record count 
   fclose (ofp);
 
   return (packedrecords >= 0) ? packedrecords : -1;
-} /* End of msr_writemseed() */
+} // End of msr_writemseed() 
+*/
 
 /***************************************************************************
  * mst_writemseed:
@@ -1061,7 +1065,7 @@ msr_writemseed (MSRecord *msr, const char *msfile, flag overwrite,
  *
  * Returns the number of records written on success and -1 on error.
  ***************************************************************************/
-int
+/* int
 mst_writemseed (MSTrace *mst, const char *msfile, flag overwrite,
                 int reclen, flag encoding, flag byteorder, flag verbose)
 {
@@ -1073,7 +1077,7 @@ mst_writemseed (MSTrace *mst, const char *msfile, flag overwrite,
   if (!mst || !msfile)
     return -1;
 
-  /* Open output file or use stdout */
+  // Open output file or use stdout 
   if (strcmp (msfile, "-") == 0)
   {
     ofp = stdout;
@@ -1085,7 +1089,7 @@ mst_writemseed (MSTrace *mst, const char *msfile, flag overwrite,
     return -1;
   }
 
-  /* Pack the MSTrace */
+  // Pack the MSTrace 
   if (mst->numsamples > 0)
   {
     packedrecords = mst_pack (mst, &ms_record_handler_int, ofp, reclen, encoding,
@@ -1098,11 +1102,12 @@ mst_writemseed (MSTrace *mst, const char *msfile, flag overwrite,
     }
   }
 
-  /* Close file and return record count */
+  // Close file and return record count 
   fclose (ofp);
 
   return (packedrecords >= 0) ? packedrecords : -1;
-} /* End of mst_writemseed() */
+} // End of mst_writemseed()
+*/ 
 
 /***************************************************************************
  * mst_writemseedgroup:
@@ -1112,7 +1117,7 @@ mst_writemseed (MSTrace *mst, const char *msfile, flag overwrite,
  *
  * Returns the number of records written on success and -1 on error.
  ***************************************************************************/
-int
+/* int
 mst_writemseedgroup (MSTraceGroup *mstg, const char *msfile, flag overwrite,
                      int reclen, flag encoding, flag byteorder, flag verbose)
 {
@@ -1126,7 +1131,7 @@ mst_writemseedgroup (MSTraceGroup *mstg, const char *msfile, flag overwrite,
   if (!mstg || !msfile)
     return -1;
 
-  /* Open output file or use stdout */
+  // Open output file or use stdout 
   if (strcmp (msfile, "-") == 0)
   {
     ofp = stdout;
@@ -1138,7 +1143,7 @@ mst_writemseedgroup (MSTraceGroup *mstg, const char *msfile, flag overwrite,
     return -1;
   }
 
-  /* Pack each MSTrace in the group */
+  // Pack each MSTrace in the group 
   mst = mstg->traces;
   while (mst)
   {
@@ -1164,8 +1169,9 @@ mst_writemseedgroup (MSTraceGroup *mstg, const char *msfile, flag overwrite,
     mst = mst->next;
   }
 
-  /* Close file and return record count */
+  // Close file and return record count 
   fclose (ofp);
 
   return packedrecords;
-} /* End of mst_writemseedgroup() */
+} // End of mst_writemseedgroup() 
+*/

@@ -54,9 +54,9 @@ EXPORTS
    ms_readtracelist
    ms_readtracelist_timewin
    ms_readtracelist_selection
-   msr_writemseed
-   mst_writemseed
-   mst_writemseedgroup
+;   msr_writemseed
+;   mst_writemseed
+;   mst_writemseedgroup
    ms_recsrcname
    ms_splitsrcname
    ms_strncpclean

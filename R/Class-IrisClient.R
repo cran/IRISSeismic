@@ -19,7 +19,7 @@
 ##    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 ################################################################################
-# R classes for an IRIS web services request client.
+# R classes for an EarthScope web services request client.
 #
 # Inspiration for the functionality in this code comes from obspy.iris.client.Client 
 # 
@@ -35,12 +35,12 @@
 ################################################################################
 # Class IrisClient
 #
-# IRIS Web service request client.
+# EarthScope web service request client.
 #
 # Documentation verbatim from obspy.iris.client.Client:
 #
 #    :type site: str, optional
-#    :param site: Base URL of the IRIS Web service (default
+#    :param site: Base URL of the EarthScope web service (default
 #        is ``'https://service.earthscope.org/'``).
 #    :type service_type: str, optional
 #    :param service_type: second element of URL, usually fdsnws
@@ -55,6 +55,7 @@
 #
 ################################################################################
 
+utils::globalVariables(c('irisNetrc','irisPass'))
 
 # check for a user R profile for the IRIS Client site URL
 # otherwise, use the default URL
@@ -62,13 +63,14 @@ irisSite <- "https://service.earthscope.org"
 if (Sys.getenv("IrisClient_site") != "") {
 	irisSite <- Sys.getenv("IrisClient_site")
 }
-# check R profile for specific reference to .netrc authentication file
-# which allows us to access restricted data sets
-# e.g. irisNetrc <- "/home/mustang/mustang.netrc"
-# we will use no default here
-irisNetrc <- NULL
-if (Sys.getenv("IrisClient_netrc") != "") { 
-	irisNetrc <- Sys.getenv("IrisClient_netrc")
+
+eventSite <- "https://earthquake.usgs.gov"
+if (Sys.getenv("IrisClient_event_site") != "") {
+	eventSite <- Sys.getenv("IrisClient_event_site")
+} else if (Sys.getenv("IrisClient_site") != "") {
+  if(!stringr::str_detect(Sys.getenv("IrisClient_site"), regex("service.*.iris.edu|service.*.earthscope.org"))){
+      eventSite <- Sys.getenv("IrisClient_site")
+  }
 }
 
 # we will want the client using us as a library to be able to identify itself.
@@ -80,11 +82,11 @@ if (Sys.getenv("IrisClient_agent") != "") {
 }
 
 useragent1 = paste0("IRISSeismic/",
-                    ifelse("IRISSeismic" %in% rownames(installed.packages()),
-                           installed.packages()["IRISSeismic","Version"], "local code"),
+                    ifelse("IRISSeismic" %in% rownames(utils::installed.packages()),
+                           utils::installed.packages()["IRISSeismic","Version"], "local code"),
                     " RCurl/",
-                     ifelse("RCurl" %in% rownames(installed.packages()),
-                           installed.packages()["RCurl","Version"], "local code"),
+                     ifelse("RCurl" %in% rownames(utils::installed.packages()),
+                           utils::installed.packages()["RCurl","Version"], "local code"),
                     " R/", R.version$major,".",R.version$minor,
                     " ", version$platform,
                      " (",irisUserAgent,")")
@@ -95,17 +97,30 @@ setClass("IrisClient",
          representation(site = "character",
                         service_type = "character",
                         debug = "logical",
-                        useragent = "character")
+                        useragent = "character",
+                        event_site = "character",
+                        retries = "numeric")
 )
 
 setMethod("initialize","IrisClient",
-          function(.Object, site=irisSite,debug=FALSE, useragent=useragent1, service_type="fdsnws"){
+          function(.Object, site=irisSite,debug=FALSE, useragent=useragent1, 
+                   service_type="fdsnws",event_site = eventSite, retries=1){ 
               .Object@site=site
               .Object@service_type=service_type
               .Object@debug=debug
               .Object@useragent=useragent
+              .Object@event_site=event_site
+              .Object@retries=retries
               .Object
           })
+
+setValidity("IrisClient", function(object){
+    if (object@retries > 5) {
+        "@retries must be 5 or fewer"
+    } else {
+        TRUE
+    }      
+})
 
 
 ################################################################################
@@ -119,9 +134,7 @@ setMethod("initialize","IrisClient",
 ################################################################################
 
 if (!isGeneric("getDataselect")) {
-  setGeneric("getDataselect", function(obj, network, station, location, channel, starttime, endtime, ...) {
-    standardGeneric("getDataselect")
-  })
+  setGeneric("getDataselect", function(obj, network, station, location, channel, starttime, endtime, ...) standardGeneric("getDataselect"))
 }
 
 getDataselect.IrisClient <- function(obj, network, station, location, channel, starttime, endtime, quality=NULL,
@@ -133,14 +146,10 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
   if (!is.logical(ignoreEpoch)) {
      stop(paste("getDataselect.IrisClient: option inclusiveEnd must be TRUE or FALSE"))
   }
-  # allow authenticated access.
-  # if we have a netrc definition, then use queryauth to access data
-  # else, use standard query call
-  url <- NULL
   
-  #print(paste0("irisNetrc=",irisNetrc))
+  url <- NULL
 
-  if (! is.null(irisNetrc)) {
+  if (! is.null(irisNetrc) || ! is.null(irisPass)) {
     	url <- paste(obj@site,obj@service_type,"dataselect/1/queryauth?",sep="/")
   } else {
     	url <- paste(obj@site,obj@service_type,"dataselect/1/query?",sep="/")
@@ -158,10 +167,10 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
   url <- paste(url,"&cha=", channel,sep="")
   url <- paste(url,"&start=", format(starttime,"%Y-%m-%dT%H:%M:%OS6", tz="GMT"),sep="")
   if (! inclusiveEnd) {
-      endtime <- endtime-0.000001
-      url <- paste(url,"&end=", format(endtime,"%Y-%m-%dT%H:%M:%OS6", tz="GMT"),sep="")
+    endtime <- endtime-0.000001
+    url <- paste(url,"&end=", format(endtime,"%Y-%m-%dT%H:%M:%OS6", tz="GMT"),sep="")
   } else {
-      url <- paste(url,"&end=", format(endtime,"%Y-%m-%dT%H:%M:%OS6", tz="GMT"),sep="")
+    url <- paste(url,"&end=", format(endtime,"%Y-%m-%dT%H:%M:%OS6", tz="GMT"),sep="")
   }
   url <- paste(url,"&nodata=204",sep="")
   if (!is.null(quality) && obj@service_type != "ph5ws" ){
@@ -180,98 +189,87 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
     write(paste("<debug>URL =",url), stdout())
   }
   
+  h <-  RCurl::basicTextGatherer()
+  # Make authenticated request using password
+  if (! is.null(irisPass)) {
+    result <- try( dataselectResponse <- 
+                   RCurl::getBinaryURL(url, useragent=obj@useragent, userpwd=irisPass,
+                                       .opts = list(headerfunction = h$update,followlocation = TRUE, 
+                                       low.speed.time=300, low.speed.limit=1, connecttimeout=300)),
+                  silent=TRUE)
+  } 
+
   # Make authenticated request using a netrc file
-  if (! is.null(irisNetrc)) {
-        h <-  RCurl::basicTextGatherer()
-        result <- try( dataselectResponse <- RCurl::getBinaryURL(url, useragent=obj@useragent, 
-				             netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update,followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)), 
-                       silent=TRUE)
-
-        # Handle error response
-        if (inherits(result,"try-error")) {
-	    err_msg <- geterrmessage()
-            stop(paste("getDataselect.IrisClient:",err_msg, url))
-	}
-
-        result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-        if (inherits(result,"try-error")) {
-            err_msg <- geterrmessage()
-            stop(paste("getDataselect.IrisClient:",err_msg, url))
-        }
-
-        if (header["status"] == "401") {  # authentication error, try again
-            Sys.sleep(3)
-            h <-  RCurl::basicTextGatherer()
-            result <- try( dataselectResponse <- RCurl::getBinaryURL(url, useragent=obj@useragent,
-                                                 netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update,followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)), 
-                           silent=TRUE)
-            # Handle error response
-            if (inherits(result,"try-error")) {
-               err_msg <- geterrmessage()
-               stop(paste("getDataselect.IrisClient:",err_msg, url))
-            }
-
-            result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-            if (inherits(result,"try-error")) {
-              err_msg <- geterrmessage()
-              stop(paste("getDataselect.IrisClient:",err_msg, url))
-            }
-        }
-        if (header["status"] == "500") {  # internal server error, try again
-            Sys.sleep(3)
-            h <-  RCurl::basicTextGatherer()
-            result <- try( dataselectResponse <- RCurl::getBinaryURL(url, useragent=obj@useragent,
-                                                 netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update,followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),
-                           silent=TRUE)
-            # Handle error response
-            if (inherits(result,"try-error")) {
-               err_msg <- geterrmessage()
-               stop(paste("getDataselect.IrisClient:",err_msg, url))
-            }
-            result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-            if (inherits(result,"try-error")) {
-              err_msg <- geterrmessage()
-              stop(paste("getDataselect.IrisClient:",err_msg, url))
-            }
-        }
-
-  } else {
-        h <-  RCurl::basicTextGatherer()
-  	result <- try( dataselectResponse <- RCurl::getBinaryURL(url, useragent=obj@useragent, .opts = list(headerfunction = h$update,followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),
-                       silent=TRUE)
-
-        # Handle error response
-        if (inherits(result,"try-error")) {
-            err_msg <- geterrmessage()
-            stop(paste("getDataselect.IrisClient:",err_msg,url))
-        }
-
-        result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-        if (inherits(result,"try-error")) {
-            err_msg <- geterrmessage()
-            stop(paste("getDataselect.IrisClient:",err_msg, url))
-        }
-
-        if (header["status"] == "500") {  # internal server error, try again
-            Sys.sleep(3)
-            h <-  RCurl::basicTextGatherer()
-            result <- try( dataselectResponse <- RCurl::getBinaryURL(url, useragent=obj@useragent,
-                                                 netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update,followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),
-                           silent=TRUE)
-            # Handle error response
-            if (inherits(result,"try-error")) {
-               err_msg <- geterrmessage()
-               stop(paste("getDataselect.IrisClient:",err_msg, url))
-            }
-            result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-            if (inherits(result,"try-error")) {
-              err_msg <- geterrmessage()
-              stop(paste("getDataselect.IrisClient:",err_msg, url))
-            }
-        }
-
+  else if (! is.null(irisNetrc)) {
+    result <- try( dataselectResponse <- 
+                   RCurl::getBinaryURL(url, useragent=obj@useragent, netrc=1, netrc.file=irisNetrc, 
+                                       .opts = list(headerfunction = h$update,followlocation = TRUE, 
+                                       low.speed.time=300, low.speed.limit=1, connecttimeout=300)), 
+                  silent=TRUE)
   }
 
+  else {
+    result <- try( dataselectResponse <- 
+                   RCurl::getBinaryURL(url, useragent=obj@useragent, 
+                                       .opts = list(headerfunction = h$update,followlocation = TRUE, 
+                                       low.speed.time=300, low.speed.limit=1, connecttimeout=300)),
+                  silent=TRUE)
+  }
+
+  # Handle error response
+  if (inherits(result,"try-error")) {
+	  err_msg <- geterrmessage()
+    stop(paste("getDataselect.IrisClient:",err_msg, url))
+  }
+
+  result <- try(header <- RCurl::parseHTTPHeader(h$value()))
+  if (inherits(result,"try-error")) {
+    err_msg <- geterrmessage()
+    stop(paste("getDataselect.IrisClient:",err_msg, url))
+  }
+
+  sleep_seconds <- jitter(3,10)
+  retries <- obj@retries
+  while (header["status"] %in% append(401,500:511) && retries >0) {  # authentication error or internal server error, try again
+    Sys.sleep(sleep_seconds)
+    h <-  RCurl::basicTextGatherer()
+    if (! is.null(irisPass)) {
+      result <- try( dataselectResponse <- 
+                     RCurl::getBinaryURL(url, useragent=obj@useragent, userpwd=irisPass,
+                                         .opts = list(headerfunction = h$update,followlocation = TRUE, 
+                                         low.speed.time=300, low.speed.limit=1, connecttimeout=300)),
+                    silent=TRUE)
+      }
+    else if (! is.null(irisNetrc)) {
+      result <- try( dataselectResponse <- 
+                     RCurl::getBinaryURL(url, useragent=obj@useragent, netrc=1, netrc.file=irisNetrc,
+                                         .opts = list(headerfunction = h$update,followlocation = TRUE, 
+                                         low.speed.time=300, low.speed.limit=1, connecttimeout=300)), 
+                    silent=TRUE)
+    }
+    else {
+      result <- try( dataselectResponse <- 
+                     RCurl::getBinaryURL(url, useragent=obj@useragent, 
+                                         .opts = list(headerfunction = h$update,followlocation = TRUE, 
+                                         low.speed.time=300, low.speed.limit=1, connecttimeout=300)),
+                    silent=TRUE) 
+    }
+            
+    # Handle error response
+    if (inherits(result,"try-error")) {
+      err_msg <- geterrmessage()
+      stop(paste("getDataselect.IrisClient:",err_msg, url))
+    }
+
+    result <- try(header <- RCurl::parseHTTPHeader(h$value()))
+    if (inherits(result,"try-error")) {
+      err_msg <- geterrmessage()
+      stop(paste("getDataselect.IrisClient:",err_msg, url))
+    }
+
+    sleep_seconds <- sleep_seconds*2
+    retries <- retries-1
+  }
 
   if (header["status"] == "204") {  #fdsnws dataselect returned nothing
       stop(paste("getDataselect.IrisClient: No Data:",header["status"],url))
@@ -283,7 +281,8 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
       } else if (header["status"] == "404") {
            stop(paste("getDataselect.IrisClient: URL Not Found:",url))
       } else {
-           stop(paste("getDataselect.IrisClient: Unexpected http status code",header["status"],header["statusMessage"],url))
+           stop(paste("getDataselect.IrisClient: Unexpected http status code",
+                      header["status"],header["statusMessage"],url))
       }
   }
 
@@ -303,7 +302,7 @@ getDataselect.IrisClient <- function(obj, network, station, location, channel, s
   # NOTE:  each with a different scale or starttime.  This still represents a single SNCL.
   # NOTE:  What to do about multiple scales in the following getChannel request?
   # Solution 1: if ignoreEpoch==TRUE, then just take the first epoch presented
-  # https://service.earthscope.prg/fdsnws/station/1/query?net=H2&sta=H2O&loc=00&cha=LHZ&starttime=2001-02-28T18:29:44&endtime=2001-02-28T19:29:44&includerestricted=false&format=text&level=channel
+  # https://service.earthscope.org/fdsnws/station/1/query?net=H2&sta=H2O&loc=00&cha=LHZ&starttime=2001-02-28T18:29:44&endtime=2001-02-28T19:29:44&includerestricted=false&format=text&level=channel
 
   sncls <- paste(channels$network,channels$station,channels$location,channels$channel)
   if (nrow(channels) > 1 && !ignoreEpoch) {
@@ -332,9 +331,7 @@ setMethod("getDataselect", signature(obj="IrisClient", network="character", stat
 ################################################################################
 
 if (!isGeneric("getSNCL")) {
-  setGeneric("getSNCL", function(obj, sncl, starttime, endtime, ...) {
-    standardGeneric("getSNCL")
-  })
+  setGeneric("getSNCL", function(obj, sncl, starttime, endtime, ...) standardGeneric("getSNCL"))
 }
 
 getSNCL.IrisClient <- function(obj, sncl, starttime, endtime, quality=NULL, repository=NULL, inclusiveEnd=TRUE, ignoreEpoch=FALSE) {
@@ -361,13 +358,12 @@ setMethod("getSNCL", signature(obj="IrisClient", sncl="character", starttime="PO
 ################################################################################
 
 if (!isGeneric("getTimeseries")) {
-  setGeneric("getTimeseries", function(obj, network, station, location, channel, starttime, endtime, ...) {
-    standardGeneric("getTimeseries")
-  })
+  setGeneric("getTimeseries", function(obj, network, station, location, channel, starttime, endtime, ...) standardGeneric("getTimeseries"))
 }
 
 getTimeseries.IrisClient <- function(obj, network, station, location, channel, starttime, endtime, processing=NULL, 
                                                             repository=NULL,inclusiveEnd=TRUE, ignoreEpoch=FALSE) {
+
   if (!is.logical(inclusiveEnd)) {
      stop(paste("getTimeseries.IrisClient: option inclusiveEnd must be TRUE or FALSE"))
   }
@@ -376,7 +372,8 @@ getTimeseries.IrisClient <- function(obj, network, station, location, channel, s
   }
 
   url <- NULL
-  if (! is.null(irisNetrc)) {
+  
+  if (! is.null(irisNetrc) || ! is.null(irisPass)) {
         url <- paste(obj@site,"irisws/timeseries/1/queryauth?",sep="/")
   } else {
         url <- paste(obj@site,"irisws/timeseries/1/query?",sep="/")
@@ -417,97 +414,106 @@ getTimeseries.IrisClient <- function(obj, network, station, location, channel, s
   }
   
   # Make webservice request
-   # Make authenticated request using a netrc file
-  if (! is.null(irisNetrc)) {
-        h <-  RCurl::basicTextGatherer()
-        result <- try( timeseriesResponse <- RCurl::getBinaryURL(url, useragent=obj@useragent,
-                                             netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update,followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),
-                       silent=TRUE)
-
-        # Handle error response
-        if (inherits(result,"try-error")) {
-            err_msg <- geterrmessage()
-            stop(paste("getTimeseries.IrisClient:",err_msg, url))
-        }
-
-        result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-        if (inherits(result,"try-error")) {
-            err_msg <- geterrmessage()
-            stop(paste("getTimeseries.IrisClient:",err_msg, url))
-        }
-        if (header["status"] == "401") {  # authentication error, try again
-            Sys.sleep(3)
-            h <-  RCurl::basicTextGatherer()
-            result <- try( timeseriesResponse <- RCurl::getBinaryURL(url, useragent=obj@useragent,
-                                                 netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update,followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),
-                           silent=TRUE)
-            # Handle error response
-            if (inherits(result,"try-error")) {
-               err_msg <- geterrmessage()
-               stop(paste("getTimeseries.IrisClient:",err_msg, url))
-            }
-
-            result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-            if (inherits(result,"try-error")) {
-              err_msg <- geterrmessage()
-              stop(paste("getTimeseries.IrisClient:",err_msg, url))
-            }
-        }
-        if (header["status"] == "500") {  # internal server error, try again
-            Sys.sleep(3)
-            h <-  RCurl::basicTextGatherer()
-            result <- try( timeseriesResponse <- RCurl::getBinaryURL(url, useragent=obj@useragent,
-                                                 netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update,followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),
-                           silent=TRUE)
-            # Handle error response
-            if (inherits(result,"try-error")) {
-               err_msg <- geterrmessage()
-               stop(paste("getTimeseries.IrisClient:",err_msg, url))
-            }
-            result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-            if (inherits(result,"try-error")) {
-              err_msg <- geterrmessage()
-              stop(paste("getTimeseries.IrisClient:",err_msg, url))
-            }
-        }
-
-  } else {
-        h <-  RCurl::basicTextGatherer()
-        result <- try( timeseriesResponse <- RCurl::getBinaryURL(url, useragent=obj@useragent, .opts = list(headerfunction = h$update,followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),
-                       silent=TRUE)
-
-        # Handle error response
-        if (inherits(result,"try-error")) {
-            err_msg <- geterrmessage()
-            stop(paste("getTimeseries.IrisClient:",err_msg,url))
-        }
-
-        result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-        if (inherits(result,"try-error")) {
-            err_msg <- geterrmessage()
-            stop(paste("getTimeseries.IrisClient:",err_msg, url))
-        }
-
-        if (header["status"] == "500") {  # internal server error, try again
-            Sys.sleep(3)
-            h <-  RCurl::basicTextGatherer()
-            result <- try( timeseriesResponse <- RCurl::getBinaryURL(url, useragent=obj@useragent,
-                                                 netrc=1, netrc.file=irisNetrc, .opts = list(headerfunction = h$update,followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),
-                           silent=TRUE)
-            # Handle error response
-            if (inherits(result,"try-error")) {
-               err_msg <- geterrmessage()
-               stop(paste("getTimeseries.IrisClient:",err_msg, url))
-            }
-            result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-            if (inherits(result,"try-error")) {
-              err_msg <- geterrmessage()
-              stop(paste("getTimeseries.IrisClient:",err_msg, url))
-            }
-        }
-
+  h <-  RCurl::basicTextGatherer()
+  # Make authenticated request using environmental variable password
+  if (! is.null(irisPass)) {
+    result <- try( timeseriesResponse <- 
+                   RCurl::getBinaryURL(url, useragent=obj@useragent, userpwd=irisPass,
+                                       .opts = list(headerfunction = h$update,
+                                                    followlocation = TRUE,
+                                                    low.speed.time=300, 
+                                                    low.speed.limit=1, 
+                                                    connecttimeout=300)),
+                   silent=TRUE)
   }
 
+   # Make authenticated request using a netrc file
+  else if (! is.null(irisNetrc)) {
+    result <- try( timeseriesResponse <- 
+                   RCurl::getBinaryURL(url, useragent=obj@useragent,
+                                       netrc=1, netrc.file=irisNetrc, 
+                                       .opts = list(headerfunction = h$update,
+                                                    followlocation = TRUE, 
+                                                    low.speed.time=300, 
+                                                    low.speed.limit=1, 
+                                                    connecttimeout=300)),
+                   silent=TRUE)
+  }
+  # Make unauthentication request
+  else {
+   result <- try( timeseriesResponse <- 
+                  RCurl::getBinaryURL(url, useragent=obj@useragent, 
+                                      .opts = list(headerfunction = h$update,
+                                                   followlocation = TRUE, 
+                                                   low.speed.time=300, 
+                                                   low.speed.limit=1, 
+                                                   connecttimeout=300)),
+                  silent=TRUE)
+  }
+
+  # Handle error response
+  if (inherits(result,"try-error")) {
+      err_msg <- geterrmessage()
+      stop(paste("getTimeseries.IrisClient:",err_msg, url))
+  }
+
+  result <- try(header <- RCurl::parseHTTPHeader(h$value()))
+  if (inherits(result,"try-error")) {
+      err_msg <- geterrmessage()
+      stop(paste("getTimeseries.IrisClient:",err_msg, url))
+  }
+
+  sleep_seconds = jitter(3,10)
+  retries <- obj@retries
+  while (header["status"] %in% append(401,500:511) && retries > 0) {  # authentication error or internal server error, try again
+      Sys.sleep(sleep_seconds)
+      h <-  RCurl::basicTextGatherer()
+      if (! is.null(irisPass)) {
+        result <- try( dataselectResponse <- 
+                       RCurl::getBinaryURL(url, useragent=obj@useragent, userpwd=irisPass,
+                                           .opts = list(headerfunction = h$update,
+                                                        followlocation = TRUE, 
+                                                        low.speed.time=300, 
+                                                        low.speed.limit=1, 
+                                                        connecttimeout=300)),
+                       silent=TRUE)
+      }
+      else if (! is.null(irisNetrc)) {
+        result <- try( timeseriesResponse <- 
+                       RCurl::getBinaryURL(url, useragent=obj@useragent,
+                                           netrc=1, netrc.file=irisNetrc, 
+                                           .opts = list(headerfunction = h$update,
+                                                        followlocation = TRUE, 
+                                                        low.speed.time=300, 
+                                                        low.speed.limit=1, 
+                                                        connecttimeout=300)),
+                       silent=TRUE)
+      }                
+      else {
+        result <- try( timeseriesResponse <- 
+                       RCurl::getBinaryURL(url, useragent=obj@useragent, 
+                                           .opts = list(headerfunction = h$update,
+                                                        followlocation = TRUE, 
+                                                        low.speed.time=300, 
+                                                        low.speed.limit=1, 
+                                                        connecttimeout=300)),
+                       silent=TRUE) 
+      }
+      # Handle error response
+      if (inherits(result,"try-error")) {
+          err_msg <- geterrmessage()
+          stop(paste("getTimeseries.IrisClient:",err_msg, url))
+      }
+
+      result <- try(header <- RCurl::parseHTTPHeader(h$value()))
+      if (inherits(result,"try-error")) {
+        err_msg <- geterrmessage()
+        stop(paste("getTimeseries.IrisClient:",err_msg, url))
+      }
+
+      sleep_seconds <- sleep_seconds*2
+      retries <- retries-1
+  }      
 
   if (header["status"] == "204") {  #irisws timeseries returned nothing
       stop(paste("getTimeseries.IrisClient: No Data:",header["status"],url))
@@ -519,7 +525,8 @@ getTimeseries.IrisClient <- function(obj, network, station, location, channel, s
       } else if (header["status"] == "404") {
            stop(paste("getTimeseries.IrisClient: URL Not Found:",url))
       } else {
-           stop(paste("getTimeseriesIrisClient: Unexpected http status code",header["status"],header["statusMessage"],url))
+           stop(paste("getTimeseriesIrisClient: Unexpected http status code",
+                      header["status"],header["statusMessage"],url))
       }
   }
 
@@ -540,7 +547,7 @@ getTimeseries.IrisClient <- function(obj, network, station, location, channel, s
   # NOTE:  each with a different scale or starttime.  This still represents a single SNCL.
   # NOTE:  What to do about multiple scales in the following getChannel request?
   # Solution 1: if ignoreEpoch==TRUE, then just take the first epoch presented
-  # https://service.earthscope.prg/fdsnws/station/1/query?net=H2&sta=H2O&loc=00&cha=LHZ&starttime=2001-02-28T18:29:44&endtime=2001-02-28T19:29:44&includerestricted=false&format=text&level=channel
+  # https://service.earthscope.org/fdsnws/station/1/query?net=H2&sta=H2O&loc=00&cha=LHZ&starttime=2001-02-28T18:29:44&endtime=2001-02-28T19:29:44&includerestricted=false&format=text&level=channel
 
   sncls <- paste(channels$network,channels$station,channels$location,channels$channel)
   if (nrow(channels) > 1 && !ignoreEpoch) {
@@ -576,9 +583,7 @@ setMethod("getTimeseries", signature(obj="IrisClient", network="character", stat
 ################################################################################
 
 if (!isGeneric("getRotation")) {
-  setGeneric("getRotation", function(obj, network, station, location, channelSet, starttime, endtime, processing) {
-    standardGeneric("getRotation")
-  })
+  setGeneric("getRotation", function(obj, network, station, location, channelSet, starttime, endtime, processing) standardGeneric("getRotation"))
 }
 
 getRotation.IrisClient <- function(obj, network, station, location, channelSet, starttime, endtime, processing) {
@@ -604,8 +609,12 @@ getRotation.IrisClient <- function(obj, network, station, location, channelSet, 
   
   # Download the rotation service response (zip file) to a temporary file
   temp <- tempfile()
-  utils::download.file(url,temp,quiet=TRUE)
-  
+  result <- try(utils::download.file(url,temp,quiet=TRUE))
+  if (inherits(result,"try-error")) {
+      err_msg <- geterrmessage()
+      stop(paste("getRotation.IrisClient:", err_msg, url))
+  } 
+
   # Create a dataframe of zip file contents and discard the metadata file
   zipContents <- utils::unzip(temp,list=TRUE,junkpaths=TRUE)
   metadata_mask <- stringr::str_detect(zipContents$Name,"metadata")
@@ -613,7 +622,7 @@ getRotation.IrisClient <- function(obj, network, station, location, channelSet, 
   
   # Sanity check
   if (nrow(zipContents) != 3) {
-    stop(paste("IrisClient.getRotation: rotation service return has",nrow(zipContents),"traces -- 3 expected"))
+    stop(paste("getRotation.IrisClient: rotation service return has",nrow(zipContents),"traces -- 3 expected"))
   }
   
   # Extract the three miniseed records, convert them to Stream objects and store them in streamList
@@ -651,7 +660,7 @@ setMethod("getRotation", signature(obj="IrisClient",
 # getNetwork method returns a dataframe with information from the output
 # of the fdsn station web service with "format=text&level=network".
 #
-#   https://service.earthscope.prg/fdsnws/station/1/
+#   https://service.earthscope.org/fdsnws/station/1/
 #
 # Example output:
 #
@@ -663,9 +672,8 @@ setMethod("getRotation", signature(obj="IrisClient",
 if (!isGeneric("getNetwork")) {
   setGeneric("getNetwork", function(obj, network, station, location, channel,
                                          starttime, endtime, includerestricted,
-                                         latitude, longitude, minradius, maxradius) {
-    standardGeneric("getNetwork")
-  })
+                                         latitude, longitude, minradius, maxradius) 
+                           standardGeneric("getNetwork"))
 }
 
 getNetwork.IrisClient <- function(obj, network, station, location, channel,
@@ -719,7 +727,13 @@ getNetwork.IrisClient <- function(obj, network, station, location, channel,
   # NOTE:  Be sure to set na.strings="" as "NA" is a valid network name  
 
   h <-  RCurl::basicTextGatherer()
-  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update,followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),silent=TRUE)
+  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,
+                                       .opts = list(headerfunction = h$update,
+                                                    followlocation = TRUE, 
+                                                    low.speed.time=300, 
+                                                    low.speed.limit=1, 
+                                                    connecttimeout=300)),
+                silent=TRUE)
 
   if (inherits(result,"try-error")) { 
      err_msg <- geterrmessage()
@@ -732,8 +746,32 @@ getNetwork.IrisClient <- function(obj, network, station, location, channel,
      stop(paste("getNetwork.IrisClient:",err_msg, url))
   }
 
+  sleep_seconds = jitter(3,10)
+  retries <- obj@retries
+  while (header["status"] %in% append(401,500:511) && retries > 0) {
+    Sys.sleep(sleep_seconds)
+    result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,
+                                         .opts = list(headerfunction = h$update,
+                                                      followlocation = TRUE,
+                                                      low.speed.time=300,
+                                                      low.speed.limit=1,
+                                                      connecttimeout=300)),silent=TRUE)
 
-  if (header["status"] != "200" && header["status"] != "204") {
+    if (inherits(result,"try-error")) {
+       stop(paste("getNetwork.IrisClient:",err_msg, url))
+    }
+
+    result <- try(header <- RCurl::parseHTTPHeader(h$value()))
+    if (inherits(result,"try-error")) {
+       stop(paste("getNetwork.IrisClient:",err_msg, url))
+    }
+
+    sleep_seconds <- sleep_seconds*2
+    retries <- retries-1
+  }
+
+
+  if (!header["status"] %in% c("200","204")) {
     err_msg <- gurlc
     if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE)) || header["status"] == "404") {
       stop(paste("getNetwork.IrisClient: URL Not Found",url))
@@ -797,7 +835,7 @@ setMethod("getNetwork", signature(obj="IrisClient",
 # getStation method returns a dataframe with information from the output
 # of the fdsn station web service with "format=text&level=station".
 #
-#   https://service.earthscope.prg/fdsnws/station/1/
+#   https://service.earthscope.org/fdsnws/station/1/
 #
 # Example output:
 #
@@ -809,9 +847,8 @@ setMethod("getNetwork", signature(obj="IrisClient",
 if (!isGeneric("getStation")) {
   setGeneric("getStation", function(obj, network, station, location, channel,
                                     starttime, endtime, includerestricted,
-                                    latitude, longitude, minradius, maxradius) {
-    standardGeneric("getStation")
-  })
+                                    latitude, longitude, minradius, maxradius) 
+                                    standardGeneric("getStation"))
 }
 
 getStation.IrisClient <- function(obj, network, station, location, channel,
@@ -865,7 +902,14 @@ getStation.IrisClient <- function(obj, network, station, location, channel,
   # NOTE:  Be sure to set na.strings="" as "NA" is a valid network name  
   
   h <-  RCurl::basicTextGatherer()
-  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update,followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),silent=TRUE)
+  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,
+                                       .opts = list(headerfunction = h$update,
+                                                    followlocation = TRUE, 
+                                                    low.speed.time=300, 
+                                                    low.speed.limit=1, 
+                                                    connecttimeout=300)),
+                silent=TRUE)
+
   if (inherits(result,"try-error")) { 
      err_msg <- geterrmessage()
      stop(paste("getStation.IrisClient:",err_msg, url))
@@ -876,7 +920,32 @@ getStation.IrisClient <- function(obj, network, station, location, channel,
      stop(paste("getStation.IrisClient:",err_msg, url))
   }
 
-  if (header["status"] != "200" && header["status"] != "204" ) {
+  sleep_seconds <- jitter(3,10)
+  retries <- obj@retries
+  while (header["status"] %in% append(401,500:511) && retries > 0) {
+    Sys.sleep(sleep_seconds)
+    result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,
+                                         .opts = list(headerfunction = h$update,
+                                                      followlocation = TRUE, 
+                                                      low.speed.time=300, 
+                                                      low.speed.limit=1, 
+                                                      connecttimeout=300)),
+                  silent=TRUE)
+
+    if (inherits(result,"try-error")) {
+       stop(paste("getStation.IrisClient:",err_msg, url))
+    }
+
+    result <- try(header <- RCurl::parseHTTPHeader(h$value()))
+    if (inherits(result,"try-error")) { 
+       stop(paste("getStation.IrisClient:",err_msg, url))
+    }  
+    
+    sleep_seconds <- sleep_seconds*2
+    retries <- retries-1
+  }
+
+  if (!header["status"] %in% c("200","204")) {
     err_msg <- gurlc
     if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE)) || header["status"] == "404") {
         stop(paste("getStation.IrisClient: URL Not Found",url))
@@ -941,7 +1010,7 @@ setMethod("getStation", signature(obj="IrisClient",
 # getChannel method returns a dataframe with information from the output
 # of the fdsn station web service with "format=text&level=channel".
 #
-#   https://service.earthscope.prg/fdsnws/station/1/
+#   https://service.earthscope.org/fdsnws/station/1/
 #
 # Example output:
 #
@@ -953,9 +1022,8 @@ setMethod("getStation", signature(obj="IrisClient",
 if (!isGeneric("getChannel")) {
   setGeneric("getChannel", function(obj, network, station, location, channel,
                                     starttime, endtime, includerestricted,
-                                    latitude, longitude, minradius, maxradius) {
-    standardGeneric("getChannel")
-  })
+                                    latitude, longitude, minradius, maxradius) 
+                                    standardGeneric("getChannel"))
 }
 
 getChannel.IrisClient <- function(obj, network, station, location, channel,
@@ -1013,7 +1081,13 @@ getChannel.IrisClient <- function(obj, network, station, location, channel,
   # NOTE:  Be sure to set na.strings="" as "NA" is a valid network name  
   
   h <-  RCurl::basicTextGatherer()
-  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),silent=TRUE)
+  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,
+                                       .opts = list(headerfunction = h$update, 
+                                                    followlocation = TRUE, 
+                                                    low.speed.time=300, 
+                                                    low.speed.limit=1, 
+                                                    connecttimeout=300)),
+                silent=TRUE)
 
   if (inherits(result,"try-error")) {
     err_msg <- geterrmessage()
@@ -1026,21 +1100,48 @@ getChannel.IrisClient <- function(obj, network, station, location, channel,
     stop(paste("getChannel.IrisClient:",err_msg, url))
   }
 
-  if (header["status"] != "200" && header["status"] != "204") {
+  sleep_seconds <- jitter(3,10)
+  retries <- obj@retries
+  while (header["status"] %in% append(401,500:511) && retries > 0) {
+    Sys.sleep(sleep_seconds)
+    result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,
+                                         .opts = list(headerfunction = h$update,
+                                                      followlocation = TRUE,
+                                                      low.speed.time=300,
+                                                      low.speed.limit=1,
+                                                      connecttimeout=300)),
+                  silent=TRUE)
+
+    if (inherits(result,"try-error")) {
+       stop(paste("getChannel.IrisClient:",err_msg, url))
+    }
+
+    result <- try(header <- RCurl::parseHTTPHeader(h$value()))
+    if (inherits(result,"try-error")) {
+       stop(paste("getChannel.IrisClient:",err_msg, url))
+    }
+
+    sleep_seconds <- sleep_seconds*2
+    retries <- retries-1
+  }
+
+  if (!header["status"] %in% c("200","204")) {
       err_msg <- gurlc
       if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE)) || header["status"] == "404") {
           stop(paste("getChannel.IrisClient: URL Not Found",url))
       } else if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
           stop(paste("getChannel.IrisClient: Cannot open connection",url))
       } else {
-          stop(paste("getChannel.IrisClient: Unexpected http status code", header["status"], strtrim(err_msg,500), url))
+          stop(paste("getChannel.IrisClient: Unexpected http status code", 
+                     header["status"], strtrim(err_msg,500), url))
       }
   }
 
   if(length(gurlc) == 0) { gurlc <- "" }
   txtcon <- textConnection(gurlc)
   on.exit(close(txtcon),add=TRUE)
-  result <- try( DF <- utils::read.delim(txtcon,sep="|",col.names=colNames,colClasses=colClasses,na.strings=""), silent=TRUE)
+  result <- try( DF <- utils::read.delim(txtcon,sep="|",col.names=colNames,colClasses=colClasses,na.strings=""), 
+                silent=TRUE)
 
   if (inherits(result,"try-error")) {
      err_msg <- geterrmessage()
@@ -1102,7 +1203,7 @@ setMethod("getChannel", signature(obj="IrisClient",
 # The fdsnws/station web service will return space characters for location
 # codes that are SPACE SPACE.
 #
-#   https://service.earthscope.prg/fdsnws/station/1/
+#   https://service.earthscope.org/fdsnws/station/1/
 #
 # #Network | Station | Location | Channel | Latitude | Longitude | Elevation | Depth | Azimuth | Dip | Instrument | Scale | ScaleFreq | ScaleUnits | SampleRate | StartTime | EndTime
 # CU|ANWB|00|LHZ|17.66853|-61.78557|39.0|0.0|0.0|-90.0|Streckeisen STS-2 Standard-gain|2.43609E9|0.05|M/S|1.0|2010-02-10T18:35:00|2599-12-31T23:59:59
@@ -1112,9 +1213,8 @@ setMethod("getChannel", signature(obj="IrisClient",
 if (!isGeneric("getAvailability")) {
   setGeneric("getAvailability", function(obj, network, station, location, channel,
                                          starttime, endtime, includerestricted,
-                                         latitude, longitude, minradius, maxradius) {
-    standardGeneric("getAvailability")
-  })
+                                         latitude, longitude, minradius, maxradius) 
+                                         standardGeneric("getAvailability"))
 }
 
 getAvailability.IrisClient <- function(obj, network, station, location, channel,
@@ -1174,7 +1274,13 @@ getAvailability.IrisClient <- function(obj, network, station, location, channel,
   # NOTE:  Be sure to set na.strings="" as "NA" is a valid network name
 
   h <-  RCurl::basicTextGatherer()
-  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),silent=TRUE)
+  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,
+                                       .opts = list(headerfunction = h$update, 
+                                                    followlocation = TRUE, 
+                                                    low.speed.time=300, 
+                                                    low.speed.limit=1, 
+                                                    connecttimeout=300)),
+                silent=TRUE)
 
   if (inherits(result,"try-error")) {   
      err_msg <- geterrmessage()
@@ -1187,7 +1293,32 @@ getAvailability.IrisClient <- function(obj, network, station, location, channel,
      stop(paste("getAvailability.IrisClient:",err_msg, url))
   }
 
-  if (header["status"] != "200" && header["status"] != "204" ) {
+  sleep_seconds = jitter(3,10)
+  retries <- obj@retries
+  while (header["status"] %in% append(401,500:511) && retries > 0) {
+    Sys.sleep(sleep_seconds)
+    result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,
+                                         .opts = list(headerfunction = h$update,
+                                                      followlocation = TRUE,
+                                                      low.speed.time=300,
+                                                      low.speed.limit=1,
+                                                      connecttimeout=300)),
+                  silent=TRUE)
+
+    if (inherits(result,"try-error")) {
+       stop(paste("getAvailability.IrisClient:",err_msg, url))
+    }
+
+    result <- try(header <- RCurl::parseHTTPHeader(h$value()))
+    if (inherits(result,"try-error")) {
+       stop(paste("getAvailability.IrisClient:",err_msg, url))
+    }
+
+    sleep_seconds <- sleep_seconds*2
+    retries <- retries-1
+  }
+
+  if (!header["status"] %in% c("200","204")) {
      err_msg <- gurlc
      if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE)) || header["status"] == "404") {
           stop(paste("getAvailability.IrisClient: URL Not Found",url))
@@ -1196,14 +1327,16 @@ getAvailability.IrisClient <- function(obj, network, station, location, channel,
      } else if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
           stop(paste("getAvailability.IrisClient: Cannot open connection",url))
      } else {
-          stop(paste("getAvailability.IrisClient: Unexpected http status code",header["status"],strtrim(err_msg,500), url))
+          stop(paste("getAvailability.IrisClient: Unexpected http status code",header["status"],
+                     strtrim(err_msg,500), url))
      }
   }
 
   if(length(gurlc) == 0) { gurlc <- "" }
   txtcon <- textConnection(gurlc)
   on.exit(close(txtcon), add=TRUE)
-  result <- try( DF <- utils::read.delim(txtcon,sep="|",col.names=colNames,colClasses=colClasses,na.strings=""), silent=TRUE)
+  result <- try( DF <- utils::read.delim(txtcon,sep="|",col.names=colNames,colClasses=colClasses,na.strings=""), 
+                silent=TRUE)
 
   if (inherits(result,"try-error")) {
      err_msg <- geterrmessage()
@@ -1267,9 +1400,8 @@ setMethod("getAvailability", signature(obj="IrisClient",
 if (!isGeneric("getUnavailability")) {
   setGeneric("getUnavailability", function(obj, network, station, location, channel,
                                            starttime, endtime, includerestricted,
-                                           latitude, longitude, minradius, maxradius) {
-    standardGeneric("getUnavailability")
-  })
+                                           latitude, longitude, minradius, maxradius) 
+                                           standardGeneric("getUnavailability"))
 }
 
 getUnavailability.IrisClient <- function(obj, network, station, location, channel,
@@ -1321,15 +1453,14 @@ setMethod("getUnavailability", signature(obj="IrisClient",
 # getDataAvailability method returns a dataframe with information from the output
 # of the iris availability web service with "format=text&level=channel".
 #
-# https://service.earthscope.prg/fdsnws/availability/1/
+# https://service.earthscope.org/fdsnws/availability/1/
 #
 ################################################################################
 if (!isGeneric("getDataAvailability")) {
   setGeneric("getDataAvailability", function(obj, network, station, location, channel, starttime, endtime, 
                                               mergequality, mergesamplerate, mergeoverlap, mergetolerance, 
-                                              includerestricted, excludetoolarge){
-    standardGeneric("getDataAvailability")
-  })
+                                              includerestricted, excludetoolarge)
+                                              standardGeneric("getDataAvailability"))
 }
 
 getDataAvailability.IrisClient <- function(obj, network, station, location, channel, starttime, endtime, 
@@ -1420,7 +1551,13 @@ getDataAvailability.IrisClient <- function(obj, network, station, location, chan
   # NOTE:  Be sure to set na.strings="" as "NA" is a valid network name
   
   h <-  RCurl::basicTextGatherer()
-  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),silent=TRUE)
+  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,
+                                       .opts = list(headerfunction = h$update, 
+                                                    followlocation = TRUE, 
+                                                    low.speed.time=300, 
+                                                    low.speed.limit=1, 
+                                                    connecttimeout=300)),
+                silent=TRUE)
   
   if (inherits(result,"try-error")) {
     err_msg <- geterrmessage()
@@ -1432,8 +1569,33 @@ getDataAvailability.IrisClient <- function(obj, network, station, location, chan
     err_msg <- geterrmessage()
     stop(paste("getDataAvailability.IrisClient:",err_msg, url))
   }
-  
-  if (header["status"] != "200" && header["status"] != "204") {
+
+  sleep_seconds = jitter(3,10)
+  retries <- obj@retries
+  while (header["status"] %in% append(401,500:511) && retries > 0) {
+    Sys.sleep(sleep_seconds)
+    result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,
+                                         .opts = list(headerfunction = h$update,
+                                                      followlocation = TRUE,
+                                                      low.speed.time=300,
+                                                      low.speed.limit=1,
+                                                      connecttimeout=300)),
+                  silent=TRUE)
+
+    if (inherits(result,"try-error")) {
+       stop(paste("getDataAvailability.IrisClient:",err_msg, url)) 
+    }
+
+    result <- try(header <- RCurl::parseHTTPHeader(h$value()))
+    if (inherits(result,"try-error")) {
+       stop(paste("getDataAvailability.IrisClient:",err_msg, url))
+    }
+
+    sleep_seconds <- sleep_seconds*2
+    retries <- retries-1
+  }
+
+  if (!header["status"] %in% c("200","204")) {
     err_msg <- gurlc
     if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE)) || header["status"] == "404") {
       stop(paste("getDataAvailability.IrisClient: URL Not Found",url))
@@ -1441,16 +1603,19 @@ getDataAvailability.IrisClient <- function(obj, network, station, location, chan
       stop(paste("getDataAvailability.IrisClient: Cannot open connection",url))
     } else if (stringr::str_detect(err_msg, regex("Error 500: Internal Server Error"))) {
       err_msg <- stringr::str_replace_all(err_msg, "[\r\n\t]","")
-      stop(paste("getDataAvailability.IrisClient: Internal Server Error:", stringr::str_match(err_msg,"Error 500: Internal Server Error(.+)Usage")[,2], url))
+      stop(paste("getDataAvailability.IrisClient: Internal Server Error:", 
+                 stringr::str_match(err_msg, "Error 500: Internal Server Error(.+)Usage")[,2], url))
     } else {
-      stop(paste("getDataAvailability.IrisClient: Unexpected http status code", header["status"], strtrim(err_msg,500),url))
+      stop(paste("getDataAvailability.IrisClient: Unexpected http status code", header["status"], 
+                 strtrim(err_msg,500),url))
     }
   }
   
   if(length(gurlc) == 0) { gurlc <- "" }
   txtcon <- textConnection(gurlc)
   on.exit(close(txtcon), add=TRUE)
-  result <- try( DF <- utils::read.delim(txtcon,sep="|",col.names=colNames,colClasses=colClasses,na.strings="",skip=4), silent=TRUE)
+  result <- try( DF <- utils::read.delim(txtcon,sep="|",col.names=colNames,colClasses=colClasses,na.strings="",skip=4), 
+                silent=TRUE)
   if (inherits(result,"try-error")) {
     err_msg <- geterrmessage()
     if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
@@ -1497,15 +1662,14 @@ setMethod("getDataAvailability", signature(obj="IrisClient",
 ################################################################################
 # getEvalresp method returns instrument response data from the evalresp webservice:
 #
-#   https://service.earthscope.org/irisws/evalresp/1/
+#   https://service/irisws/evalresp/1/
 #
 ################################################################################
 
 if (!isGeneric("getEvalresp")) {
   setGeneric("getEvalresp", function(obj, network, station, location, channel, time,
-                                     minfreq, maxfreq, nfreq, units, output, spacing) {
-     standardGeneric("getEvalresp")
-  })
+                                     minfreq, maxfreq, nfreq, units, output, spacing) 
+                                     standardGeneric("getEvalresp"))
 }
 
 getEvalresp.IrisClient <- function(obj, network, station, location, channel, time, 
@@ -1566,7 +1730,13 @@ getEvalresp.IrisClient <- function(obj, network, station, location, channel, tim
   # Conversion of URL into a data frame is a single line with utils::read.table().
 
   h <-  RCurl::basicTextGatherer()
-  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),silent=TRUE)
+  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,
+                                       .opts = list(headerfunction = h$update, 
+                                                    followlocation = TRUE, 
+                                                    low.speed.time=300, 
+                                                    low.speed.limit=1, 
+                                                    connecttimeout=300)),
+                silent=TRUE)
 
   if (inherits(result,"try-error")) {  
      err_msg <- geterrmessage()
@@ -1579,7 +1749,32 @@ getEvalresp.IrisClient <- function(obj, network, station, location, channel, tim
      stop(paste("getEvalresp.IrisClient:",err_msg, url))
   }
 
-  if (header["status"] != "200" && header["status"] != "204") {
+  sleep_seconds = jitter(3,10)
+  retries <- obj@retries
+  while (header["status"] %in% append(401,500:511) && retries > 0) {
+    Sys.sleep(sleep_seconds)
+    result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,
+                                         .opts = list(headerfunction = h$update,
+                                                      followlocation = TRUE,
+                                                      low.speed.time=300,
+                                                      low.speed.limit=1,
+                                                      connecttimeout=300)),
+                  silent=TRUE)
+
+    if (inherits(result,"try-error")) {
+       stop(paste("getEvalresp.IrisClient:",err_msg, url))
+    }
+
+    result <- try(header <- RCurl::parseHTTPHeader(h$value()))
+    if (inherits(result,"try-error")) {
+       stop(paste("getEvalresp.IrisClient:",err_msg, url))
+    }
+
+    sleep_seconds <- sleep_seconds*2
+    retries <- retries-1
+  }
+
+  if (!header["status"] %in% c("200","204")) {
     err_msg <- gurlc
     if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE)) || header["status"] == "404") {
         stop(paste("getEvalresp.IrisClient: URL Not Found",url))
@@ -1587,9 +1782,11 @@ getEvalresp.IrisClient <- function(obj, network, station, location, channel, tim
         stop(paste("getEvalresp.IrisClient: Cannot open connection",url))
     } else if (stringr::str_detect(err_msg, regex("Error 500: Internal Server Error"))) {
         err_msg <- stringr::str_replace_all(err_msg, "[\r\n\t]","")
-        stop(paste("getEvalresp.IrisClient: Internal Server Error:", stringr::str_match(err_msg,"Error 500: Internal Server Error(.+)Usage")[,2], url))
+        stop(paste("getEvalresp.IrisClient: Internal Server Error:", 
+                   stringr::str_match(err_msg,"Error 500: Internal Server Error(.+)Usage")[,2], url))
     } else {
-        stop(paste("getEvalresp.IrisClient: Unexpected http status code", header["status"], strtrim(err_msg,500),url))
+        stop(paste("getEvalresp.IrisClient: Unexpected http status code", header["status"], 
+                   strtrim(err_msg,500),url))
     }
   }
   
@@ -1636,20 +1833,13 @@ setMethod("getEvalresp", signature(obj="IrisClient",
 
 if (!isGeneric("getEvent")) {
   setGeneric("getEvent", function(obj, starttime, endtime, minmag, maxmag, magtype,
-                                  mindepth, maxdepth) {
-    standardGeneric("getEvent")
-  })
+                                  mindepth, maxdepth) standardGeneric("getEvent"))
 }
 
 getEvent.IrisClient <- function(obj, starttime, endtime, minmag, maxmag, magtype,
                                 mindepth, maxdepth) {
   
-  if(stringr::str_detect(obj@site,regex("service.*.iris.edu|service.*.earthscope.org"))) {
-     url <- "https://earthquake.usgs.gov/fdsnws/event/1/query?"
-  } else {
-     url <- paste(obj@site,"/fdsnws/event/1/query?",sep="/")
-  }
-
+  url <- paste(obj@event_site,"/fdsnws/event/1/query?",sep="")
   url <- paste(url,"starttime=",format(starttime,"%Y-%m-%dT%H:%M:%OS0", tz="GMT"),sep="")
   url <- paste(url,"&endtime=",format(endtime,"%Y-%m-%dT%H:%M:%OS0", tz="GMT"),sep="")
   url <- paste(url,"&format=text",sep="")
@@ -1690,7 +1880,13 @@ getEvent.IrisClient <- function(obj, starttime, endtime, minmag, maxmag, magtype
   # Conversion of URL into a data frame is a single line with read.table().
 
   h <-  RCurl::basicTextGatherer()
-  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),silent=TRUE) 
+  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,
+                                       .opts = list(headerfunction = h$update, 
+                                                    followlocation = TRUE, 
+                                                    low.speed.time=300, 
+                                                    low.speed.limit=1, 
+                                                    connecttimeout=300)),
+                silent=TRUE) 
 
   if (inherits(result,"try-error")) {
      err_msg <- geterrmessage()
@@ -1703,21 +1899,33 @@ getEvent.IrisClient <- function(obj, starttime, endtime, minmag, maxmag, magtype
      stop(paste("getEvent.IrisClient:",err_msg, url))
   }
 
-  if (header["status"] == "503" || header["status"] == "500") {
-     Sys.sleep(3)
-     h <-  RCurl::basicTextGatherer()
-     result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),silent=TRUE)
-     if (inherits(result,"try-error")) {
-         stop(paste("getEvent.IrisClient:",err_msg, url))
-     }
-     result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-     if (inherits(result,"try-error")) {
-         err_msg <- geterrmessage()
-         stop(paste("getEvent.IrisClient:",err_msg, url))
-     }
+  sleep_seconds = jitter(3,10)
+  retries <- obj@retries
+  while (header["status"] %in% append(401,500:511) && retries > 0) {
+    Sys.sleep(sleep_seconds)
+    result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,
+                                         .opts = list(headerfunction = h$update,
+                                                      followlocation = TRUE,
+                                                      low.speed.time=300,
+                                                      low.speed.limit=1,
+                                                      connecttimeout=300)),
+                  silent=TRUE)
+
+    if (inherits(result,"try-error")) {
+       stop(paste("getEvent.IrisClient:",err_msg, url))
+    }
+
+    result <- try(header <- RCurl::parseHTTPHeader(h$value()))
+    if (inherits(result,"try-error")) {
+       stop(paste("getEvent.IrisClient:",err_msg, url))
+    }
+
+    sleep_seconds <- sleep_seconds*2
+    retries <- retries-1
   }
 
-  if (header["status"] != "200" && header["status"] != "204") {
+
+  if (!header["status"] %in% c("200","204")) {
     err_msg <- gurlc
     if (stringr::str_detect(err_msg, regex("service unavailable",ignore_case=TRUE)) || header["status"] == "503") {
         stop(paste("getEvent.IrisClient: Service Unavailable", url))
@@ -1736,7 +1944,8 @@ getEvent.IrisClient <- function(obj, starttime, endtime, minmag, maxmag, magtype
   if(length(gurlc) == 0) { gurlc <- "" }
   txtcon <- textConnection(gurlc)
   on.exit(close(txtcon), add=TRUE)
-  result <- try ( DF <- utils::read.table(txtcon, sep="|", quote="", col.names=colNames, colClasses=colClasses),silent=TRUE )
+  result <- try ( DF <- utils::read.table(txtcon, sep="|", quote="", col.names=colNames, colClasses=colClasses),
+                 silent=TRUE )
   if (inherits(result,"try-error")) {
     err_msg <- geterrmessage()
     if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
@@ -1779,9 +1988,8 @@ setMethod("getEvent", signature(obj="IrisClient",
 ################################################################################
 
 if (!isGeneric("getTraveltime")) {
-  setGeneric("getTraveltime", function(obj, latitude, longitude, depth, staLatitude, staLongitude) {
-    standardGeneric("getTraveltime")
-  })
+  setGeneric("getTraveltime", function(obj, latitude, longitude, depth, staLatitude, staLongitude) 
+                              standardGeneric("getTraveltime"))
 }
 
 getTraveltime.IrisClient <- function(obj, latitude, longitude, depth, staLatitude, staLongitude) {
@@ -1829,7 +2037,13 @@ getTraveltime.IrisClient <- function(obj, latitude, longitude, depth, staLatitud
   # Conversion of URL into a data frame is a single line with read.table().
 
   h <-  RCurl::basicTextGatherer()
-  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),silent=TRUE)
+  result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,
+                                       .opts = list(headerfunction = h$update, 
+                                                    followlocation = TRUE, 
+                                                    low.speed.time=300, 
+                                                    low.speed.limit=1, 
+                                                    connecttimeout=300)),
+                silent=TRUE)
 
   if (inherits(result,"try-error")) {
     err_msg <- geterrmessage()
@@ -1842,7 +2056,32 @@ getTraveltime.IrisClient <- function(obj, latitude, longitude, depth, staLatitud
     stop(paste("getTraveltime.IrisClient:",err_msg, url))
   }
 
-  if (header["status"] != "200" && header["status"] != "204") {
+  sleep_seconds = jitter(3,10)
+  retries <- obj@retries
+  while (header["status"] %in% append(401,500:511) && retries > 0) {
+    Sys.sleep(sleep_seconds)
+    result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,
+                                         .opts = list(headerfunction = h$update,
+                                                      followlocation = TRUE,
+                                                      low.speed.time=300,
+                                                      low.speed.limit=1,
+                                                      connecttimeout=300)),
+                  silent=TRUE)
+
+    if (inherits(result,"try-error")) {
+       stop(paste("getTraveltime.IrisClient:",err_msg, url))
+    }
+
+    result <- try(header <- RCurl::parseHTTPHeader(h$value()))
+    if (inherits(result,"try-error")) {
+       stop(paste("getTraveltime.IrisClient:",err_msg, url))
+    }
+
+    sleep_seconds <- sleep_seconds*2
+    retries <- retries-1
+  }
+
+  if (!header["status"] %in% c("200","204")) {
     err_msg <- gurlc
     if (stringr::str_detect(err_msg, regex("couldn't connect to host",ignore_case=TRUE))) {
         stop(paste("getTraveltime.IrisClient: Couldn't connect to host", url))
@@ -1851,7 +2090,8 @@ getTraveltime.IrisClient <- function(obj, latitude, longitude, depth, staLatitud
     } else if (stringr::str_detect(err_msg, regex("cannot open the connection",ignore_case=TRUE))) {
         stop(paste("getTraveltime.IrisClient: Cannot open connection",url))
     } else {
-        stop(paste("getTraveltime.IrisClient: Unexpected http status code",header["status"],strtrim(err_msg,500), url))
+        stop(paste("getTraveltime.IrisClient: Unexpected http status code",header["status"],
+                   strtrim(err_msg,500), url))
     }
   }
   
@@ -1894,9 +2134,7 @@ setMethod("getTraveltime", signature(obj="IrisClient",
 ################################################################################
 
 if (!isGeneric("getDistaz")) {
-  setGeneric("getDistaz", function(obj, latitude, longitude, staLatitude, staLongitude) {
-    standardGeneric("getDistaz")
-  })
+  setGeneric("getDistaz", function(obj, latitude, longitude, staLatitude, staLongitude) standardGeneric("getDistaz"))
 }
 
 getDistaz.IrisClient <- function(obj, latitude, longitude, staLatitude, staLongitude) {
@@ -1916,7 +2154,12 @@ getDistaz.IrisClient <- function(obj, latitude, longitude, staLatitude, staLongi
   # Get data from distaz web service
 
   h <-  RCurl::basicTextGatherer()
-  result <- try( distazXml <- RCurl::getURL(url, useragent=obj@useragent,.opts = list(headerfunction = h$update, followlocation = TRUE, low.speed.time=300, low.speed.limit=1, connecttimeout=300)),
+  result <- try( distazXml <- RCurl::getURL(url, useragent=obj@useragent,
+                                            .opts = list(headerfunction = h$update, 
+                                                         followlocation = TRUE, 
+                                                         low.speed.time=300, 
+                                                         low.speed.limit=1, 
+                                                         connecttimeout=300)),
                  silent=TRUE)
   
   # Handle error response
@@ -1931,7 +2174,32 @@ getDistaz.IrisClient <- function(obj, latitude, longitude, staLatitude, staLongi
     stop(paste("getDistaz.IrisClient:", err_msg))
   }
 
-  if (header["status"] != "200" && header["status"] != "204") {
+  sleep_seconds = jitter(3,10)
+  retries <- obj@retries
+  while (header["status"] %in% append(401,500:511) && retries > 0) {
+    Sys.sleep(sleep_seconds)
+    result <- try(gurlc <- RCurl::getURL(url,useragent=obj@useragent,
+                                         .opts = list(headerfunction = h$update,
+                                                      followlocation = TRUE,
+                                                      low.speed.time=300,
+                                                      low.speed.limit=1,
+                                                      connecttimeout=300)),
+                  silent=TRUE)
+
+    if (inherits(result,"try-error")) {
+       stop(paste("getDistaz.IrisClient:",err_msg, url))
+    }
+
+    result <- try(header <- RCurl::parseHTTPHeader(h$value()))
+    if (inherits(result,"try-error")) {
+       stop(paste("getDistaz.IrisClient:",err_msg, url))
+    }
+
+    sleep_seconds <- sleep_seconds*2
+    retries <- retries-1
+  }
+
+  if (!header["status"] %in% c("200","204")) {
     err_msg <- distazXml
     if (stringr::str_detect(err_msg, regex("Not Found",ignore_case=TRUE)) || header["status"] == "404") {
         stop(paste("getDistaz.IrisClient: URL Not Found:",url))
@@ -1943,7 +2211,8 @@ getDistaz.IrisClient <- function(obj, latitude, longitude, staLatitude, staLongi
     } else if (nchar(distazXml)==0) {
         stop(paste("getDistaz.IrisClient: returned empty string", url))
     } else {
-        stop(paste("getDistaz.IrisClient: Unexpected http status code",header["status"], strtrim(err_msg,500) ,url))
+        stop(paste("getDistaz.IrisClient: Unexpected http status code",header["status"], 
+                   strtrim(err_msg,500) ,url))
     }
   }
       

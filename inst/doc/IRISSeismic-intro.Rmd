@@ -19,9 +19,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Introduction
 
 The `IRISSeismic` package for seismic data analysis was developed by 
-[Mazama Science](http://mazamascience.com) for the 
-[EarthScope Consortium](https://www.earthscope.org) (formerly IRIS, the Incorporated Research Institutions 
-for Seismology).  This development is part of the **MUSTANG** 
+[Mazama Science](http://mazamascience.com) for [EarthScope](https://www.earthscope.org/) (formerly IRIS Data Management Center)
+This development is part of the **MUSTANG** 
 project for automated QC of seismic data.
 
 The goal of this package is to make it easy to obtain and work with data from
@@ -31,7 +30,7 @@ and how it can be used in interactive sessions.  Detailed information about
 object properties and function arguments can be found in the package documentation.
 
 The core objects in this package, especially `Trace` and `Stream` objects,
-borrow heavily from concepts and features found in the Python [ObsPy](https://obspy.org) package.  References to specific **ObsPy** classes can be found in
+borrow heavily from concepts and features found in the Python [ObsPy](https://github.com/obspy/obspy/wiki/) package.  References to specific **ObsPy** classes can be found in
 the source code.
 
 ## Getting Started
@@ -43,7 +42,7 @@ documentation.
 ### RStudio
 
 Users of the `IRISSeismic` package are encouraged to first download and install
-the [RStudio](https://posit.co/downloads/) integrated development environment for 
+the [RStudio](https://posit.co/) integrated development environment for 
 **R**.  Newcomers to `R` will find **RStudio** a much friendlier 
 environment in which to work.
 
@@ -72,7 +71,7 @@ responsible for creating datetime objects of class `POSIXct`.
 
 The first three commands in the following code chunk use the `IrisClient`
 object to communicate with web services and return a `Stream` object full
-of data from the EarthScope.  The fourth line checks to see how many distinct
+of data from EarthScope.  The fourth line checks to see how many distinct
 chunks of seismic data exist.  The last line passes this `Stream` object to
 a function that will plot the times at which this channel was collecting data.
 
@@ -202,9 +201,9 @@ The `Trace` object has the following slots:
 
 
 The `TraceHeader` metadata and the actual signal come from the
-[dataselect webservice](https://service.earthscope.org/fdsnws/dataselect/).
+[dataselect webservice](https://service.iris.edu/fdsnws/dataselect/).
 The instrument metadata are obtained from the
-[station webservice](https://service.earthscope.org/fdsnws/station/).
+[station webservice](https://service.iris.edu/fdsnws/station/).
 
 ### Be careful with times
 
@@ -235,7 +234,7 @@ as.POSIXct("2010-02-27T04:00:00", tz="GMT") # BAD -- no formatting
 ## Example Operations
 
 The example at the beginning of this vignette already demonstrated how to obtain 
-seismic data from EarthScope web services, how to learn about the number and size of 
+seismic data from DMC web services, how to learn about the number and size of 
 individual traces within the requested time range and how to generate a first
 plot of the seismic signal.  This section will introduce more use cases that
 delve further into the capabilities of the `IRISSeismic` package.  For complete
@@ -295,7 +294,7 @@ if (exists("tr2"))  { rm(tr2) }
 Access to triggering algorithms for detecting events is provided by the
 `STALTA()` method of `Trace` objects.
 ( *cf* [A Comparison of Select Trigger Algorithms for Automated Global Seismic 
-Phase and Event Detection](https://www.semanticscholar.org/paper/A-comparison-of-select-trigger-algorithms-for-phase-Withers-Aster/4211924fbde6f0a32536ad9730d201a80e4f272a?p2df)). The `STALTA()` method has the following
+Phase and Event Detection](https://pubs.geoscienceworld.org/ssa/bssa/article-abstract/88/1/95/102726/A-comparison-of-select-trigger-algorithms-for)). The `STALTA()` method has the following
 arguments and defaults:
 
   * `x` -- `Trace` being analyzed
@@ -365,9 +364,9 @@ if (exists("tr")) { rm(tr) }
 ### Data availability
 
 The `IrisClient` also provides functionality for interacting with
-other web services at EarthScope.  The `getAvailability()` method allows users
+other web services at the DMC.  The `getAvailability()` method allows users
 to query what SNCLs are available, obtaining that information from the
-[station webservice](https://service.earthscope.org/fdsnws/station/).
+[station webservice](https://service.iris.edu/fdsnws/station/).
 
 Information is returned as a dataframe containing all the information
 returned by ws-availability.  Standard

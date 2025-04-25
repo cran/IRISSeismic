@@ -603,7 +603,7 @@ mergeTraces.Stream <- function(x, fillMethod) {
     stop(paste("mergeTraces.Stream:",num_rates,"unique sampling rates encountered in Stream."))
   }
 
-  # some fdsnws/dataselect implementations cut on record instead of sample like EarthScope. Trace starttime can be < requestedStarttime and
+  # some fdsnws/dataselect implementations cut on record instead of sample like IRIS. Trace starttime can be < requestedStarttime and
   # trace endtime can be > requestedEndtime
   if (gapInfo$nsamples[1] == 0) {
      totalStart <- x@traces[[1]]@stats@starttime

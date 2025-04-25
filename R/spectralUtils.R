@@ -25,7 +25,7 @@
 
 # "Spectral Analysis -- Smoothed Periodogram Method"
 #
-#   https://web.archive.org/web/20030917133457/http://www.ltrr.arizona.edu/~dmeko/notes_6.pdf
+#   https://web.archive.org/web/20030917133457/https://www.ltrr.arizona.edu/~dmeko/notes_6.pdf
 #
 #   Simple explanation of DFT and smoothed periodogram with an explanation of 
 #   Daniell smoothers:
@@ -500,7 +500,7 @@ psdList2NoiseMatrix <- function(psdList, evalresp=NULL) {
   nfreq <- length(psdList[[1]]$freq)
   units <- "acc"
   
-  # Get instrument response from EarthScope webservices if not provided by input evalresp
+  # Get instrument response from IRIS webservices if not provided by input evalresp
   if (is.null(evalresp)) {
       evalresp <- getEvalresp(iris,network,station,location,channel,time=starttime+1,
                                 minfreq=minfreq,maxfreq=maxfreq,nfreq=nfreq,units=units)
@@ -679,11 +679,8 @@ noiseModels <- function(freq) {
   # NOTE:  Original New High/Low Noise Models in Peterson paper:
   # NOTE:    https://pubs.usgs.gov/of/1993/0322/report.pdf
   # NOTE:
-  # NOTE:  IRIS DMC 2005 paper
-  # NOTE:    https://www.earth.northwestern.edu/people/seth/327/HV/McNamaraetal_AmbientNoise.3.0.pdf
-  # NOTE:
   # NOTE:  "Ambient Noise Levels in the Continental US", 2003 
-  # NOTE:     https://geohazards.usgs.gov/staffweb/mcnamara/PDFweb/McNamaraBuland.pdf
+  # NOTE:     https://pubs.usgs.gov/publication/70026920
   # NOTE:
   # NOTE:  Source code to compare:
   # NOTE:    https://github.com/g2e/seizmo/blob/master/noise/nlnm.m

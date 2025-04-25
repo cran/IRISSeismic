@@ -92,7 +92,7 @@ msr_unpack (char *record, int reclen, MSRecord **ppmsr,
   /* Verify that record includes a valid header */
   if (!MS_ISVALIDHEADER (record))
   {
-    ms_recsrcname (record, srcname, 1);
+    ms_recsrcname (record, srcname, sizeof(srcname), 1);
     ms_log (2, "msr_unpack(%s) Record header & quality indicator unrecognized: '%c'\n", srcname);
     ms_log (2, "msr_unpack(%s) This is not a valid Mini-SEED record\n", srcname);
 
@@ -102,7 +102,7 @@ msr_unpack (char *record, int reclen, MSRecord **ppmsr,
   /* Verify that passed record length is within supported range */
   if (reclen < MINRECLEN || reclen > MAXRECLEN)
   {
-    ms_recsrcname (record, srcname, 1);
+    ms_recsrcname (record, srcname, sizeof(srcname), 1);
     ms_log (2, "msr_unpack(%s): Record length is out of range: %d\n", srcname, reclen);
     return MS_OUTOFRANGE;
   }

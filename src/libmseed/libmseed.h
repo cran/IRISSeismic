@@ -740,15 +740,21 @@ extern int      ms_readtracelist_timewin (MSTraceList **ppmstl, const char *msfi
 extern int      ms_readtracelist_selection (MSTraceList **ppmstl, const char *msfile, int reclen, double timetol, double sampratetol,
 					    Selections *selections, flag dataquality, flag skipnotdata, flag dataflag, flag verbose);
 
+/* (GKS, 04-22-2025) msr_writemseed, mst_writemseed, and mst_writemseedgroup 
+ * are commented out because CRAN standards require compiled code to not 
+ * write to stdout. The IRISSeismic R-package does not call on these functions.
+ */
+/* 
 extern int      msr_writemseed ( MSRecord *msr, const char *msfile, flag overwrite, int reclen,
 				 flag encoding, flag byteorder, flag verbose );
 extern int      mst_writemseed ( MSTrace *mst, const char *msfile, flag overwrite, int reclen,
 				 flag encoding, flag byteorder, flag verbose );
 extern int      mst_writemseedgroup ( MSTraceGroup *mstg, const char *msfile, flag overwrite,
-				      int reclen, flag encoding, flag byteorder, flag verbose );
+				 int reclen, flag encoding, flag byteorder, flag verbose );
+*/
 
 /* General use functions */
-extern char*    ms_recsrcname (char *record, char *srcname, flag quality);
+extern char*    ms_recsrcname (char *record, char *srcname, int srcname_size, flag quality);
 extern int      ms_splitsrcname (char *srcname, char *net, char *sta, char *loc, char *chan, char *qual);
 extern int      ms_strncpclean (char *dest, const char *source, int length);
 extern int      ms_strncpcleantail (char *dest, const char *source, int length);
@@ -825,7 +831,6 @@ typedef struct LeapSecond_s
 extern LeapSecond *leapsecondlist;
 extern int ms_readleapseconds (char *envvarname);
 extern int ms_readleapsecondfile (char *filename);
-extern int64_t scan_d64(char *str, int offset, char **endptr); /* REC */
 
 /* Generic byte swapping routines */
 extern void     ms_gswap2 ( void *data2 );

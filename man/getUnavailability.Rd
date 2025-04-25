@@ -100,7 +100,7 @@ if (inherits(result,"try-error")) {
   e <- events[eIndex[1],]
 
 # Find all BHZ channels that were NOT collecting data at the time of the quake 
-# and within 5 degrees of the quake epicenter (or are otherwise unavailable from EarthScope).
+# and within 5 degrees of the quake epicenter (or are otherwise unavailable from IRIS).
   result <- try(channels <- getUnavailability(iris,"*","*","*","BHZ",starttime,endtime,
                             lat=e$latitude,long=e$longitude,maxradius=5))
   if (inherits(result,"try-error")) {

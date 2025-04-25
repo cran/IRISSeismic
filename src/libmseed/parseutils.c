@@ -372,7 +372,7 @@ ms_parse_raw (char *record, int maxreclen, flag details, flag swapflag)
 
   /* Generate a source name string */
   srcname[0] = '\0';
-  ms_recsrcname (record, srcname, 1);
+  ms_recsrcname (record, srcname, sizeof(srcname), 1);
 
   fsdh = (struct fsdh_s *)record;
 

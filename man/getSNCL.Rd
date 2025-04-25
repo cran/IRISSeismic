@@ -21,7 +21,7 @@ getSNCL(obj, sncl, starttime, endtime, ...)
   \item{starttime}{ POSIXct class specifying the starttime (GMT) }
   \item{endtime}{ POSIXct class specifying the endtime (GMT) }
   \item{\dots}{optional arguments   
-     \code{quality} optional character string identifying the quality. EarthScope webservices defaults to quality="M".
+     \code{quality} optional character string identifying the quality. IRIS webservices defaults to quality="M".
      \code{repository} optional character string identifying whether to exclusively search primary archive or realtime collection buffers.
            Acceptable values are "primary" or "realtime". If not specified, IRIS webservices defaults to both repositories.
      \code{inclusiveEnd} optional logical determining whether the endtime is inclusive (default = TRUE)

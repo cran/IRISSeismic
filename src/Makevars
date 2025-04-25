@@ -9,7 +9,7 @@ PKG_CPICFLAGS=-fPIC
 $(SHLIB): libmseed/libmseed.a
 
 libmseed/libmseed.a:
-	@(cd libmseed && $(MAKE) static CC="$(CC)" CFLAGS="$(CFLAGS)" CPICFLAGS="$(CPICFLAGS)" AR="$(AR)")
+	@(cd libmseed && $(MAKE) static CC="$(CC)" CFLAGS="$(CFLAGS) -I$(R_INCLUDE_DIR)" CPICFLAGS="$(CPICFLAGS)" AR="$(AR)")
 
 clean:
 	@(cd libmseed && $(MAKE) clean)

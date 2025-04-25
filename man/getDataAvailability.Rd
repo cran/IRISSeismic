@@ -40,7 +40,7 @@ getDataAvailability(obj, network, station, location, channel,starttime, endtime,
 
 \details{
 The \code{getDataAvailability} method uses the FDSNWS availability service to obtain start and endtimes for all continuous trace 
-segments in the EarthScope (or other) archive for the requested network, station, location, channels and returns that data in a dataframe. 
+segments in the IRIS (or other) archive for the requested network, station, location, channels and returns that data in a dataframe. 
 Each row of the dataframe represents a unique data trace extent. 
 
 Each of the arguments \code{network}, \code{station}, \code{location} or \code{channel} may contain

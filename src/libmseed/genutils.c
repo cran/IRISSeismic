@@ -24,8 +24,6 @@ static hptime_t ms_time2hptime_int (int year, int day, int hour,
 
 static struct tm *ms_gmtime_r (int64_t *timep, struct tm *result);
 
-int64_t scan_d64(char *str, int offset, char **endptr);
-
 /* A constant number of seconds between the NTP and Posix/Unix time epoch */
 #define NTPPOSIXEPOCHDELTA 2208988800LL
 
@@ -43,7 +41,7 @@ LeapSecond *leapsecondlist = NULL;
  * Returns a pointer to the resulting string or NULL on error.
  ***************************************************************************/
 char *
-ms_recsrcname (char *record, char *srcname, flag quality)
+ms_recsrcname (char *record, char *srcname, int srcname_size, flag quality)
 {
   struct fsdh_s *fsdh;
   char network[6];
@@ -63,12 +61,13 @@ ms_recsrcname (char *record, char *srcname, flag quality)
 
   /* Build the source name string including the quality indicator*/
   if (quality)
-    sprintf (srcname, "%s_%s_%s_%s_%c",
+    snprintf (srcname, srcname_size, "%s_%s_%s_%s_%c",
              network, station, location, channel, fsdh->dataquality);
+
 
   /* Build the source name string without the quality indicator*/
   else
-    sprintf (srcname, "%s_%s_%s_%s", network, station, location, channel);
+    snprintf (srcname, srcname_size, "%s_%s_%s_%s", network, station, location, channel);
 
   return srcname;
 } /* End of ms_recsrcname() */
@@ -1180,7 +1179,6 @@ ms_readleapsecondfile (char *filename)
   LeapSecond *lastls = NULL;
   int64_t expires;
   char readline[200];
-  char *endptr;
   char *cp;
   int64_t leapsecond;
   int TAIdelta;
@@ -1221,11 +1219,7 @@ ms_readleapsecondfile (char *filename)
     if (!strncmp (readline, "#@", 2))
     {
       expires = 0;
-
-      /*(replacing)fields  = sscanf (readline, "#@ %" SCNd64, &expires); REC*/
-      fields = 0;
-      expires = scan_d64(readline,2,&endptr);
-      if (endptr - readline + 2 > 0) fields++;
+      fields  = sscanf (readline, "#@ %" SCNd64, &expires); 
 
       if (fields == 1)
       {
@@ -1249,11 +1243,7 @@ ms_readleapsecondfile (char *filename)
     if (*readline == '#')
       continue;
 
-    /*(replacing) fields = sscanf (readline, "%" SCNd64 " %d ", &leapsecond, &TAIdelta); REC*/
-    fields = 0;
-    leapsecond = scan_d64(readline,0,&endptr);
-    if (endptr - readline > 0) fields++;
-    fields += sscanf(endptr, " %d ", &TAIdelta);
+    fields = sscanf (readline, "%" SCNd64 " %d ", &leapsecond, &TAIdelta); 
 
     if (fields == 2)
     {
@@ -1751,29 +1741,4 @@ ms_gmtime_r (int64_t *timep, struct tm *result)
   return result;
 } /* End of ms_gmtime_r() */
 
-/******************************************
- * scan_d64 -- scan string for 64-bit int
- * read string starting at character offset
- *     and convert to a 64 bit long long int.
- * return the long long int.
- * set endptr to where we stopped the scan.
- * REC - 2016-12-02
- *******************************************/
-int64_t scan_d64(char *str, int offset, char **endptr) {
-
-    /* implementation based on die.net strtol(3) man page example */
-    int base = 10;
-    int64_t val = 0;
-
-    /* conversion to unsigned long long */
-    errno = 0;
-    val = strtoull(str+offset, endptr, base);
-
-    if (errno != 0 && val == 0) {
-        perror("strtoull");
-        exit(EXIT_FAILURE);
-    }
-
-    return val;
-}
 

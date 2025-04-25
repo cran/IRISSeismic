@@ -8,7 +8,7 @@ PKG_LIBS=-Llibmseed -lmseed
 $(SHLIB): libmseed/libmseed.a
 
 libmseed/libmseed.a:
-	@(cd libmseed && $(MAKE) static CC="$(CC)" CFLAGS="$(CFLAGS)" AR="$(AR)")
+	@(cd libmseed && $(MAKE) static CC="$(CC)" CFLAGS="$(CFLAGS) -I$(R_INCLUDE_DIR)" AR="$(AR)")
 
 clean:
 	@(cd libmseed && $(MAKE) clean )

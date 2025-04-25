@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <R.h>
 
 #include "libmseed.h"
 
@@ -239,7 +240,7 @@ ms_log_main (MSLogParam *logp, int level, va_list *varlist)
 
   if (!logp)
   {
-    fprintf (stderr, "ms_log_main() called without specifying log parameters");
+    REprintf("ms_log_main() called without specifying log parameters");
     return -1;
   }
 
@@ -272,7 +273,7 @@ ms_log_main (MSLogParam *logp, int level, va_list *varlist)
     }
     else
     {
-      fprintf (stderr, "%s", message);
+      REprintf("%s", message);
     }
   }
   else if (level == 1) /* Diagnostic message */
@@ -296,7 +297,7 @@ ms_log_main (MSLogParam *logp, int level, va_list *varlist)
     }
     else
     {
-      fprintf (stderr, "%s", message);
+      REprintf("%s", message);
     }
   }
   else if (level == 0) /* Normal log message */
@@ -320,7 +321,7 @@ ms_log_main (MSLogParam *logp, int level, va_list *varlist)
     }
     else
     {
-      fprintf (stdout, "%s", message);
+      Rprintf("%s", message);
     }
   }
 

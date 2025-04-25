@@ -26,12 +26,11 @@ getTimeseries(obj, network, station, location, channel,
   \item{endtime}{POSIXct class specifying the endtime (GMT) }
   \item{\dots}{optional arguments
      \code{repository} optional character string identifying whether to exclusively search primary archive or realtime collection buffers.
-           Acceptable values are "primary" or "realtime". If not specified, IRIS webservices defaults to both repositories.
-     \code{processing} optional character string with processing commands
+           Acceptable values are "primary" or "realtime". If not specified, IRIS webservices defaults to both repositories.  
+     \code{processing} optional character string with processing commands 
      \code{inclusiveEnd} optional logical determining whether the endtime is inclusive (default = TRUE)
      \code{ignoreEpoch} optional logical defining behavior when multiple epochs are encountered (default = FALSE)
    }
-
 }
 
 \details{
@@ -63,8 +62,9 @@ Handling all possible metadata differences so that the data may be merged is bey
 package. Instead, to avoid errors, users may specify \code{ignoreEpoch=TRUE} in which case
 the very first SNCL-epoch encountered will be used and all others will be discarded.
 
-For access to restricted data, getDataselect will look for system environmental variable "IrisClient_netrc"
-which should point to a .netrc authentication file.
+For access to restricted data, getDataselect will look for a system environmental variable "IrisClient_passw" which should be a 
+ string in the form "database_login:database_password". Alternatively,getDataselect will look for system environmental variable 
+ "IrisClient_netrc" which should point to a .netrc authentication file.
 
 Error returns from the webservice will stop evaluation and generate an error message.
 }
