@@ -76,14 +76,14 @@ chunks of seismic data exist.  The last line passes this `Stream` object to
 a function that will plot the times at which this channel was collecting data.
 
 ```{r second, fig.height=4, fig.width=5}
-starttime <- as.POSIXct("2002-04-20", tz="GMT")
-endtime <- as.POSIXct("2002-04-21", tz="GMT")
-result <- try(st <- getDataselect(iris,"US","OXF","","BHZ",starttime,endtime))
-if (inherits(result,"try-error")) {
+starttime <- as.POSIXct("2002-04-20", tz = "GMT")
+endtime <- as.POSIXct("2002-04-21", tz = "GMT")
+result <- try(st <- getDataselect(iris, "US", "OXF", "", "BHZ", starttime, endtime))
+if (inherits(result, "try-error")) {
   message(geterrmessage())
 } else {
   length(st@traces)
-  plotUpDownTimes(st, min_signal=1, min_gap=1)
+  plotUpDownTimes(st, min_signal = 1, min_gap = 1)
 }
 ```
 
@@ -97,7 +97,7 @@ function.  The duration (secs) of gaps between traces is displayed along with th
 number of samples that were missed during the gap.
 
 ```{r third}
-if (exists("st")){
+if (exists("st")) {
   getGaps(st)
 }
 ```
@@ -106,7 +106,7 @@ Next we can examine various statistics for each individual trace with
 the following `parallel-` functions.
 
 ```{r fourth}
-if (exists("st")){
+if (exists("st")) {
   parallelLength(st)
   parallelMax(st)
   parallelSd(st)
@@ -118,7 +118,7 @@ might have a signal.  Metadata for this trace is stored in the `stats`
 slot of the `Trace` object.
 
 ```{r fifth}
-if (exists("st")){
+if (exists("st")) {
   tr <- st@traces[[3]]
   tr@stats
 }
@@ -127,7 +127,7 @@ if (exists("st")){
 Finally, we can look at the seismic signal with the `plot` method.
 
 ```{r sixth, fig.height=4, fig.width=6}
-if (exists("tr")){
+if (exists("tr")) {
   plot(tr)
 }
 ```
@@ -147,7 +147,7 @@ The package documentation gives a full description of each object but we can
 also interrogate them using the `slotNames()` function.
 
 ```{r seventh}
-if (exists("st")){
+if (exists("st")) {
   slotNames(st)
 }
 ```
@@ -167,7 +167,7 @@ When in doubt about what a particular *slot* contains, it is always a good
 idea to ask what type of object it is.
 
 ```{r eighth}
-if (exists("st")){
+if (exists("st")) {
   class(st@url)
   class(st@requestedStarttime)
   class(st@traces)
@@ -179,14 +179,18 @@ The next code chunk examines the first `Trace` in our `Stream`.
 **Note:**  `R` uses double square brackets, `[[...]]` to access list items.
 
 ```{r ninth}
-if (exists("st")){
+if (exists("st")) {
   slotNames(st@traces[[1]])
 }
 ```
 
 ```{r include=FALSE}
-if (exists("st")) { rm(st) }
-if (exists("tr")) { rm(tr) }
+if (exists("st")) {
+  rm(st)
+}
+if (exists("tr")) {
+  rm(tr)
+}
 ```
 
 The `Trace` object has the following slots:
@@ -222,13 +226,15 @@ converts ASCII strings into times.
 A few examples will demonstrate the issues:
 
 ```{r tenth}
-as.POSIXct("2010-02-27", tz="GMT") # good
-as.POSIXct("2010-02-27 04:00:00", tz="GMT") # good
-as.POSIXct("2010-02-27T04:00:00", tz="GMT",
-           format="%Y-%m-%dT%H:%M:%OS") # good
+as.POSIXct("2010-02-27", tz = "GMT") # good
+as.POSIXct("2010-02-27 04:00:00", tz = "GMT") # good
+as.POSIXct("2010-02-27T04:00:00",
+  tz = "GMT",
+  format = "%Y-%m-%dT%H:%M:%OS"
+) # good
 
 as.POSIXct("2010-02-27") # BAD -- no timezone
-as.POSIXct("2010-02-27T04:00:00", tz="GMT") # BAD -- no formatting
+as.POSIXct("2010-02-27T04:00:00", tz = "GMT") # BAD -- no formatting
 ```
 
 ## Example Operations
@@ -241,7 +247,7 @@ delve further into the capabilities of the `IRISSeismic` package.  For complete
 details on available functions, please see the package documentation.
 
 ```{r eleventh, results="hide"}
-help("IRISSeismic",package="IRISSeismic")
+help("IRISSeismic", package = "IRISSeismic")
 ```
 
 ### Closer examination of a seismic signal
@@ -265,28 +271,34 @@ covering a shorter period of time.  A simpler technique, if the signal is alread
 in memory, is to use the `slice()` method.
 
 ```{r twelfth,fig.height=8, fig.width=6}
-starttime <- as.POSIXct("2010-02-27", tz="GMT")
-endtime <- as.POSIXct("2010-02-28", tz="GMT")
-result <- try(st <- getDataselect(iris,"IU","ANMO","00","BHZ",starttime,endtime))
-if (inherits(result,"try-error")) {
+starttime <- as.POSIXct("2010-02-27", tz = "GMT")
+endtime <- as.POSIXct("2010-02-28", tz = "GMT")
+result <- try(st <- getDataselect(iris, "IU", "ANMO", "00", "BHZ", starttime, endtime))
+if (inherits(result, "try-error")) {
   message(geterrmessage())
 } else {
-  start2 <- as.POSIXct("2010-02-27 06:40:00", tz="GMT")
-  end2 <- as.POSIXct("2010-02-27 07:40:00", tz="GMT")
+  start2 <- as.POSIXct("2010-02-27 06:40:00", tz = "GMT")
+  end2 <- as.POSIXct("2010-02-27 07:40:00", tz = "GMT")
 
   tr1 <- st@traces[[1]]
   tr2 <- slice(tr1, start2, end2)
 
-  layout(matrix(seq(2)))        # layout a 2x1 matrix
+  layout(matrix(seq(2))) # layout a 2x1 matrix
   plot(tr1)
   plot(tr2)
-  layout(1)                     # restore original layout
+  layout(1) # restore original layout
 }
 ```
 ```{r include=FALSE}
-if (exists("st")) { rm(st) }
-if (exists("tr1"))  { rm(tr1) }
-if (exists("tr2"))  { rm(tr2) }
+if (exists("st")) {
+  rm(st)
+}
+if (exists("tr1")) {
+  rm(tr1)
+}
+if (exists("tr2")) {
+  rm(tr2)
+}
 ```
 
 ### Detecting events with STA/LTA
@@ -314,16 +326,16 @@ function to return the **approximate** start of the seismic signal.
 We'll test this with our original seismic signal.
 
 ```{r thirteenth}
-starttime <- as.POSIXct("2002-04-20", tz="GMT")
-endtime <- as.POSIXct("2002-04-21", tz="GMT")
-result <- try(st <- getDataselect(iris,"US","OXF","","BHZ",starttime,endtime))
-if (inherits(result,"try-error")) {
+starttime <- as.POSIXct("2002-04-20", tz = "GMT")
+endtime <- as.POSIXct("2002-04-21", tz = "GMT")
+result <- try(st <- getDataselect(iris, "US", "OXF", "", "BHZ", starttime, endtime))
+if (inherits(result, "try-error")) {
   message(geterrmessage())
 } else {
   tr <- st@traces[[3]]
-  picker <- STALTA(tr,3,30)
-  threshold <- quantile(picker,0.99999,na.rm=TRUE)
-  to <- triggerOnset(tr,picker,threshold)
+  picker <- STALTA(tr, 3, 30)
+  threshold <- quantile(picker, 0.99999, na.rm = TRUE)
+  to <- triggerOnset(tr, picker, threshold)
 }
 ```
 
@@ -343,22 +355,26 @@ arguments and defaults:
   * `windowSecs` -- total window size (secs)
   
 ```{r fourteenth, fig.height=12, fig.width=6}
-if (exists("tr")){
-  layout(matrix(seq(3)))        # layout a 3x1 matrix
-  closeup1 <- eventWindow(tr,picker,threshold,3600)
-  closeup2 <- eventWindow(tr,picker,threshold,600)
+if (exists("tr")) {
+  layout(matrix(seq(3))) # layout a 3x1 matrix
+  closeup1 <- eventWindow(tr, picker, threshold, 3600)
+  closeup2 <- eventWindow(tr, picker, threshold, 600)
   plot(tr)
-  abline(v=to, col='red', lwd=2)
+  abline(v = to, col = "red", lwd = 2)
   plot(closeup1)
-  abline(v=to, col='red', lwd=2)
+  abline(v = to, col = "red", lwd = 2)
   plot(closeup2)
-  abline(v=to, col='red', lwd=2)
-  layout(1)                     # restore original layout
+  abline(v = to, col = "red", lwd = 2)
+  layout(1) # restore original layout
 }
 ```
 ```{r include=FALSE}
-if (exists("st")) { rm(st) }
-if (exists("tr")) { rm(tr) }
+if (exists("st")) {
+  rm(st)
+}
+if (exists("tr")) {
+  rm(tr)
+}
 ```
 
 ### Data availability
@@ -375,10 +391,10 @@ what other 'B' channels are available at our station of interest during
 the time of the big quake above.
 
 ```{r fiftheenth}
-starttime <- as.POSIXct("2010-02-27", tz="GMT")
-endtime <- as.POSIXct("2010-02-28", tz="GMT")
-result <- try(availability <- getAvailability(iris,"IU","ANMO","*","B??",starttime,endtime))
-if (inherits(result,"try-error")) {
+starttime <- as.POSIXct("2010-02-27", tz = "GMT")
+endtime <- as.POSIXct("2010-02-28", tz = "GMT")
+result <- try(availability <- getAvailability(iris, "IU", "ANMO", "*", "B??", starttime, endtime))
+if (inherits(result, "try-error")) {
   message(geterrmessage())
 } else {
   availability
@@ -430,68 +446,69 @@ The following example demonstrates the use of several of these services together
 iris <- new("IrisClient")
 
 # Two days around the "Nisqually Quake"
-starttime <- as.POSIXct("2001-02-27", tz="GMT")
-endtime <- starttime + 3600 * 24 *2
+starttime <- as.POSIXct("2001-02-27", tz = "GMT")
+endtime <- starttime + 3600 * 24 * 2
 
 # Find biggest seismic event over these two days -- it's the "Nisqually"
-result <- try(events <- getEvent(iris, starttime, endtime, minmag=5.0))
-if (inherits(result,"try-error")) {
+result <- try(events <- getEvent(iris, starttime, endtime, minmag = 5.0))
+if (inherits(result, "try-error")) {
   message(geterrmessage())
 } else {
   bigOneIndex <- which(events$magnitude == max(events$magnitude))
-  bigOne <- events[bigOneIndex[1],]
+  bigOne <- events[bigOneIndex[1], ]
 }
 
-# Find US stations that are available within 10 degrees of arc of the 
+# Find US stations that are available within 10 degrees of arc of the
 # event location during the 15 minutes after the event
-if (exists("bigOne")){
+if (exists("bigOne")) {
   start <- bigOne$time
   end <- start + 900
   result <- try(av <- getAvailability(iris, "US", "", "", "BHZ", start, end,
-                      latitude=bigOne$latitude, longitude=bigOne$longitude,
-                      minradius=0, maxradius=10))
-  if (inherits(result,"try-error")) {
+    latitude = bigOne$latitude, longitude = bigOne$longitude,
+    minradius = 0, maxradius = 10
+  ))
+  if (inherits(result, "try-error")) {
     message(geterrmessage())
   } else {
-    
-# Get the station the furthest East
+    # Get the station the furthest East
     minLonIndex <- which(av$longitude == max(av$longitude))
-    snclE <- av[minLonIndex,]
+    snclE <- av[minLonIndex, ]
   }
 }
 
 # Get travel times to this station
-result <- try(traveltimes <- getTraveltime(iris, bigOne$latitude, bigOne$longitude, bigOne$depth,
-                             snclE$latitude, snclE$longitude))
-if (inherits(result,"try-error")) {
+result <- try(traveltimes <- getTraveltime(
+  iris, bigOne$latitude, bigOne$longitude, bigOne$depth,
+  snclE$latitude, snclE$longitude
+))
+if (inherits(result, "try-error")) {
   message(geterrmessage())
 } else {
-
-# Look at the list                             
+  # Look at the list
   traveltimes
 
-# Find the P and S arrival times
-  pArrival <- start + traveltimes$travelTime[traveltimes$phaseName=="P"]
-  sArrival <- start + traveltimes$travelTime[traveltimes$phaseName=="S"] 
+  # Find the P and S arrival times
+  pArrival <- start + traveltimes$travelTime[traveltimes$phaseName == "P"]
+  sArrival <- start + traveltimes$travelTime[traveltimes$phaseName == "S"]
 
-# Get the BHZ signal for this station
-  result <- try(st <- getDataselect(iris,snclE$network,snclE$station,
-                    snclE$location,snclE$channel,
-                    start,end))
-  if (inherits(result,"try-error")) {
+  # Get the BHZ signal for this station
+  result <- try(st <- getDataselect(
+    iris, snclE$network, snclE$station,
+    snclE$location, snclE$channel,
+    start, end
+  ))
+  if (inherits(result, "try-error")) {
     message(geterrmessage())
   } else {
-
-# Check that there is only a single trace
+    # Check that there is only a single trace
     length(st@traces)
-# Plot the seismic trace and mark the "P" and "S" arrival times
+    # Plot the seismic trace and mark the "P" and "S" arrival times
     tr <- st@traces[[1]]
-    plot(tr, subsampling=1) # need subsampling=1 to add vertical lines with abline()
-    abline(v=pArrival, col='red')
-    abline(v=sArrival, col='blue')
+    plot(tr, subsampling = 1) # need subsampling=1 to add vertical lines with abline()
+    abline(v = pArrival, col = "red")
+    abline(v = sArrival, col = "blue")
   }
 }
-
 ```
 
 

@@ -12,8 +12,8 @@ The \code{getDataAvailability} method obtains miniseed time extents from the Ear
 
 \usage{
 getDataAvailability(obj, network, station, location, channel,starttime, endtime,
-                     mergequality, mergesamplerate, mergeoverlap, mergetolerance, 
-                     includerestricted, excludetoolarge)
+                    mergequality, mergesamplerate, mergeoverlap, mergetolerance, 
+                    includerestricted, excludetoolarge)
 }
 
 \arguments{

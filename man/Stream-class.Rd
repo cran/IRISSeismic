@@ -1,5 +1,4 @@
 \name{Stream-class}
-\Rdversion{1.1}
 \docType{class}
 \alias{Stream-class}
 \alias{Stream}
@@ -50,55 +49,58 @@ Objects are typically created by calls to \link{getDataselect}.
 
 \section{Methods}{
   \describe{
-    \item{getGaps}{\code{signature(x="Stream")}: 
+    \item{assignQuality}{ \code{signature(x="Stream", quality="character")}:
+    returns a Stream where the quality code in each trace @id slot is replaced
+    by quality. quality must be one of "R", "D", "Q", "M". }
+    \item{getGaps}{\code{signature(x="Stream")}:
     returns information on data dropouts between \code{Traces}; see \link{getGaps} }
-    \item{getUpDownTimes}{\code{signature(x="Stream", min_signal="numeric", min_gap="numeric")}: 
+    \item{getUpDownTimes}{\code{signature(x="Stream", min_signal="numeric", min_gap="numeric")}:
     returns a vector of datetimes associated with channel up/down transitions; see \link{getUpDownTimes} }
-    \item{length}{\code{signature(x="Stream")}: 
+    \item{length}{\code{signature(x="Stream")}:
     returns the total number of data points in all \code{Traces} }
-    \item{max}{\code{signature(x="Stream")}: 
+    \item{max}{\code{signature(x="Stream")}:
     returns the overall data maximum for all data in all \code{Traces} }
-    \item{median}{\code{signature(x="Stream", na.rm= "logical")}: 
+    \item{median}{\code{signature(x="Stream", na.rm= "logical")}:
     returns the overall data median for all data in all \code{Traces} }
-    \item{mean}{\code{signature(x="Stream")}: 
+    \item{mean}{\code{signature(x="Stream")}:
     returns the overall data mean for all data in all \code{Traces} }
-    \item{mergeTraces}{\code{signature(x="Stream", fillMethod="fillNA")}: 
+    \item{mergeTraces}{\code{signature(x="Stream", fillMethod="fillNA")}:
     returns a new \code{Stream} object where all \code{Traces} have been merged into a single \code{Trace} \link{mergeTraces} }
-    \item{min}{\code{signature(x="Stream")}: 
+    \item{min}{\code{signature(x="Stream")}:
     returns the overall data minimum for all data in all \code{Traces} }
-    \item{multiplyBy}{\code{signature(x="Stream", y="numeric")}: 
+    \item{multiplyBy}{\code{signature(x="Stream", y="numeric")}:
     returns a new \code{Stream} object where the data in every \code{Trace} have been multiplied by y; see \link{multiplyBy} }
-    \item{parallelLength}{\code{signature(x="Stream")}: 
+    \item{parallelLength}{\code{signature(x="Stream")}:
     returns a vector of data lengths, one for each \code{Trace} }
-    \item{parallelMax}{\code{signature(x="Stream")}: 
+    \item{parallelMax}{\code{signature(x="Stream")}:
     returns a vector of data maxima, one for each \code{Trace} }
-    \item{parallelMedian}{\code{signature(x="Stream", na.rm= "logical")}: 
+    \item{parallelMedian}{\code{signature(x="Stream", na.rm= "logical")}:
     returns a vector of data medians, one for each \code{Trace} }
-    \item{parallelMean}{\code{signature(x="Stream")}: 
+    \item{parallelMean}{\code{signature(x="Stream")}:
     returns a vector of data means, one for each \code{Trace} }
-    \item{parallelMin}{\code{signature(x="Stream")}: 
+    \item{parallelMin}{\code{signature(x="Stream")}:
     returns a vector of data minima, one for each \code{Trace} }
-    \item{parallelRms}{\code{signature(x="Stream")}: 
+    \item{parallelRms}{\code{signature(x="Stream")}:
     returns a vector of RMS calculations, one for each \code{Trace}; see \link{rmsVariance} }
-    \item{parallelRmsVariance}{\code{signature(x="Stream")}: 
+    \item{parallelRmsVariance}{\code{signature(x="Stream")}:
     returns a vector of RMS variance calculations, one for each \code{Trace}; see \link{rmsVariance} }
-    \item{parallelSd}{\code{signature(x="Stream", na.rm="logical")}: 
+    \item{parallelSd}{\code{signature(x="Stream", na.rm="logical")}:
     returns a vector of standard deviation calculations, one for each \code{Trace} }
-    \item{plot}{\code{signature(x="Stream")}: 
+    \item{plot}{\code{signature(x="Stream")}:
     default plot of the merged \code{Traces} in a \code{Stream} with appropriate labeling}
-    \item{plotUpDownTimes}{\code{signature(x="Stream", min_signal="numeric", min_gap="numeric")}: 
+    \item{plotUpDownTimes}{\code{signature(x="Stream", min_signal="numeric", min_gap="numeric")}:
     plots the times at which a \code{Stream} transitions from data collection to non-collection (on/off); see \link{getUpDownTimes}}
-    \item{rms}{\code{signature(x="Stream")}: 
+    \item{rms}{\code{signature(x="Stream")}:
     returns the overall Root Mean Square amplitude for all data in all \code{Traces}; see \link{rmsVariance} }
-    \item{rmsVariance}{\code{signature(x="Stream")}: 
+    \item{rmsVariance}{\code{signature(x="Stream")}:
     returns the overall RMS variance for all data in all \code{Traces}; see \link{rmsVariance} }
-    \item{sd}{\code{signature(x="Stream", na.rm="logical")}: 
+    \item{sd}{\code{signature(x="Stream", na.rm="logical")}:
     returns the overall standard deviations for all data in all \code{Traces} }
-    \item{slice}{\code{signature(x="Stream", starttime="POSIXct", endtime="POSIXct")}: 
+    \item{slice}{\code{signature(x="Stream", starttime="POSIXct", endtime="POSIXct")}:
     returns a new \code{Stream} sliced out of an existing \code{Stream} (see \link{slice})}
-    \item{uniqueIds}{\code{signature(x="Stream")}: 
+    \item{uniqueIds}{\code{signature(x="Stream")}:
     returns a vector of SNCLQ identifiers, one for each \code{Trace} }
-	 }
+  }
 }
 
 %% \references{ }

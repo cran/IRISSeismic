@@ -34,6 +34,7 @@ exportClasses(
 exportMethods(
     "as.headerLine",
     "as.vector",
+    "assignQuality",
     "butterworth",
     "DDT",
     "envelope",

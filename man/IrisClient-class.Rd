@@ -14,7 +14,7 @@ A class for making data and metadata requests from EarthScope web services.
 \section{Slots}{
   \describe{
     \item{\code{site}:}{Object of class \code{"character"}:
-    this is the first part of the url that the web service will be pointed to, defaults to "https://service.earthscope.org" }
+    this is the top level domain that the web services will be pointed to; defaults to "https://service.earthscope.org" }
     \item{\code{service_type}:}{Object of class \code{"character"}:
     defaults to \code{fdsnws}; for data retrieval from the IRIS PH5 repository, set this to \code{ph5ws}; }
     \item{\code{debug}:}{Object of class \code{"logical"}:
@@ -22,8 +22,15 @@ A class for making data and metadata requests from EarthScope web services.
     \item{\code{useragent}:}{Object of class \code{"character"}:
     client identification string }
     \item{\code{event_site}:}{Object of class \code{"character"}:
-    this is the first part of the url that the event web service will be pointed to, defaults to \code{site} or
-    if \code{site=https://service.earthscope.org}, defaults to \code{https://earthquake.usgs.gov} }
+    this is the top level domain that the event web service url will be pointed to; defaults to \code{site} or
+    if \code{site="https://service.earthscope.org"} or \code{site="https://service.iris.edu"}, 
+    defaults to \code{"https://earthquake.usgs.gov"} }
+    \item{\code{dataselect_site}:}{Object of class \code{"character"}:
+    this is the top level domain that the dataselect web service url will be pointed to; defaults to \code{site}}
+    \item{\code{station_site}:}{Object of class \code{"character"}:
+    this is the top level domain that the station web service url will be pointed to; defaults to \code{site}} 
+    \item{\code{availability_site}:}{Object of class \code{"character"}:
+    this is the top level domain that the availability web service url will be pointed to; defaults to \code{site}} 
     \item{\code{retries}:}{Object of class \code{"numeric"}:
     set the number of retries for API calls when receiving a server error response, must be 5 or fewer }
   }

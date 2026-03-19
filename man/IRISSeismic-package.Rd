@@ -33,6 +33,18 @@ EarthScope web services: \url{https://service.earthscope.org/}
 
 \section{History}{
 
+  version 1.8.0
+  \itemize{
+    \item{ added fields to IrisClient object for dataselect_site, station_site, availability_site }
+    \item{ added new miniseed2Stream boolean parameter removeZeroSampleTraces (default = TRUE) }
+    \item{ added new methods \code{assignQuality.Stream} and \code{assignQuality.Trace}  }
+  }
+
+  version 1.7.1
+  \itemize{
+    \item{ added http status code 429 to web service retry criteria }
+  }
+
   version 1.7.0
   \itemize{
     \item{ added slot 'retries' to the IrisClient class, for use by select API calls}

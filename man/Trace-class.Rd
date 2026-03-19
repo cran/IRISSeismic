@@ -28,7 +28,7 @@ populated by calls to \link{getDataselect}.
 
 \section{Slots}{
   \describe{
-    \item{\code{id}:}{Object of class \code{"character"}: 
+    \item{\code{id}:}{Object of class \code{"character"}:
     Unique "SNCL" identifier specifying the Network, Station, Location, Channel and Quality factor
     associated with this trace: eg. \code{AK.PIN..VEA.M}. The \code{id} is generated automatically
     when the trace is first created and is intended for read only.}
@@ -42,47 +42,50 @@ populated by calls to \link{getDataselect}.
     \item{\code{InputUnits}:}{Object of class \code{"character"}:
     The units of the data as input from the perspective of data acquisition.
     After correcting data for this response, these would be the resulting units.}
-    \item{\code{stats}:}{Object of class \code{"TraceHeader"}: 
+    \item{\code{stats}:}{Object of class \code{"TraceHeader"}:
     Container with metadata information describing the trace. (see \link{TraceHeader-class}) }
     \item{\code{data}:}{Object of class \code{"numeric"}: Vector of data values. }
   }
 }
-  
+
 \section{Methods}{
   \describe{
-    \item{as.vector}{\code{signature(x="Trace")}: 
+    \item{assignQuality}{ \code{signature(x="Trace", quality="character")}:
+    returns a Trace where the quality code in the trace @id slot is replaced
+    by quality. quality must be one of "R", "D", "Q", "M". }
+    \item{as.vector}{\code{signature(x="Trace")}:
     returns the data slot; equivalent to \code{x@data} }
-    \item{DDT}{\code{signature(x="Trace", demean="logical", detrend="logical", taper="numeric")}: 
+    \item{DDT}{\code{signature(x="Trace", demean="logical", detrend="logical", taper="numeric")}:
     returns a new trace that has been 'cleaned up' for further processing by applying demean, detrend, and taper techniques (see \link{DDT}) }
-    \item{envelope}{\code{signature(x="Trace")}: 
+    \item{envelope}{\code{signature(x="Trace")}:
     returns the envelope of the seismic signal (see \link{envelope}) }
-    \item{isDC}{\code{signature(x="Trace")}: 
+    \item{isDC}{\code{signature(x="Trace")}:
     returns \code{TRUE} if trace data consist of a DC signal }
-    \item{length}{\code{signature(x="Trace")}: 
+    \item{length}{\code{signature(x="Trace")}:
     returns the length of the data; equivalent to \code{length(x@data)} }
-    \item{max}{\code{signature(x="Trace")}: 
+    \item{max}{\code{signature(x="Trace")}:
     returns the maximum value of the data; equivalent to \code{max(x@data)} }
-    \item{median}{\code{signature(x="Trace", na.rm="logical")}: 
+    \item{median}{\code{signature(x="Trace", na.rm="logical")}:
     returns the median value of the data; equivalent to \code{median(x@data)} }
-    \item{mean}{\code{signature(x="Trace")}: 
+    \item{mean}{\code{signature(x="Trace")}:
     returns the mean value of the data; equivalent to \code{mean(x@data)} }
-    \item{min}{\code{signature(x="Trace")}: 
+    \item{min}{\code{signature(x="Trace")}:
     returns the minimum value of the data; equivalent to \code{min(x@data)} }
-    \item{multiplyBy}{\code{signature(x="Trace", y="numeric")}: 
+    \item{multiplyBy}{\code{signature(x="Trace", y="numeric")}:
     returns a new \code{Trace} where the data have been multiplied by y (see \link{multiplyBy})}
-    \item{plot}{\code{signature(x="Trace")}: 
+    \item{plot}{\code{signature(x="Trace")}:
     default plot of the \code{Trace} data with appropriate labeling}
-    \item{rms}{\code{signature(x="Trace")}: 
+    \item{rms}{\code{signature(x="Trace")}:
     returns the Root Mean Square amplitude of the data (see \link{rms}) }
-    \item{rmsVariance}{\code{signature(x="Trace")}: 
+    \item{rmsVariance}{\code{signature(x="Trace")}:
     returns the RMS variance of the data (see \link{rmsVariance}) }
-    \item{sd}{\code{signature(x="Trace", na.rm="logical")}: 
+    \item{sd}{\code{signature(x="Trace", na.rm="logical")}:
     returns the standard deviation of the data; equivalent to \code{sd(x@data)} }
-    \item{slice}{\code{signature(x="Trace", starttime="POSIXct", endtime="POSIXct")}: 
+    \item{slice}{\code{signature(x="Trace", starttime="POSIXct", endtime="POSIXct")}:
     returns a new \code{Trace} subset of an existing \code{Trace} (see \link{slice})}
-    \item{STALTA}{\code{signature(x="Trace",staSecs="numeric",ltaSecs="numeric",algorithm="character", ...)}: 
+    \item{STALTA}{\code{signature(x="Trace",staSecs="numeric",ltaSecs="numeric",algorithm="character", ...)}:
     returns the STALTA picker result (see \link{STALTA})}
-    \item{triggerOnset}{\code{signature(x="Trace", picker="numeric", threshold="numeric", ...)}: 
+    \item{triggerOnset}{\code{signature(x="Trace", picker="numeric", threshold="numeric", ...)}:
     returns the time or index of an event onset as determined by the STALTA picker (see \link{triggerOnset})}
 	 }
 }

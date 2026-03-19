@@ -5,8 +5,6 @@
 
 # See seismic/src/parseMiniSEED.c for code comments
 parseMiniSEED <- function(buffer) {
-  result <- .Call("parseMiniSEED",buffer)
+  result <- .Call("parseMiniSEED", buffer)
   return(result)
 }
-
-
