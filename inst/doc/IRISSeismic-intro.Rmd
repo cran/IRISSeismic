@@ -377,52 +377,11 @@ if (exists("tr")) {
 }
 ```
 
-### Data availability
-
-The `IrisClient` also provides functionality for interacting with
-other web services at the DMC.  The `getAvailability()` method allows users
-to query what SNCLs are available, obtaining that information from the
-[station webservice](https://service.iris.edu/fdsnws/station/).
-
-Information is returned as a dataframe containing all the information
-returned by ws-availability.  Standard
-DMC webservice wildcards can be used as in the example below which tells us
-what other 'B' channels are available at our station of interest during
-the time of the big quake above.
-
-```{r fiftheenth}
-starttime <- as.POSIXct("2010-02-27", tz = "GMT")
-endtime <- as.POSIXct("2010-02-28", tz = "GMT")
-result <- try(availability <- getAvailability(iris, "IU", "ANMO", "*", "B??", starttime, endtime))
-if (inherits(result, "try-error")) {
-  message(geterrmessage())
-} else {
-  availability
-}
-```
-
-The `getAvailability()` method accepts the following arguments:
-
-  * `obj` -- an `IrisClient` object 
-  * `network` -- network code 
-  * `station` -- station code 
-  * `location` -- location code 
-  * `channel` -- channel code 
-  * `starttime` -- POSIXct starttime (GMT) 
-  * `endtime` -- POSIXct endtime (GMT) 
-  * `includerestricted` -- optional flag whether to report on restricted data (default=`FALSE`) 
-  * `latitude` -- optional latitude when specifying location and radius 
-  * `longitude` -- optional longitude when specifying location and radius 
-  * `minradius` -- optional minimum radius when specifying location and radius 
-  * `maxradius` -- optional maximum radius  when specifying location and radius 
-
 ### Other EarthScope web services
 
-Several methods of the `IrisClient` class work very similarly to the
-`getAvailability()` method in that they return dataframes of information obtained
+Several methods of the `IrisClient` class return dataframes of information obtained
 from web services of the same name.  The suite of methods returning dataframes includes:
 
-  * `getAvailability`
   * `getChannel`
   * `getDataselect`
   * `getEvalresp`
@@ -431,7 +390,6 @@ from web services of the same name.  The suite of methods returning dataframes i
   * `getSNCL`
   * `getStation`
   * `getTraveltime`
-  * `getUnavailability`
 
 The following example demonstrates the use of several of these services together to do the following:
 
@@ -463,7 +421,7 @@ if (inherits(result, "try-error")) {
 if (exists("bigOne")) {
   start <- bigOne$time
   end <- start + 900
-  result <- try(av <- getAvailability(iris, "US", "", "", "BHZ", start, end,
+  result <- try(av <- getChannel(iris, "US", "", "", "BHZ", start, end,
     latitude = bigOne$latitude, longitude = bigOne$longitude,
     minradius = 0, maxradius = 10
   ))

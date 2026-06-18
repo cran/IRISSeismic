@@ -1,6 +1,6 @@
 Type: Package
 Package: IRISSeismic
-Version: 1.8.0
+Version: 1.9.0
 Title: Classes and Methods for Seismic Data Analysis
 Authors@R: c(
     person("Jonathan", "Callahan", email="jonathan@mazamascience.com", role=c("aut")),
@@ -30,5 +30,5 @@ Author: Jonathan Callahan [aut],
   Mary Templeton [aut],
   Chad Trabant [ctb]
 Maintainer: Gillian Sharer <gillian.sharer@earthscope.org>
-Packaged: 2026-03-18 02:41:47 UTC; gilliansharer
-Date/Publication: 2026-03-19 08:30:24 UTC
+Packaged: 2026-06-17 22:55:23 UTC; gilliansharer
+Date/Publication: 2026-06-18 05:10:27 UTC

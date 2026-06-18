@@ -73,10 +73,10 @@ bigOne <- events[bigOneIndex[1],]
 # Find US stations that are available within an hour of the event
 start <- bigOne$time
 end <- start + 3600
-availability <- getAvailability(iris, "US", "", "", "BHZ",
-                                starttime=start, endtime=end,
-                                latitude=bigOne$latitude, longitude=bigOne$longitude,
-                                minradius=0, maxradius=10)
+availability <- getChannel(iris, "US", "", "", "BHZ",
+                           starttime=start, endtime=end,
+                           latitude=bigOne$latitude, longitude=bigOne$longitude,
+                           minradius=0, maxradius=10)
     
 # Get the station the furthest East
 minLonIndex <- which(availability$longitude == max(availability$longitude))

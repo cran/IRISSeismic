@@ -2005,6 +2005,15 @@ getAvailability.IrisClient <- function(obj,
                                        minradius,
                                        maxradius) {
   # Parameters common to all 'station' webservice requests
+  .Deprecated( 
+    msg=paste(
+      "getAvailability is deprecated.",
+      "https://service.earthscope.org/fdsnws/station service no longer supports",
+      "parameters 'matchtimeseries' or 'includeavailability'.",
+      "These parameters have been removed from this function and it now",
+      "returns the same result as `getChannel.IrisClient`."
+    )
+  )
   url <- paste(obj@station_site, obj@service_type, "station/1/query?", sep = "/")
   url <- paste(url, "net=", ifelse(network == "", "*", network), sep = "")
   url <- paste(url, "&sta=", ifelse(station == "", "*", station), sep = "")
@@ -2045,10 +2054,10 @@ getAvailability.IrisClient <- function(obj,
   }
 
   # Parameters specific to the getAvailability() method
-  if (obj@service_type != "ph5ws") {
-    url <- paste(url, "&includeavailability=true", sep = "")
-    url <- paste(url, "&matchtimeseries=true", sep = "")
-  }
+  #if (obj@service_type != "ph5ws") {
+  #  url <- paste(url, "&includeavailability=true", sep = "")
+  #  url <- paste(url, "&matchtimeseries=true", sep = "")
+  #}
   url <- paste(url, "&level=channel", sep = "")
 
   # Write debug output
@@ -2341,6 +2350,14 @@ getUnavailability.IrisClient <- function(obj,
                                          minradius,
                                          maxradius) {
   # Get all channels
+  .Deprecated(
+    msg=paste(
+     "getUnavailability is deprecated.",
+     "https://service.earthscope.org/fdsnws/station service no longer supports",
+     "parameters 'matchtimeseries' or 'includeavailability'. As a result, this",
+     "function now returns an empty dataframe."
+   )
+  )
   c <- getChannel(
     obj,
     network,
@@ -2357,7 +2374,7 @@ getUnavailability.IrisClient <- function(obj,
   )
 
   # Get available channels
-  a <- getAvailability(
+  a <- suppressWarnings(getAvailability(
     obj,
     network,
     station,
@@ -2370,7 +2387,7 @@ getUnavailability.IrisClient <- function(obj,
     longitude,
     minradius,
     maxradius
-  )
+  ))
 
   # Create unique record identifiers (SNCL is enough)
   c_sncls <- paste(c$network, c$station, c$location, c$channel, sep = ".")

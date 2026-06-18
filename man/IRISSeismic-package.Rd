@@ -33,6 +33,11 @@ EarthScope web services: \url{https://service.earthscope.org/}
 
 \section{History}{
 
+  version 1.9.0
+  \itemize{
+    \item{ deprecates functions getAvailability and getUnavailability }
+  }
+
   version 1.8.0
   \itemize{
     \item{ added fields to IrisClient object for dataselect_site, station_site, availability_site }

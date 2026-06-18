@@ -146,16 +146,6 @@ if (exists("tr")) {
   rm(tr)
 }
 
-## ----fiftheenth---------------------------------------------------------------
-starttime <- as.POSIXct("2010-02-27", tz = "GMT")
-endtime <- as.POSIXct("2010-02-28", tz = "GMT")
-result <- try(availability <- getAvailability(iris, "IU", "ANMO", "*", "B??", starttime, endtime))
-if (inherits(result, "try-error")) {
-  message(geterrmessage())
-} else {
-  availability
-}
-
 ## ----sixteenth, fig.height=4, fig.width=6-------------------------------------
 # Open a connection to EarthScope webservices
 iris <- new("IrisClient")
@@ -178,7 +168,7 @@ if (inherits(result, "try-error")) {
 if (exists("bigOne")) {
   start <- bigOne$time
   end <- start + 900
-  result <- try(av <- getAvailability(iris, "US", "", "", "BHZ", start, end,
+  result <- try(av <- getChannel(iris, "US", "", "", "BHZ", start, end,
     latitude = bigOne$latitude, longitude = bigOne$longitude,
     minradius = 0, maxradius = 10
   ))

@@ -7,6 +7,10 @@
 \title{Retrieve Channel metadata from EarthScope}
 
 \description{
+This method is deprecated. It relies on the EarthScope fdsnws/station web service parameter
+"matchtimeseries" which is no longer supported. Without "matchtimeseries" this method will
+always return an empty dataframe.
+
 The \code{getUnavailability} method obtains metadata for channels that are not available from the EarthScope station web service
 and returns it in a dataframe.
 }

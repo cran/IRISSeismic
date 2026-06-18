@@ -38,7 +38,7 @@ A class for making data and metadata requests from EarthScope web services.
 \section{Methods}{
   \describe{
     \item{getAvailability}{
-    makes a channel request of the station web service and returns the result as a dataframe; see \code{\link{getAvailability}} }
+    Deprecated. Makes a channel request of the station web service and returns the result as a dataframe; see \code{\link{getAvailability}} }
     \item{getChannel}{
     makes a channel request of the station web service and returns the result as a dataframe; see \code{\link{getChannel}} }
     \item{getDataAvailability}{
@@ -60,7 +60,7 @@ A class for making data and metadata requests from EarthScope web services.
     \item{getTraveltime}{
     makes a request of the traveltime web service and returns the information as a dataframe; see \code{\link{getTraveltime}} }
     \item{getUnavailability}{
-    makes a channel request of the station web service and returns the result as a dataframe; see \code{\link{getUnavailability}} }
+    Deprecated. Makes a channel request of the station web service and returns the result as a dataframe; see \code{\link{getUnavailability}} }
 	 }
 }
 
