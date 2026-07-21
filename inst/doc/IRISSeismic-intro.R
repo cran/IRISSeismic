@@ -182,8 +182,8 @@ if (exists("bigOne")) {
 }
 
 # Get travel times to this station
-result <- try(traveltimes <- getTraveltime(
-  iris, bigOne$latitude, bigOne$longitude, bigOne$depth,
+result <- try(traveltimes <- taupTraveltime(
+  bigOne$latitude, bigOne$longitude, bigOne$depth,
   snclE$latitude, snclE$longitude
 ))
 if (inherits(result, "try-error")) {

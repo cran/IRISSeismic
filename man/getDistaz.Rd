@@ -6,8 +6,10 @@
 \title{Retrieve great circle distance information from EarthScope}
 
 \description{
+Deprecated due to the upcoming retirement of the EarthScope \code{distaz} web service.
+
 The \code{getDistaz} method obtains great circle distance data from
-the EarthScope \code{distaz} web service.
+the EarthScope \code{distaz} web service. 
 }
 
 \usage{

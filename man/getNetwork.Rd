@@ -1,48 +1,64 @@
 \name{getNetwork}
 \docType{methods}
 \alias{getNetwork}
-\alias{getNetwork,IrisClient,character,character,character,character,POSIXct,POSIXct,logical-method}
-\alias{getNetwork,IrisClient,character,character,character,character,POSIXct,POSIXct,missing-method}
+\alias{getNetwork,IrisClient,characterORmissing,characterORmissing,characterORmissing,characterORmissing,POSIXctORmissing,POSIXctORmissing,logicalORmissing-method}
 
-\title{Retrieve Network metadata from EarthScope}
+\title{Retrieve Network metadata from EarthScope or other FDSN station service}
 
 \description{
-The \code{getNetwork} method obtains network metadata from the EarthScope station web service
-and returns it in a dataframe.
+The \code{getNetwork} method obtains network metadata from the EarthScope
+(or other Data Center) station web service and returns it in a dataframe. 
 }
 
 \usage{
-getNetwork(obj, network, station, location, channel,
-           starttime, endtime, includerestricted,
-           latitude, longitude, minradius, maxradius)
+getNetwork(
+  obj,
+  network,
+  station,
+  location,
+  channel,
+  starttime,
+  endtime,
+  includerestricted,
+  latitude,
+  longitude,
+  minradius,
+  maxradius,
+  ...)
 }
 
 \arguments{
-  \item{obj}{ \code{IrisClient} object }
-  \item{network}{ character string with the two letter seismic network code }
-  \item{station}{ character string with the station code }
-  \item{location}{ character string with the location code }
-  \item{channel}{ character string with the three letter channel code }
-  \item{starttime}{ POSIXct class specifying the starttime (GMT) }
-  \item{endtime}{ POSIXct class specifying the endtime (GMT) }
-  \item{includerestricted}{ optional logical identifying whether to report on restricted data (default=\code{FALSE}) }
-  \item{latitude}{ optional latitude used when specifying a location and radius }
-  \item{longitude}{ optional longitude used when specifying a location and radius }
-  \item{minradius}{ optional minimum radius used when specifying a location and radius }
-  \item{maxradius}{ optional maximum radius used when specifying a location and radius }
+  \item{obj}{\code{IrisClient} object}
+  \item{network}{optional character string with the two letter seismic network code}
+  \item{station}{optional character string with the station code}
+  \item{location}{optional character string with the location code}
+  \item{channel}{optional character string with the three letter channel code}
+  \item{starttime}{optional POSIXct class specifying the starttime (GMT)}
+  \item{endtime}{optional POSIXct class specifying the endtime (GMT)}
+  \item{includerestricted}{optional logical identifying whether to report on
+    restricted data (default=\code{FALSE})}
+  \item{latitude}{optional latitude used when specifying a location and radius}
+  \item{longitude}{optional longitude used when specifying a location and radius} 
+  \item{minradius}{optional minimum radius used when specifying a location and
+    radius}
+  \item{maxradius}{optional maximum radius used when specifying a location and
+    radius}
+  \item{\dots}{optional other parameters passed to the station web service}
 }
 
 
 \details{
-The \code{getNetwork} method utilizes the station web service to return data for all stations that meet the criteria defined by the arguments
-and returns that data in a dataframe. Each row of the dataframe represents a unique network.
+The \code{getNetwork} method utilizes the station web service to return data for
+all stations that meet the criteria defined by the arguments and returns that
+data in a dataframe. Each row of the dataframe represents a unique network.
 
-Each of the arguments \code{network}, \code{station}, \code{location} or \code{channel} may contain
-a valid code or a wildcard expression, e.g. "BH?" or "*".  Empty strings are converted to "*".
-Otherwise, the ascii string that is used for
-these values is simply inserted into the web service request URL.
+Each of the arguments \code{network}, \code{station}, \code{location} or
+\code{channel} may contain a valid code or a wildcard expression, e.g. "BH?"
+or "*".  Empty strings are converted to "*". Otherwise, the ascii string that
+is used for these values is simply inserted into the web service request URL.
 
-For more details see the \href{https://service.earthscope.org/fdsnws/station/1/}{web service documentation}.
+For more details see the
+\href{https://service.earthscope.org/fdsnws/station/1/}{web service documentation}.
 }
 
 \value{
@@ -56,12 +72,12 @@ Rows are ordered by \code{network}.
 }
 
 \references{
-%% ~put references to the literature/web site here ~
 The EarthScope station web service:
 
   \url{https://service.earthscope.org/fdsnws/station/1/}
 
-This implementation was inspired by the functionality in the obspy get_stations() method.
+This implementation was inspired by the functionality in the ObsPy
+get_stations() method.
  
   \url{https://docs.obspy.org/packages/autogen/obspy.clients.fdsn.client.Client.get_stations.html}
 
@@ -70,10 +86,6 @@ This implementation was inspired by the functionality in the obspy get_stations(
 \author{
 Jonathan Callahan \email{jonathan@mazamascience.com}
 }
-
-%% \note{ }
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
 \code{\link{IrisClient-class}}
@@ -87,7 +99,8 @@ iris <- new("IrisClient")
 starttime <- as.POSIXct("2001-02-28",tz="GMT")
 endtime <- starttime + 2*24*3600
 
-# Use the getEvent web service to determine what events happened in this time period
+# Use the getEvent web service to determine what events happened in this time
+# period
 result <- try(events <- getEvent(iris,starttime,endtime,6.0))
 if (inherits(result,"try-error")) {
   message(geterrmessage())
@@ -99,14 +112,15 @@ if (inherits(result,"try-error")) {
   e <- events[eIndex[1],]
 
 
-# Which seismic networks have BHZ stations within 5 degrees of the quake epicenter?
+# Which seismic networks have BHZ stations within 5 degrees of the quake
+# epicenter?
   result <- try(networks <- getNetwork(iris,"*","*","*","BHZ",starttime,endtime,
                             lat=e$latitude,lon=e$longitude,maxradius=5))
   if (inherits(result,"try-error")) {
     message(geterrmessage())
-  } else {
+ } else {
     networks
-  }
+ }
 }
 }
 

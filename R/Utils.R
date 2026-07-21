@@ -233,14 +233,14 @@ rotate2D <- function(st1, st2, angle) {
   # and 2 (lead, usually oriented E) using metadata information
 
   if (!is.na(st1@traces[[1]]@stats@azimuth) &&
-    !is.na(st2@traces[[1]]@stats@azimuth)) {
+        !is.na(st2@traces[[1]]@stats@azimuth)) {
     az1 <- st1@traces[[1]]@stats@azimuth
     az2 <- st2@traces[[1]]@stats@azimuth
 
     azdiff <- az1 - az2
 
     if (!((abs(azdiff) > 87 & abs(azdiff) < 93) ||
-      (abs(azdiff) > 267 & abs(azdiff) < 273))) {
+            (abs(azdiff) > 267 & abs(azdiff) < 273))) {
       stop(paste(
         "Incoming streams are not orthogonal (+/- 3 degrees):",
         st1@traces[[1]]@id,
@@ -374,6 +374,62 @@ surfaceDistance <- function(lat1_deg, lon1_deg, lat2_deg, lon2_deg) {
   return(d)
 }
 
+################################################################################
+# taupTraveltime
+#
+taupTraveltime <- function(latitude,
+                           longitude,
+                           depth = 0,
+                           staLatitude,
+                           staLongitude) {
+
+  taup_classpath <- paste0(
+    "'",
+    system.file("java/lib", package = "IRISSeismic"),
+    "/*'"
+  )
+
+  # LGPL license requirement: users must be able to swap in a modified version
+  # of the library.
+  external_classpath <- Sys.getenv("TAUP_JAR_DIR", unset = "")
+  if (nzchar(external_classpath)) {
+    taup_classpath <- paste0("'", external_classpath, "/*'")
+  }
+
+  args <- c(
+    "-cp", taup_classpath,
+    "edu.sc.seis.TauP.cmdline.ToolRun", "time",
+    "--evdepth", depth,
+    "--sta", staLatitude, staLongitude,
+    "--evt", latitude, longitude,
+    "--csv"
+  )
+
+  taup_output <- system2("java", args = args, stdout = TRUE, stderr = FALSE)
+  taup_dataframe <- read.csv(
+    text = paste(taup_output[-1], collapse = "\n"),
+    header = FALSE,
+    stringsAsFactors = FALSE,
+    col.names = c(
+      "distance",
+      "depth",
+      "phaseName",
+      "travelTime",
+      "rayParam",
+      "takeoff",
+      "incident",
+      "station",
+      "puristDistance",
+      "purist_flag",
+      "puristName",
+      "description"
+    )
+  )
+  drop_cols <- c("station", "purist_flag", "description")
+  taup_dataframe <- taup_dataframe[, !(names(taup_dataframe) %in% drop_cols)]
+
+  return(taup_dataframe)
+}
 
 ################################################################################
 # END

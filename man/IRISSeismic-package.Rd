@@ -33,6 +33,16 @@ EarthScope web services: \url{https://service.earthscope.org/}
 
 \section{History}{
 
+  version 1.10.0
+  \itemize{
+    \item{ deprecates functions getTraveltime, getDistaz }
+    \item{ added new function taupTraveltime as a replacement for getTraveltime }
+    \item{ getEvent will now accept any parameter in the FDSN event web service
+           specification }
+    \item{ getNetwork, getStation, getChannel will now accept any parameter in
+           the FDSN station web service specification, except 'level' and 'format' }
+  }
+
   version 1.9.0
   \itemize{
     \item{ deprecates functions getAvailability and getUnavailability }

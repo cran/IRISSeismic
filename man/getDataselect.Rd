@@ -3,17 +3,25 @@
 \alias{getDataselect,IrisClient,character,character,character,character,POSIXct,POSIXct-method}
 
 
-\title{Retrieve seismic data from EarthScope}
+\title{Retrieve seismic data from EarthScope or other FDSN Data Center}
 
 \description{
-The \code{getDataselect} method makes a request of the EarthScope \code{dataselect} 
-webservice and returns a \code{Stream} object in which individual \code{Traces}
-have been sorted by start time.
+The \code{getDataselect} method makes a request of the EarthScope (or other
+Data Center) \code{dataselect} webservice and returns a \code{Stream} object
+in which individual \code{Traces} have been sorted by start time.
 }
 
 \usage{
-getDataselect(obj, network, station, location, channel, 
-              starttime, endtime, ...)
+getDataselect(
+  obj,
+  network,
+  station,
+  location,
+  channel, 
+  starttime,
+  endtime,
+  ...
+)
 }
 
 \arguments{
@@ -25,41 +33,53 @@ getDataselect(obj, network, station, location, channel,
   \item{starttime}{POSIXct class specifying the starttime (GMT)}
   \item{endtime}{POSIXct class specifying the endtime (GMT)}
   \item{\dots}{optional arguments
-     \code{quality} optional character string identifying the quality. IRIS webservices defaults to quality="M".
-     \code{repository} optional character string identifying whether to exclusively search primary archive or realtime collection buffers.
-           Acceptable values are "primary" or "realtime". If not specified, IRIS webservices defaults to both repositories.
-     \code{inclusiveEnd} optional logical determining whether the endtime is inclusive (default = TRUE)
-     \code{ignoreEpoch} optional logical defining behavior when multiple epochs are encountered (default = FALSE)
+     \code{quality} optional character string identifying the quality.
+       EarthScope webservices defaults to quality="M".
+     \code{repository} optional character string identifying whether to
+       exclusively search primary archive or realtime collection buffers.
+       Acceptable values are "primary" or "realtime". If not specified,
+       EarthScope webservices defaults to both repositories.
+     \code{inclusiveEnd} optional logical determining whether the endtime is
+       inclusive (default = TRUE)
+     \code{ignoreEpoch} optional logical defining behavior when multiple epochs
+       are encountered (default = FALSE)
    }
 }
 
 \details{
-This is the primary method for retrieving seismic data.  Data requests are made through
-the \code{dataselect} webservice and returned data are parsed using the internal miniseed2Stream() function.
+This is the primary method for retrieving seismic data.  Data requests are made
+through the \code{dataselect} webservice and returned data are parsed using the
+internal miniseed2Stream() function.
 
-If the location argument contains an empty string to specify a 'blank' location code, a location
-code of \code{"--"} will be used in the dataselect request URL.
+If the location argument contains an empty string to specify a 'blank' location
+code, a location code of \code{"--"} will be used in the dataselect request URL.
 (See \href{https://service.earthscope.org/fdsnws/dataselect/1/}{dataselect documentation}.)
 
-If \code{inclusiveEnd=FALSE}, then \code{getDataselect} will subtract 0.000001 seconds from the endtime before passing the 
-value to the \code{dataselect} webservice. An endtime of, e.g., \code{as.POSIXct("2016-01-03", tz="GMT")} will be passed 
-into \code{dataselect} as \code{end=2016-01-02T23:59:59.999999}. A data sample at time 2016-01-03T00:00:00 will not be returned
-unless \code{inclusiveEnd=TRUE}.
+If \code{inclusiveEnd=FALSE}, then \code{getDataselect} will subtract 0.000001
+seconds from the endtime before passing the value to the \code{dataselect}
+webservice. An endtime of, e.g., \code{as.POSIXct("2016-01-03", tz="GMT")} will
+be passed into \code{dataselect} as \code{end=2016-01-02T23:59:59.999999}. A
+data sample at time 2016-01-03T00:00:00 will not be returned unless
+\code{inclusiveEnd=TRUE}.
 
-Error returns from the webservice will stop evaluation and generate an error message.
+Error returns from the webservice will stop evaluation and generate an error
+message.
 
 Sometimes the station webservice will return multiple records for the same SNCL,
-each with a different scale or starttime.  These represent different \emph{epochs} with
-potentially different metadata parameters for the SNCL and, by default, will cause
-a 'Multiple epochs' error message to be generated.
+each with a different scale or starttime.  These represent different
+\emph{epochs} with potentially different metadata parameters for the SNCL and,
+by default, will cause a 'Multiple epochs' error message to be generated.
 
-Handling all possible metadata differences so that the data may be merged is beyond the scope of this
-package. Instead, to avoid errors, users may specify \code{ignoreEpoch=TRUE} in which case
-the very first SNCL-epoch encountered will be used and all others will be discarded.
+Handling all possible metadata differences so that the data may be merged is
+beyond the scope of this package. Instead, to avoid errors, users may specify
+\code{ignoreEpoch=TRUE} in which case the very first SNCL-epoch encountered
+will be used and all others will be discarded.
 
-For access to restricted data, getDataselect will look for a system environmental variable "IrisClient_passw" which should be a 
-string in the form "login:password". Alternatively, getDataselect will look for system environmental variable 
-"IrisClient_netrc" which should point to a .netrc authentication file.
+For access to restricted data, getDataselect will look for a system
+environmental variable "IrisClient_passw" which should be a string in the form
+"login:password". Alternatively, getDataselect will look for system
+environmental variable "IrisClient_netrc" which should point to a .netrc
+authentication file.
 
 }
 
@@ -68,12 +88,12 @@ A new \code{Stream} object is returned.
 }
 
 \references{
-%% ~put references to the literature/web site here ~
 The EarthScope dataselect webservice:
 
   \url{https://service.earthscope.org/fdsnws/dataselect/1/}
 
-This implementation is similar in functionality to the obspy dataselect function:
+This implementation is similar in functionality to the obspy dataselect
+function:
 
   \url{https://docs.obspy.org/_modules/obspy/clients/fdsn/client.html}
 }
@@ -81,10 +101,6 @@ This implementation is similar in functionality to the obspy dataselect function
 \author{
 Jonathan Callahan \email{jonathan@mazamascience.com}
 }
-
-%% \note{ }
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
 \code{\link{getSNCL}}, 

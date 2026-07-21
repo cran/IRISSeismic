@@ -8,6 +8,13 @@
   These functions are deprecated and may be defunct as soon as the next release.
 
   \itemize{
+    \item{ \code{getTraveltime.IrisClient}: getTraveltime has a dependency on
+      the EarthScope web service 'traveltime' which will not be supported
+      in the future.
+    }
+    \item{ \code{getDistaz.IrisClient}: getDistaz has a dependency on the 
+      EarthScope web service 'distaz' which will not be supported in the future.
+    }
     \item{ \code{getAvailability.IrisClient}: getAvailability has a dependency
       on the EarthScope station web service parameters 'matchtimeseries' and
       'includeavailability' which are no longer available. Without these 

@@ -1,48 +1,65 @@
 \name{getChannel}
 \docType{methods}
 \alias{getChannel}
-\alias{getChannel,IrisClient,character,character,character,character,POSIXct,POSIXct,logical-method}
-\alias{getChannel,IrisClient,character,character,character,character,POSIXct,POSIXct,missing-method}
+\alias{getChannel,IrisClient,character,characterORmissing,characterORmissing,characterORmissing,POSIXctORmissing,POSIXctORmissing,logicalORmissing-method}
 
-\title{Retrieve Channel metadata from EarthScope}
+
+\title{Retrieve Channel metadata from EarthScope or other FDSN Data Center}
 
 \description{
-The \code{getChannel} method obtains channel metadata from the EarthScope \code{station} web service
-and returns it in a dataframe.
+The \code{getChannel} method obtains channel metadata from the EarthScope (or
+other Data center) \code{station} web service and returns it in a dataframe.
 }
 
 \usage{
-getChannel(obj, network, station, location, channel,
-           starttime, endtime, includerestricted,
-           latitude, longitude, minradius, maxradius)
+getChannel(
+  obj,
+  network,
+  station,
+  location,
+  channel,
+  starttime,
+  endtime,
+  includerestricted,
+  latitude,
+  longitude,
+  minradius,
+  maxradius,
+  ...)
 }
 
 \arguments{
-  \item{obj}{ \code{IrisClient} object }
-  \item{network}{ character string with the two letter seismic network code }
-  \item{station}{ character string with the station code }
-  \item{location}{ character string with the location code }
-  \item{channel}{ character string with the three letter channel code }
-  \item{starttime}{ POSIXct class specifying the starttime (GMT) }
-  \item{endtime}{ POSIXct class specifying the endtime (GMT) }
-  \item{includerestricted}{ optional logical identifying whether to report on restricted data }
-  \item{latitude}{ optional latitude used when specifying a location and radius }
-  \item{longitude}{ optional longitude used when specifying a location and radius }
-  \item{minradius}{ optional minimum radius used when specifying a location and radius }
-  \item{maxradius}{ optional maximum radius used when specifying a location and radius }
+  \item{obj}{\code{IrisClient} object}
+  \item{network}{character string with the two letter seismic network code}
+  \item{station}{optional character string with the station code}
+  \item{location}{optional character string with the location code}
+  \item{channel}{optional character string with the three letter channel code}
+  \item{starttime}{optional POSIXct class specifying the starttime (GMT)}
+  \item{endtime}{optional POSIXct class specifying the endtime (GMT)}
+  \item{includerestricted}{optional logical identifying whether to report on
+    restricted data}
+  \item{latitude}{optional latitude used when specifying a location and radius}
+  \item{longitude}{optional longitude used when specifying a location and radius}
+  \item{minradius}{optional minimum radius used when specifying a location and
+    radius}
+  \item{maxradius}{optional maximum radius used when specifying a location and
+    radius}
+  \item{\dots}{optional other parameters passed to the station service}
 }
 
 
 \details{
-The \code{getChannel} method uses the station web service to obtain data for all channels that meet the criteria defined by the arguments
-and returns that data in a dataframe. Each row of the dataframe represents a unique channel-epoch. 
+The \code{getChannel} method uses the station web service to obtain data for
+all channels that meet the criteria defined by the arguments and returns that
+data in a dataframe. Each row of the dataframe represents a unique channel-epoch. 
 
-Each of the arguments \code{network}, \code{station}, \code{location} or \code{channel} may contain
-a valid code or a wildcard expression, e.g. "BH?" or "*". Empty strings are converted to "*".
-Otherwise the ascii string that is used for
-these values is simply inserted into the web service request URL.
+Each of the arguments \code{network}, \code{station}, \code{location} or
+\code{channel} may contain a valid code or a wildcard expression, e.g. "BH?" or
+"*". Empty strings are converted to "*". Otherwise the ascii string that is used
+for these values is simply inserted into the web service request URL.
 
-For more details see the \href{https://service.earthscope.org/fdsnws/station/1/}{webservice documentation}.
+For more details see the
+\href{https://service.earthscope.org/fdsnws/station/1/}{webservice documentation}.
 }
 
 \value{
@@ -60,18 +77,18 @@ Rows are ordered by \code{snclId}.
 The snclId column, eg. "US.OCWA..BHE", is generated as a convenience. It is not part of
 the normal return from the station web service.
 
-\bold{Note:}  The \code{snclId}s is not a unique identifier. If the time span of interest
-crosses an epoch boundary where instrumentation was changed then multiple records (rows)
-will share the same \code{snclId}.
+\bold{Note:}  The \code{snclId}s is not a unique identifier. If the time span of
+interest crosses an epoch boundary where instrumentation was changed then
+multiple records (rows) will share the same \code{snclId}.
 }
 
 \references{
-%% ~put references to the literature/web site here ~
 The EarthScope station webservice:
 
   \url{https://service.earthscope.org/fdsnws/station/1/}
 
-This implementation was inspired by the functionality in the obspy get_stations() method.
+This implementation was inspired by the functionality in the ObsPy
+get_stations() method.
  
   \url{https://docs.obspy.org/packages/autogen/obspy.clients.fdsn.client.Client.get_stations.html}
 
@@ -81,12 +98,9 @@ This implementation was inspired by the functionality in the obspy get_stations(
 Jonathan Callahan \email{jonathan@mazamascience.com}
 }
 
-%% \note{ }
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
 \seealso{
-\code{\link{IrisClient-class}}, \code{\link{getAvailability}}, \code{\link{getUnavailability}}
+\code{\link{IrisClient-class}}, \code{\link{getAvailability}},
+\code{\link{getUnavailability}}
 }
 
 \examples{
@@ -97,7 +111,8 @@ iris <- new("IrisClient")
 starttime <- as.POSIXct("2001-02-28",tz="GMT")
 endtime <- starttime + 2*24*3600
 
-# Use the getEvent web service to determine what events happened in this time period
+# Use the getEvent web service to determine what events happened in this time
+# period
 result <- try(events <- getEvent(iris,starttime,endtime,6.0))
 if (inherits(result,"try-error")) {
   message(geterrmessage())
@@ -118,8 +133,10 @@ if (inherits(result,"try-error")) {
   stations
 }
 
-# Get some detailed information on any BHZ channels at the "Octopus Mountain" station
-result <- try(channels <- getChannel(iris,"US","OCWA","*","BHZ",starttime,endtime))
+# Get some detailed information on any BHZ channels at the "Octopus Mountain"
+# station
+result <- try(channels <- 
+  getChannel(iris, "US", "OCWA", "*", "BHZ", starttime, endtime))
 if (inherits(result,"try-error")) {
   message(geterrmessage())
 } else {

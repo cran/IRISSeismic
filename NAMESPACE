@@ -4,6 +4,7 @@
 
 import(methods)     # for methods used in defining S4 classes
 import(stringr)
+importFrom("utils", "read.csv")
 
 ############################################################
 # Load dynamic libraries (shared object files)
@@ -101,7 +102,8 @@ S3method("as.vector", Trace)
 export("miniseed2Stream",
        "readMiniseedFile",
        "rotate2D",
-       "surfaceDistance")
+       "surfaceDistance",
+       "taupTraveltime")
 
 # from spectralUtils.R
 export("crossSpectrum",

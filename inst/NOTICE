@@ -1,0 +1,26 @@
+This package bundles the following third-party libraries.
+
+libmseed (src/libmseed), statically linked into this package's compiled code
+  Copyright (C) 2016 Chad Trabant, IRIS Data Management Center
+  Licensed under the GNU Lesser General Public License, version 3 (LGPL-3).
+  License text: licenses/LICENSE
+  Source: https://github.com/iris-edu/libmseed
+
+TauP, seisFile, seedCodec (H. Philip Crotwell, University of South Carolina),
+used by taupTraveltime() via the jars in inst/java/lib
+  Licensed under the GNU Lesser General Public License, version 3 (LGPL-3).
+  License text: licenses/LICENSE
+  Source: https://github.com/crotwell/TauP
+          https://github.com/crotwell/seisFile
+          https://github.com/crotwell/seedCodec
+
+reload4j
+  Copyright 2007 The Apache Software Foundation
+  Licensed under the Apache License, Version 2.0.
+  License text: licenses/LICENSE-APACHE-2.0
+  Source: https://reload4j.qos.ch/
+
+Gson (Google Inc.)
+  Licensed under the Apache License, Version 2.0.
+  License text: licenses/LICENSE-APACHE-2.0
+  Source: https://github.com/google/gson

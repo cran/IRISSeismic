@@ -1,0 +1,25 @@
+citHeader("To cite the IRISSeismic package in publications use:")
+
+bibentry(
+  bibtype = "Manual",
+  title   = "IRISSeismic: Classes and Methods for Seismic Data Analysis",
+  author  = c(
+    person("Jonathan", "Callahan"),
+    person("Rob", "Casey"),
+    person("Gillian", "Sharer"),
+    person("Mary", "Templeton")
+  ),
+  year    = format(Sys.Date(), "%Y"),
+  note    = paste("R package version", meta$Version),
+  url     = "https://CRAN.R-project.org/package=IRISSeismic"
+)
+
+citFooter(
+  "The taupTraveltime() function wraps the TauP Toolkit, which is bundled",
+  "with this package (inst/java/lib) under the LGPL-3 license -- see",
+  "inst/NOTICE and inst/licenses/LICENSE. If you use taupTraveltime(),",
+  "please also cite:\n\n",
+  "  Crotwell, H. P., T. J. Owens, J. Ritsema (1999). The TauP Toolkit:",
+  "  Flexible seismic travel-time and ray-path utilities, Seismological",
+  "  Research Letters, 70, 154-160."
+)

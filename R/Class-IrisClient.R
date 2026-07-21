@@ -131,6 +131,9 @@ useragent1 <- paste0(
   " (", irisUserAgent, ")"
 )
 
+setClassUnion("POSIXctORmissing",c("POSIXct","missing"))
+setClassUnion("characterORmissing",c("character","missing"))
+setClassUnion("logicalORmissing",c("logical","missing"))
 
 setClass(
   "IrisClient",
@@ -193,8 +196,14 @@ setValidity("IrisClient", function(object) {
 ################################################################################
 
 if (!isGeneric("getDataselect")) {
-  setGeneric("getDataselect", function(obj, network, station, location, channel,
-                                       starttime, endtime, ...) {
+  setGeneric("getDataselect", function(obj,
+                                       network,
+                                       station,
+                                       location,
+                                       channel,
+                                       starttime,
+                                       endtime,
+                                       ...) {
     standardGeneric("getDataselect")
   })
 }
@@ -210,6 +219,7 @@ getDataselect.IrisClient <- function(obj,
                                      repository = NULL,
                                      inclusiveEnd = TRUE,
                                      ignoreEpoch = FALSE) {
+
   if (!is.logical(inclusiveEnd)) {
     stop(paste("getDataselect.IrisClient: option inclusiveEnd must be TRUE or
                FALSE"))
@@ -231,25 +241,32 @@ getDataselect.IrisClient <- function(obj,
     url <- paste(url, "net=", network, sep = "")
   }
   url <- paste(url, "&sta=", station, sep = "")
-  # NOTE:  Locations with blanks must be converted into "--" when creating the URL
-  # NOTE:  For getDataselect only, convert "" to "--"
+  # Locations with blanks must be converted into "--" when creating the URL
+  # For getDataselect only, convert "" to "--"
   location <- ifelse(location == "", "--", location)
   url <- paste(url, "&loc=", stringr::str_replace(location, "  ", "--"),
     sep = ""
   )
   url <- paste(url, "&cha=", channel, sep = "")
-  url <- paste(url, "&start=", format(starttime, "%Y-%m-%dT%H:%M:%OS6",
-    tz = "GMT"
-  ),
-  sep = ""
+  url <- paste(
+    url,
+    "&start=",
+    format(starttime, "%Y-%m-%dT%H:%M:%OS6", tz = "GMT"),
+    sep = ""
   )
   if (!inclusiveEnd) {
     endtime <- endtime - 0.000001
-    url <- paste(url, "&end=", format(endtime, "%Y-%m-%dT%H:%M:%OS6", tz = "GMT"),
+    url <- paste(
+      url,
+      "&end=",
+      format(endtime, "%Y-%m-%dT%H:%M:%OS6", tz = "GMT"),
       sep = ""
     )
   } else {
-    url <- paste(url, "&end=", format(endtime, "%Y-%m-%dT%H:%M:%OS6", tz = "GMT"),
+    url <- paste(
+      url,
+      "&end=",
+      format(endtime, "%Y-%m-%dT%H:%M:%OS6", tz = "GMT"),
       sep = ""
     )
   }
@@ -1035,11 +1052,12 @@ if (!isGeneric("getNetwork")) {
                                     channel,
                                     starttime,
                                     endtime,
-                                    includerestricted,
+                                    includerestricted = FALSE,
                                     latitude,
                                     longitude,
                                     minradius,
-                                    maxradius) {
+                                    maxradius,
+                                    ...) {
     standardGeneric("getNetwork")
   })
 }
@@ -1055,30 +1073,51 @@ getNetwork.IrisClient <- function(obj,
                                   latitude,
                                   longitude,
                                   minradius,
-                                  maxradius) {
+                                  maxradius,
+                                  ...) {
+
+  args <- list(...)
+  # if user specifies format or level, remove. Those are set by getNetwork
+  # and are not changeable
+  args[["level"]] <- NULL
+  args[["format"]] <- NULL
+  arg_names <- names(args)
+
   # Parameters common to all 'station' webservice requests
   url <- paste(obj@station_site, obj@service_type, "station/1/query?", sep = "/")
-  url <- paste(url, "net=", ifelse(network == "", "*", network), sep = "")
-  url <- paste(url, "&sta=", ifelse(station == "", "*", station), sep = "")
-  # NOTE:  Blank locations containing two spaces must be converted to "--"
-  location <- ifelse(location == "", "*", location)
-  url <- paste(url, "&loc=", stringr::str_replace(location, "  ", "--"), sep = "")
-  url <- paste(url, "&cha=", ifelse(channel == "", "*", channel), sep = "")
-  url <- paste(url, "&starttime=",
-    format(starttime, "%Y-%m-%dT%H:%M:%OS", tz = "GMT"),
-    sep = ""
-  )
-  url <- paste(url, "&endtime=",
-    format(endtime, "%Y-%m-%dT%H:%M:%OS", tz = "GMT"),
-    sep = ""
-  )
-  url <- paste(url, "&nodata=204", sep = "")
-  if (obj@service_type != "ph5ws") {
-    url <- paste(url, "&includerestricted=",
-      ifelse(includerestricted, "true", "false"),
+  url <- paste(url, "nodata=204", sep = "")
+  if (!missing(network)) {
+    url <- paste(url, "&net=", ifelse(network == "", "*", network), sep = "")
+  }
+
+  if (!missing(station)) {
+    url <- paste(url, "&sta=", ifelse(station == "", "*", station), sep = "")
+  }
+  if (!missing(location)) {
+    # Blank locations containing two spaces must be converted to "--"
+    location <- ifelse(location == "", "*", location)
+    url <- paste(url, "&loc=", stringr::str_replace(location, "  ", "--"), sep = "")
+  }
+  if (!missing(channel)) {
+    url <- paste(url, "&cha=", ifelse(channel == "", "*", channel), sep = "")
+  }
+  if (!missing(starttime)) {
+    url <- paste(url, "&starttime=",
+      format(starttime, "%Y-%m-%dT%H:%M:%OS", tz = "GMT"),
       sep = ""
     )
   }
+  if (!missing(endtime)) {
+    url <- paste(url, "&endtime=",
+      format(endtime, "%Y-%m-%dT%H:%M:%OS", tz = "GMT"),
+      sep = ""
+    )
+  }
+
+  if (!missing(includerestricted) && obj@service_type == "fdsnws") {
+    url <- paste(url, "&includerestricted=", tolower(includerestricted), sep = "")
+  }
+
   url <- paste(url, "&format=text", sep = "")
 
   # Add optional geographic constraints if they are passed in
@@ -1093,6 +1132,22 @@ getNetwork.IrisClient <- function(obj,
   }
   if (!missing(maxradius)) {
     url <- paste(url, "&maxradius=", maxradius, sep = "")
+  }
+
+  # add other optional parameters
+  if (length(args)) {
+    url_string <- mapply(function(arg_name, arg_value) {
+      if (inherits(arg_value, "POSIXct")) {
+        paste0(
+          "&", arg_name, "=",
+          format(arg_value, "%Y-%m-%dT%H:%M:%OS0", tz = "GMT")
+        )
+      } else {
+        paste0("&", arg_name, "=", arg_value)
+      }
+    }, arg_names, args, SIMPLIFY = FALSE)
+    url_string <- paste0(url_string, collapse = "")
+    url <- paste0(url, url_string)
   }
 
   # Parameters specific to the getNetwork() method
@@ -1232,13 +1287,13 @@ getNetwork.IrisClient <- function(obj,
 setMethod(
   "getNetwork", signature(
     obj = "IrisClient",
-    network = "character",
-    station = "character",
-    location = "character",
-    channel = "character",
-    starttime = "POSIXct",
-    endtime = "POSIXct",
-    includerestricted = "logical",
+    network = "characterORmissing",
+    station = "characterORmissing",
+    location = "characterORmissing",
+    channel = "characterORmissing",
+    starttime = "POSIXctORmissing",
+    endtime = "POSIXctORmissing",
+    includerestricted = "logicalORmissing",
     latitude = "ANY",
     longitude = "ANY",
     minradius = "ANY",
@@ -1255,7 +1310,8 @@ setMethod(
            latitude,
            longitude,
            minradius,
-           maxradius) {
+           maxradius,
+           ...) {
     getNetwork.IrisClient(
       obj,
       network,
@@ -1268,55 +1324,11 @@ setMethod(
       latitude,
       longitude,
       minradius,
-      maxradius
+      maxradius,
+      ...
     )
   }
 )
-
-# includerestricted="missing", use FALSE
-setMethod(
-  "getNetwork", signature(
-    obj = "IrisClient",
-    network = "character",
-    station = "character",
-    location = "character",
-    channel = "character",
-    starttime = "POSIXct",
-    endtime = "POSIXct",
-    includerestricted = "missing",
-    latitude = "ANY",
-    longitude = "ANY",
-    minradius = "ANY",
-    maxradius = "ANY"
-  ),
-  function(obj,
-           network,
-           station,
-           location,
-           channel,
-           starttime,
-           endtime,
-           includerestricted,
-           latitude,
-           longitude,
-           minradius,
-           maxradius) {
-    getNetwork.IrisClient(obj,
-      network,
-      station,
-      location,
-      channel,
-      starttime,
-      endtime,
-      includerestricted = FALSE,
-      latitude,
-      longitude,
-      minradius,
-      maxradius
-    )
-  }
-)
-
 
 ################################################################################
 # getStation method returns a dataframe with information from the output
@@ -1343,7 +1355,8 @@ if (!isGeneric("getStation")) {
                                     latitude,
                                     longitude,
                                     minradius,
-                                    maxradius) {
+                                    maxradius,
+                                    ...) {
     standardGeneric("getStation")
   })
 }
@@ -1359,27 +1372,47 @@ getStation.IrisClient <- function(obj,
                                   latitude,
                                   longitude,
                                   minradius,
-                                  maxradius) {
+                                  maxradius,
+                                  ...) {
+  args <- list(...)
+  # if user specifies format or level, remove. Those are set by getStation
+  # and are not changeable
+  args[["level"]] <- NULL
+  args[["format"]] <- NULL
+  arg_names <- names(args)
+
   # Parameters common to all 'station' webservice requests
   url <- paste(obj@station_site, obj@service_type, "station/1/query?", sep = "/")
   url <- paste(url, "net=", ifelse(network == "", "*", network), sep = "")
-  url <- paste(url, "&sta=", ifelse(station == "", "*", station), sep = "")
-  # NOTE:  Blank locations containing two spaces must be converted to "--"
-  location <- ifelse(location == "", "*", location)
-  url <- paste(url, "&loc=", stringr::str_replace(location, "  ", "--"), sep = "")
-  url <- paste(url, "&cha=", ifelse(channel == "", "*", channel), sep = "")
-  url <- paste(url, "&starttime=",
-    format(starttime, "%Y-%m-%dT%H:%M:%OS", tz = "GMT"),
-    sep = ""
-  )
-  url <- paste(url, "&endtime=",
-    format(endtime, "%Y-%m-%dT%H:%M:%OS", tz = "GMT"),
-    sep = ""
-  )
-  url <- paste(url, "&nodata=204", sep = "")
-  if (!is.null(includerestricted) && obj@service_type != "ph5ws") {
-    url <- paste(url, "&includerestricted=", includerestricted, sep = "")
+  if (!missing(station)) {
+    url <- paste(url, "&sta=", ifelse(station == "", "*", station), sep = "")
   }
+  if (!missing(location)) {
+    # Blank locations containing two spaces must be converted to "--"
+    location <- ifelse(location == "", "*", location)
+    url <- paste(url, "&loc=", stringr::str_replace(location, "  ", "--"), sep = "")
+  }
+  if (!missing(channel)) {
+    url <- paste(url, "&cha=", ifelse(channel == "", "*", channel), sep = "")
+  }
+  if (!missing(starttime)) {
+    url <- paste(url, "&starttime=",
+      format(starttime, "%Y-%m-%dT%H:%M:%OS", tz = "GMT"),
+      sep = ""
+    )
+  }
+  if (!missing(endtime)) {
+    url <- paste(url, "&endtime=",
+      format(endtime, "%Y-%m-%dT%H:%M:%OS", tz = "GMT"),
+      sep = ""
+    )
+  }
+  url <- paste(url, "&nodata=204", sep = "")
+
+  if (!missing(includerestricted) && obj@service_type == "fdsnws") {
+    url <- paste(url, "&includerestricted=", tolower(includerestricted), sep = "")
+  }
+
   url <- paste(url, "&format=text", sep = "")
 
   # Add optional geographic constraints if they are passed in
@@ -1394,6 +1427,22 @@ getStation.IrisClient <- function(obj,
   }
   if (!missing(maxradius)) {
     url <- paste(url, "&maxradius=", maxradius, sep = "")
+  }
+
+  # add other optional parameters
+  if (length(args)) {
+    url_string <- mapply(function(arg_name, arg_value) {
+      if (inherits(arg_value, "POSIXct")) {
+        paste0(
+          "&", arg_name, "=",
+          format(arg_value, "%Y-%m-%dT%H:%M:%OS0", tz = "GMT")
+        )
+      } else {
+        paste0("&", arg_name, "=", arg_value)
+      }
+    }, arg_names, args, SIMPLIFY = FALSE)
+    url_string <- paste0(url_string, collapse = "")
+    url <- paste0(url, url_string)
   }
 
   # Parameters specific to the getStation() method
@@ -1540,12 +1589,12 @@ setMethod(
   "getStation", signature(
     obj = "IrisClient",
     network = "character",
-    station = "character",
-    location = "character",
-    channel = "character",
-    starttime = "POSIXct",
-    endtime = "POSIXct",
-    includerestricted = "logical",
+    station = "characterORmissing",
+    location = "characterORmissing",
+    channel = "characterORmissing",
+    starttime = "POSIXctORmissing",
+    endtime = "POSIXctORmissing",
+    includerestricted = "logicalORmissing",
     latitude = "ANY",
     longitude = "ANY",
     minradius = "ANY",
@@ -1562,7 +1611,8 @@ setMethod(
            latitude,
            longitude,
            minradius,
-           maxradius) {
+           maxradius,
+           ...) {
     getStation.IrisClient(
       obj,
       network,
@@ -1575,55 +1625,11 @@ setMethod(
       latitude,
       longitude,
       minradius,
-      maxradius
+      maxradius,
+      ...
     )
   }
 )
-
-# includerestricted="missing", use NULL
-setMethod(
-  "getStation", signature(
-    obj = "IrisClient",
-    network = "character",
-    station = "character",
-    location = "character",
-    channel = "character",
-    starttime = "POSIXct",
-    endtime = "POSIXct",
-    includerestricted = "missing",
-    latitude = "ANY",
-    longitude = "ANY",
-    minradius = "ANY",
-    maxradius = "ANY"
-  ),
-  function(obj,
-           network,
-           station,
-           location,
-           channel,
-           starttime,
-           endtime,
-           includerestricted,
-           latitude,
-           longitude,
-           minradius,
-           maxradius) {
-    getStation.IrisClient(obj,
-      network,
-      station,
-      location,
-      channel,
-      starttime,
-      endtime,
-      includerestricted = NULL,
-      latitude,
-      longitude,
-      minradius,
-      maxradius
-    )
-  }
-)
-
 
 ################################################################################
 # getChannel method returns a dataframe with information from the output
@@ -1650,7 +1656,8 @@ if (!isGeneric("getChannel")) {
                                     latitude,
                                     longitude,
                                     minradius,
-                                    maxradius) {
+                                    maxradius,
+                                    ...) {
     standardGeneric("getChannel")
   })
 }
@@ -1666,32 +1673,47 @@ getChannel.IrisClient <- function(obj,
                                   latitude,
                                   longitude,
                                   minradius,
-                                  maxradius) {
+                                  maxradius,
+                                  ...) {
+
+  args <- list(...)
+  # if user specifies format or level, remove. Those are set by getChannel
+  # and are not changeable
+  args[["level"]] <- NULL
+  args[["format"]] <- NULL
+  arg_names <- names(args)
+
   # Parameters common to all 'station' webservice requests
+  # make station, location, channel, starttime, endtime optional
   url <- paste(obj@station_site, obj@service_type, "station/1/query?", sep = "/")
   url <- paste(url, "net=", ifelse(network == "", "*", network), sep = "")
-  url <- paste(url, "&sta=", ifelse(station == "", "*", station), sep = "")
-  # NOTE:  Blank locations containing two spaces must be converted to "--"
-  location <- ifelse(location == "", "*", location)
-  url <- paste(url, "&loc=", stringr::str_replace(location, "  ", "--"), sep = "")
-  url <- paste(url, "&cha=", ifelse(channel == "", "*", channel), sep = "")
-  url <- paste(url, "&starttime=",
-    format(starttime, "%Y-%m-%dT%H:%M:%OS", tz = "GMT"),
-    sep = ""
-  )
-  url <- paste(url, "&endtime=",
-    format(endtime, "%Y-%m-%dT%H:%M:%OS", tz = "GMT"),
-    sep = ""
-  )
-  url <- paste(url, "&nodata=204", sep = "")
-  if (obj@service_type == "fdsnws") {
-    if (!is.null(includerestricted)) {
-      url <- paste(url, "&includerestricted=", tolower(includerestricted),
-        sep = ""
-      )
-    }
+  if (!missing(station)) {
+    url <- paste(url, "&sta=", ifelse(station == "", "*", station), sep = "")
   }
-  url <- paste(url, "&format=text", sep = "")
+  if (!missing(location)) {
+    # Blank locations containing two spaces must be converted to "--"
+    location <- ifelse(location == "", "*", location)
+    url <- paste(url, "&loc=", stringr::str_replace(location, "  ", "--"), sep = "")
+  }
+  if (!missing(channel)) {
+    url <- paste(url, "&cha=", ifelse(channel == "", "*", channel), sep = "")
+  }
+  if (!missing(starttime)) {
+    url <- paste(url, "&starttime=",
+      format(starttime, "%Y-%m-%dT%H:%M:%OS", tz = "GMT"),
+      sep = ""
+    )
+  }
+  if (!missing(endtime)) {
+    url <- paste(url, "&endtime=",
+      format(endtime, "%Y-%m-%dT%H:%M:%OS", tz = "GMT"),
+      sep = ""
+    )
+  }
+  url <- paste(url, "&nodata=204", sep = "")
+  if (!missing(includerestricted) && obj@service_type == "fdsnws") {
+    url <- paste(url, "&includerestricted=", tolower(includerestricted), sep = "")
+  }
 
   # Add optional geographic constraints if they are passed in
   if (!missing(latitude)) {
@@ -1707,8 +1729,25 @@ getChannel.IrisClient <- function(obj,
     url <- paste(url, "&maxradius=", maxradius, sep = "")
   }
 
+  # add other optional parameters
+  if (length(args)) {
+    url_string <- mapply(function(arg_name, arg_value) {
+      if (inherits(arg_value, "POSIXct")) {
+        paste0(
+          "&", arg_name, "=",
+          format(arg_value, "%Y-%m-%dT%H:%M:%OS0", tz = "GMT")
+        )
+      } else {
+        paste0("&", arg_name, "=", arg_value)
+      }
+    }, arg_names, args, SIMPLIFY = FALSE)
+    url_string <- paste0(url_string, collapse = "")
+    url <- paste0(url, url_string)
+  }
+
   # Parameters specific to the getChannel() method
   url <- paste(url, "&level=channel", sep = "")
+  url <- paste(url, "&format=text", sep = "")
 
   # Write debug output
   if (obj@debug) {
@@ -1751,7 +1790,7 @@ getChannel.IrisClient <- function(obj,
   # NOTE:  Be sure to set na.strings="" as "NA" is a valid network name
 
   h <- RCurl::basicTextGatherer()
-  result <- try(
+  url_result <- try(
     gurlc <- RCurl::getURL(url,
       useragent = obj@useragent,
       .opts = list(
@@ -1765,15 +1804,47 @@ getChannel.IrisClient <- function(obj,
     silent = TRUE
   )
 
-  if (inherits(result, "try-error")) {
+  if (inherits(url_result, "try-error")) {
     err_msg <- geterrmessage()
-    stop(paste("getChannel.IrisClient:", err_msg, url))
+    head_result <- ""
+    if (h$value() != "") {
+      head_result <- try(
+        header <- RCurl::parseHTTPHeader(h$value()),
+        silent = TRUE
+      )
+    }
+    if (obj@debug) {
+      stop(paste(
+        "getChannel.IrisClient:",
+        gsub("[\r\n]", " ", err_msg),
+        gsub("[\r\n]", " ", url_result),
+        if (exists("header")) {
+          paste0(names(header), "=", header, collapse=", ")
+        } else {
+          head_result
+        }
+      ))
+    } else {
+      stop(paste("getChannel.IrisClient:", gsub("[\r\n]", " ", err_msg), url))
+    }
   }
 
-  result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-  if (inherits(result, "try-error")) {
+  head_result <- try(
+    header <- RCurl::parseHTTPHeader(h$value()),
+    silent = TRUE
+  )
+  if (inherits(head_result, "try-error")) {
     err_msg <- geterrmessage()
-    stop(paste("getChannel.IrisClient:", err_msg, url))
+    if (obj@debug) {
+      stop(paste(
+        "getChannel.IrisClient:",
+        gsub("[\r\n]", " ", err_msg),
+        gsub("[\r\n]", " ", url_result),
+        gsub("[\r\n]", " ", head_result)
+      ))
+    } else {
+      stop(paste("getChannel.IrisClient:", gsub("[\r\n]", " ", err_msg), url))
+    }
   }
 
   sleep_seconds <- jitter(3, 10)
@@ -1781,7 +1852,7 @@ getChannel.IrisClient <- function(obj,
   while (header["status"] %in% c(401, 429, 500:511) && retries > 0) {
     if (header["status"] == 429) sleep_seconds <- sleep_seconds + 60
     Sys.sleep(sleep_seconds)
-    result <- try(
+    url_result <- try(
       gurlc <- RCurl::getURL(url,
         useragent = obj@useragent,
         .opts = list(
@@ -1795,13 +1866,15 @@ getChannel.IrisClient <- function(obj,
       silent = TRUE
     )
 
-    if (inherits(result, "try-error")) {
-      stop(paste("getChannel.IrisClient:", err_msg, url))
+    if (inherits(url_result, "try-error")) {
+      err_msg <- geterrmessage()
+      stop(paste("getChannel.IrisClient:", gsub("[\r\n]", " ", err_msg), url))
     }
 
-    result <- try(header <- RCurl::parseHTTPHeader(h$value()))
-    if (inherits(result, "try-error")) {
-      stop(paste("getChannel.IrisClient:", err_msg, url))
+    head_result <- try(header <- RCurl::parseHTTPHeader(h$value()), silent = TRUE)
+    if (inherits(head_result, "try-error")) {
+      err_msg <- geterrmessage()
+      stop(paste("getChannel.IrisClient:", gsub("[\r\n]", " ", err_msg), url))
     }
 
     sleep_seconds <- sleep_seconds * 2
@@ -1809,7 +1882,7 @@ getChannel.IrisClient <- function(obj,
   }
 
   if (!header["status"] %in% c("200", "204")) {
-    err_msg <- gurlc
+    err_msg <- url_result
     if (stringr::str_detect(err_msg, regex("Not Found", ignore_case = TRUE)) ||
       header["status"] == "404") {
       stop(paste("getChannel.IrisClient: URL Not Found", url))
@@ -1818,10 +1891,21 @@ getChannel.IrisClient <- function(obj,
     ))) {
       stop(paste("getChannel.IrisClient: Cannot open connection", url))
     } else {
-      stop(paste(
-        "getChannel.IrisClient: Unexpected http status code",
-        header["status"], strtrim(err_msg, 500), url
-      ))
+      if (obj@debug) {
+        stop(paste(
+          "getChannel.IrisClient: Unexpected http status code",
+          header["status"],
+          gsub("[\r\n]", " ", err_msg),
+          paste0(names(header), "=", header, collapse=", ")
+        ))
+      } else {
+        stop(paste(
+          "getChannel.IrisClient: Unexpected http status code",
+          header["status"],
+          gsub("[\r\n]", " ", err_msg),
+          url
+        ))
+      }
     }
   }
 
@@ -1874,12 +1958,12 @@ setMethod(
   "getChannel", signature(
     obj = "IrisClient",
     network = "character",
-    station = "character",
-    location = "character",
-    channel = "character",
-    starttime = "POSIXct",
-    endtime = "POSIXct",
-    includerestricted = "logical",
+    station = "characterORmissing",
+    location = "characterORmissing",
+    channel = "characterORmissing",
+    starttime = "POSIXctORmissing",
+    endtime = "POSIXctORmissing",
+    includerestricted = "logicalORmissing",
     latitude = "ANY",
     longitude = "ANY",
     minradius = "ANY",
@@ -1896,7 +1980,8 @@ setMethod(
            latitude,
            longitude,
            minradius,
-           maxradius) {
+           maxradius,
+           ...) {
     getChannel.IrisClient(
       obj,
       network,
@@ -1909,55 +1994,11 @@ setMethod(
       latitude,
       longitude,
       minradius,
-      maxradius
+      maxradius,
+      ...
     )
   }
 )
-
-# includerestricted="missing", use NULL
-setMethod(
-  "getChannel", signature(
-    obj = "IrisClient",
-    network = "character",
-    station = "character",
-    location = "character",
-    channel = "character",
-    starttime = "POSIXct",
-    endtime = "POSIXct",
-    includerestricted = "missing",
-    latitude = "ANY",
-    longitude = "ANY",
-    minradius = "ANY",
-    maxradius = "ANY"
-  ),
-  function(obj,
-           network,
-           station,
-           location,
-           channel,
-           starttime,
-           endtime,
-           includerestricted,
-           latitude,
-           longitude,
-           minradius,
-           maxradius) {
-    getChannel.IrisClient(obj,
-      network,
-      station,
-      location,
-      channel,
-      starttime,
-      endtime,
-      includerestricted = NULL,
-      latitude,
-      longitude,
-      minradius,
-      maxradius
-    )
-  }
-)
-
 
 ################################################################################
 # getAvailability method returns a dataframe with information from the output
@@ -3089,8 +3130,6 @@ setMethod(
 #
 #   https://earthquake.usgs.gov/fdsnws/event/1/
 #
-# TODO:  The getEvent method could be fleshed out with a more complete list
-# TODO:  of arguments to be used as ws-event parameters.
 ################################################################################
 
 if (!isGeneric("getEvent")) {
@@ -3101,7 +3140,8 @@ if (!isGeneric("getEvent")) {
                                   maxmag,
                                   magtype,
                                   mindepth,
-                                  maxdepth) {
+                                  maxdepth,
+                                  ...) {
     standardGeneric("getEvent")
   })
 }
@@ -3113,19 +3153,30 @@ getEvent.IrisClient <- function(obj,
                                 maxmag,
                                 magtype,
                                 mindepth,
-                                maxdepth) {
+                                maxdepth,
+                                ...) {
+
+  args <- list(...)
+  args[["format"]] <- NULL
+  arg_names <- names(args)
   url <- paste(obj@event_site, "/fdsnws/event/1/query?", sep = "")
-  url <- paste(url, "starttime=", format(starttime, "%Y-%m-%dT%H:%M:%OS0",
-    tz = "GMT"
-  ),
-  sep = ""
-  )
-  url <- paste(url, "&endtime=", format(endtime, "%Y-%m-%dT%H:%M:%OS0",
-    tz = "GMT"
-  ),
-  sep = ""
-  )
-  url <- paste(url, "&format=text", sep = "")
+  url <- paste(url, "format=text", sep = "")
+  if (!missing(starttime)) {
+    url <- paste(
+      url,
+      "&starttime=",
+      format(starttime, "%Y-%m-%dT%H:%M:%OS0", tz = "GMT"),
+      sep = ""
+    )
+  }
+  if (!missing(endtime)) {
+    url <- paste(
+      url,
+      "&endtime=",
+      format(endtime, "%Y-%m-%dT%H:%M:%OS0", tz = "GMT"),
+      sep = ""
+    )
+  }
 
   # Add optional arguments if they are non-null
   if (!missing(minmag)) {
@@ -3142,6 +3193,22 @@ getEvent.IrisClient <- function(obj,
   }
   if (!missing(maxdepth)) {
     url <- paste(url, "&maxdepth=", maxdepth, sep = "")
+  }
+
+  # add other optional parameters
+  if (length(args)) {
+    url_string <- mapply(function(arg_name, arg_value) {
+      if (inherits(arg_value, "POSIXct")) {
+        paste0(
+          "&", arg_name, "=",
+          format(arg_value, "%Y-%m-%dT%H:%M:%OS0", tz = "GMT")
+        )
+      } else {
+        paste0("&", arg_name, "=", arg_value)
+      }
+    }, arg_names, args, SIMPLIFY = FALSE)
+    url_string <- paste0(url_string, collapse = "")
+    url <- paste0(url, url_string)
   }
 
   # Write debug output
@@ -3315,19 +3382,33 @@ getEvent.IrisClient <- function(obj,
 setMethod(
   "getEvent", signature(
     obj = "IrisClient",
-    starttime = "POSIXct",
-    endtime = "POSIXct",
+    starttime = "POSIXctORmissing",
+    endtime = "POSIXctORmissing",
     minmag = "ANY",
     maxmag = "ANY",
     magtype = "ANY",
     mindepth = "ANY",
     maxdepth = "ANY"
   ),
-  function(obj, starttime, endtime, minmag, maxmag,
-           magtype, mindepth, maxdepth) {
+  function(obj,
+           starttime,
+           endtime,
+           minmag,
+           maxmag,
+           magtype,
+           mindepth,
+           maxdepth,
+           ...) {
     getEvent.IrisClient(
-      obj, starttime, endtime, minmag, maxmag,
-      magtype, mindepth, maxdepth
+      obj,
+      starttime,
+      endtime,
+      minmag,
+      maxmag,
+      magtype,
+      mindepth,
+      maxdepth,
+      ...
     )
   }
 )
@@ -3354,6 +3435,7 @@ if (!isGeneric("getTraveltime")) {
 
 getTraveltime.IrisClient <- function(obj, latitude, longitude, depth,
                                      staLatitude, staLongitude) {
+  .Deprecated("taupTraveltime")
   # Create URL arguments from incoming parameters
   evloc <- paste("[", latitude, ",", longitude, "]", sep = "")
   staloc <- paste("[", staLatitude, ",", staLongitude, "]", sep = "")
@@ -3563,6 +3645,9 @@ getDistaz.IrisClient <- function(obj,
                                  longitude,
                                  staLatitude,
                                  staLongitude) {
+  .Deprecated(msg="This function relies on the EarthScope web service
+              https://service.earthscope.org/irisws/distaz/ which will
+              stop being supported in the near future.")
   # Assemble URL
   url <- paste(obj@site, "/irisws/distaz/1/query?", sep = "")
   url <- paste(url, "&evtlat=", latitude, sep = "")

@@ -305,8 +305,8 @@ if (exists("tr2")) {
 
 Access to triggering algorithms for detecting events is provided by the
 `STALTA()` method of `Trace` objects.
-( *cf* [A Comparison of Select Trigger Algorithms for Automated Global Seismic 
-Phase and Event Detection](https://pubs.geoscienceworld.org/ssa/bssa/article-abstract/88/1/95/102726/A-comparison-of-select-trigger-algorithms-for)). The `STALTA()` method has the following
+( *cf* [A Comparison of Select Trigger Algorithms for Automated Global Seismic
+Phase and Event Detection](https://doi.org/10.1785/BSSA0880010095)). The `STALTA()` method has the following
 arguments and defaults:
 
   * `x` -- `Trace` being analyzed
@@ -389,7 +389,6 @@ from web services of the same name.  The suite of methods returning dataframes i
   * `getNetwork`
   * `getSNCL`
   * `getStation`
-  * `getTraveltime`
 
 The following example demonstrates the use of several of these services together to do the following:
 
@@ -435,8 +434,8 @@ if (exists("bigOne")) {
 }
 
 # Get travel times to this station
-result <- try(traveltimes <- getTraveltime(
-  iris, bigOne$latitude, bigOne$longitude, bigOne$depth,
+result <- try(traveltimes <- taupTraveltime(
+  bigOne$latitude, bigOne$longitude, bigOne$depth,
   snclE$latitude, snclE$longitude
 ))
 if (inherits(result, "try-error")) {

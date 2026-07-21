@@ -397,6 +397,9 @@ psdList <- function(st) {
   st_merged <- mergeTraces(st, fillMethod = "fillZero")
   tr_merged <- st_merged@traces[[1]]
   tr_merged@data[is.na(tr_merged@data)] <- 0 # very occasionally a trace will contain NaN values from the original miniSEED?
+  if(isDC(tr_merged)) {
+    stop(c("psdList: trace is flatlined"))
+  }
 
   # Choose chunk size based on the chanel 'band code'(=sampling rate)
   # See:  https://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf , Appendix A
